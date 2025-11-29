@@ -421,4 +421,67 @@
   .cp-table td.cp-sep { width: 10px; text-align: center; }
   .cp-table td.cp-val { text-align: left; }
 
+  /* --- PERBAIKAN POSISI CETAK (NEW) --- */
+  
+  /* Wadah Khusus Baris Cetak */
+  .print-row {
+    display: flex;
+    flex-direction: row;       /* Paksa berjejer ke samping */
+    justify-content: center;   /* Rata tengah kertas */
+    align-items: flex-start;   /* Rata atas */
+    gap: 10px;                 /* Jarak antar kartu Depan & Belakang */
+    margin-bottom: 20px;       /* Jarak antar baris siswa */
+    break-inside: avoid;       /* Mencegah kartu terpotong pindah halaman */
+    page-break-inside: avoid;
+  }
+
+  /* --- UPDATE SETTING CETAK (PORTRAIT) --- */
+  @media print {
+    
+    /* 1. UBAH ORIENTASI KERTAS JADI PORTRAIT */
+    @page { 
+      size: A4 portrait;   /* Paksa mode Portrait */
+      margin: 10mm;        /* Margin 1cm di semua sisi */
+    }
+
+    /* 2. UPDATE WADAH BARIS */
+    .print-row {
+      display: flex;
+      flex-direction: row;      /* Tetap berjejer ke samping */
+      justify-content: center;  /* Rata tengah */
+      align-items: flex-start;
+      
+      /* PERUBAHAN PENTING DI SINI: */
+      gap: 2px;                 /* Perkecil jarak agar muat di lebar portrait */
+      flex-wrap: nowrap;        /* PAKSA jangan turun baris */
+      transform: scale(0.95);   /* Perkecil sedikit (95%) agar aman dari margin printer */
+      transform-origin: top center;
+      
+      margin-bottom: 5px;       /* Jarak antar baris siswa dikurangi karena di-scale */
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* Reset Container Utama */
+    body, #dashboardPage, .container { 
+      min-width: 0 !important; 
+      width: 100% !important; 
+      padding: 0 !important; 
+      overflow: visible !important;
+    }
+
+    /* Pastikan ukuran kartu tetap, tapi dikendalikan oleh scale di atas */
+    .id-card.temp-madrasah, 
+    .back-card {
+      width: 335px !important;
+      height: 220px !important;
+      box-shadow: none !important; 
+      margin: 0 !important;        
+      border: 1px solid #000 !important; 
+      /* Pastikan background tercetak */
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+
 </style>
