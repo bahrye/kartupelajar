@@ -15,7 +15,9 @@
     if(page === 'dashboard') {
       document.getElementById('dashboardPage').style.display = 'block';
       modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
-      renderPreview(); // Init preview
+      
+      // Load data pengaturan dari server
+      loadSettings(); 
     }
   }
 
@@ -256,12 +258,16 @@
     }).deleteStudent(currentToken, studentList[index].row);
   }
 
-  // --- RENDER CARD LOGIC ---
+  // --- CONFIGURATION FUNCTIONS (BARU) ---
+
+  // 1. Ambil nilai dari Form
   function getConfigs() {
     return {
       yayasan: document.getElementById('confYayasan').value,
       alamat1: document.getElementById('confAlamat1').value,
       alamat2: document.getElementById('confAlamat2').value,
+      telp: document.getElementById('confTelp').value,    // Baru
+      email: document.getElementById('confEmail').value,  // Baru
       tgl: document.getElementById('confTgl').value,
       kepala: document.getElementById('confKepala').value,
       nip: document.getElementById('confNIP').value,
@@ -270,6 +276,109 @@
       stempel: document.getElementById('confStempel').value,
       ttd: document.getElementById('confTTD').value,
     };
+  }
+
+  // 2. Fungsi Simpan ke Server
+  function runSaveSettings() {
+    var conf = getConfigs();
+    var btn = document.getElementById('btnSaveConfig');
+    var txt = btn.innerHTML;
+    
+    btn.disabled = true; btn.innerText = "Menyimpan...";
+
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = txt;
+      if(res.status === 'success') {
+        showToast(res.message, 'bg-success');
+      } else {
+        showToast(res.message, 'bg-danger');
+      }
+    }).saveSchoolConfig(currentToken, conf);
+  }
+
+  // 3. Fungsi Load dari Server
+  function loadSettings() {
+    google.script.run.withSuccessHandler(function(res){
+      if(res.status === 'success' && res.data) {
+        var d = res.data;
+        // Isi form jika datanya ada di database
+        if(d.yayasan) document.getElementById('confYayasan').value = d.yayasan;
+        if(d.alamat1) document.getElementById('confAlamat1').value = d.alamat1;
+        if(d.alamat2) document.getElementById('confAlamat2').value = d.alamat2;
+        if(d.telp) document.getElementById('confTelp').value = d.telp;
+        if(d.email) document.getElementById('confEmail').value = d.email;
+        if(d.tgl) document.getElementById('confTgl').value = d.tgl;
+        if(d.kepala) document.getElementById('confKepala').value = d.kepala;
+        if(d.nip) document.getElementById('confNIP').value = d.nip;
+        if(d.logoKiri) document.getElementById('confLogoKiri').value = d.logoKiri;
+        if(d.logoKanan) document.getElementById('confLogoKanan').value = d.logoKanan;
+        if(d.stempel) document.getElementById('confStempel').value = d.stempel;
+        if(d.ttd) document.getElementById('confTTD').value = d.ttd;
+        
+        // Render ulang preview setelah data masuk
+        renderPreview();
+      }
+    }).getSchoolConfig(currentToken);
+  }
+
+  // 4. Update Tampilan Kartu Belakang (createBackCardHTML)
+  function createBackCardHTML(conf) {
+    var sekolah = document.getElementById('schoolTitle').innerText || "MADRASAH CONTOH";
+    var yayasan = conf.yayasan || "YAYASAN PENDIDIKAN";
+    var alamat1 = conf.alamat1 || "NSM: ... NPSN: ...";
+    var alamat2 = conf.alamat2 || "Alamat Kota...";
+    
+    // UPDATE LOGIC DISINI
+    // Gunakan input conf.telp, jika kosong fallback ke conf.nip (untuk jaga2), lalu placeholder
+    var kontakHP = conf.telp ? conf.telp : (conf.nip !== '-' ? conf.nip : '0812xxxx'); 
+    var email = conf.email || "admin@sekolah.com";
+    
+    var logoKiri = conf.logoKiri;
+    var logoKanan = conf.logoKanan;
+
+    return `
+      <div class="back-card">
+        <div class="back-header-flat">
+           <div class="back-logo-box"><img src="${logoKiri}" onerror="this.style.display='none'"></div>
+           <div class="back-header-text">
+             <div class="txt-yayasan">${yayasan}</div>
+             <div class="txt-sekolah">${sekolah}</div>
+             <div class="txt-alamat">${alamat1}<br>${alamat2}</div>
+           </div>
+           <div class="back-logo-box"><img src="${logoKanan}" onerror="this.style.display='none'"></div>
+        </div>
+
+        <div class="back-body">
+          <div>
+            <div class="rules-title">KETENTUAN - KETENTUAN</div>
+            <ol class="rules-list">
+              <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah.toUpperCase()}</strong>.</li>
+              <li>Siswa wajib mematuhi Tata Tertib Madrasah & Perpustakaan.</li>
+              <li>Siswa bertanggung jawab penuh atas penggunaan kartu ini.</li>
+              <li>Kehilangan kartu harap segera melapor ke Tata Usaha/Kesiswaan.</li>
+              <li>Kartu wajib dibawa setiap hari sekolah/kegiatan madrasah.</li>
+            </ol>
+          </div>
+
+          <div class="back-footer-container">
+            <div class="cp-title">Contact Person:</div>
+            <table class="cp-table">
+              <tr>
+                <td class="cp-label">No Telp/HP</td>
+                <td class="cp-sep">:</td>
+                <td class="cp-val">${kontakHP}</td>
+              </tr>
+              <tr>
+                <td class="cp-label">Email</td>
+                <td class="cp-sep">:</td>
+                <td class="cp-val">${email}</td>
+              </tr>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    `;
   }
 
   function createCardHTML(s, conf) {
@@ -321,69 +430,91 @@
     `;
   }
 
-  // Preview di Tab Pengaturan (Hanya 1 dummy)
+  // --- FUNGSI RENDER PREVIEW (DENGAN LAYOUT FIX) ---
   function renderPreview() {
-    var dummy = {
+    // 1. Data Dummy & Config
+    var dummy = { 
       nama: "PREVIEW SISWA", nisn: "0012345678", 
       tmp_lahir: "Jakarta", tgl_lahir: "2010-01-01", 
-      jk: "L", alamat: "Jl. Contoh No. 1", foto: "https://via.placeholder.com/150"
+      jk: "L", kelas: "X-A", 
+      alamat: "Jl. Contoh No. 1", foto: "" 
     };
     var conf = getConfigs();
-    document.getElementById('previewContainer').innerHTML = createCardHTML(dummy, conf);
+
+    var htmlDepan = createCardHTML(dummy, conf);
+    var htmlBelakang = createBackCardHTML(conf);
+
+    // 2. Cek apakah wadah Flip sudah ada?
+    var flipper = document.getElementById('cardFlipper');
+    
+    if (!flipper) {
+      // PERBAIKAN DISINI: Tambahkan class 'd-flex flex-column align-items-center'
+      // Ini memaksa susunan Vertikal yang Rapi
+      document.getElementById('previewContainer').innerHTML = `
+        <div class="d-flex flex-column align-items-center justify-content-center p-3">
+          
+          <div class="flip-container" onclick="toggleFlipManual()">
+            <div class="flip-inner" id="cardFlipper">
+              <div class="flip-face flip-front" id="viewDepan">
+                 ${htmlDepan}
+              </div>
+              <div class="flip-face flip-back" id="viewBelakang">
+                 ${htmlBelakang}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center text-muted small user-select-none">
+              <i class="bi bi-arrow-repeat"></i> Klik kartu untuk memutar (Flip)
+          </div>
+
+        </div>
+      `;
+      flipper = document.getElementById('cardFlipper');
+    } else {
+      // Update isi saja jika container sudah ada
+      document.getElementById('viewDepan').innerHTML = htmlDepan;
+      document.getElementById('viewBelakang').innerHTML = htmlBelakang;
+    }
+
+    // 3. Logic Otomatis Deteksi Input (Tetap Sama)
+    var activeEl = document.activeElement;
+    if (activeEl && activeEl.id) {
+      if (activeEl.id === 'confTelp' || activeEl.id === 'confEmail') {
+         flipper.classList.add('flipped');
+      } else if (activeEl.id.startsWith('conf')) {
+         flipper.classList.remove('flipped');
+      }
+    }
   }
 
-  // --- UPDATE FINAL: NAMA SEKOLAH KAPITAL DI RULES ---
-  function createBackCardHTML(conf) {
-    var sekolah = document.getElementById('schoolTitle').innerText || "MADRASAH CONTOH";
-    var yayasan = conf.yayasan || "YAYASAN PENDIDIKAN";
-    var alamat1 = conf.alamat1 || "NSM: ... NPSN: ...";
-    var alamat2 = conf.alamat2 || "Alamat Kota...";
+  // Fungsi Manual
+  function toggleFlipManual() {
+    var flipper = document.getElementById('cardFlipper');
+    if(flipper) flipper.classList.toggle('flipped');
+  }
+
+  // --- FUNGSI TOGGLE KLIK KARTU ---
+  function togglePreview(element) {
+    var depan = document.getElementById('viewDepan');
+    var belakang = document.getElementById('viewBelakang');
     
-    var kontakHP = conf.nip !== '-' ? conf.nip : '0812xxxx'; 
-    var email = conf.email || "admin@sekolah.com";
-    var logoKiri = conf.logoKiri;
-    var logoKanan = conf.logoKanan;
-
-    return `
-      <div class="back-card">
-        <div class="back-header-flat">
-           
-           <div class="back-logo-box">
-             <img src="${logoKiri}" onerror="this.style.display='none'">
-           </div>
-
-           <div class="back-header-text">
-             <div class="txt-yayasan">${yayasan}</div>
-             <div class="txt-sekolah">${sekolah}</div>
-             <div class="txt-alamat">${alamat1}<br>${alamat2}</div>
-           </div>
-
-           <div class="back-logo-box">
-             <img src="${logoKanan}" onerror="this.style.display='none'">
-           </div>
-
-        </div>
-
-        <div class="back-body">
-          <div>
-            <div class="rules-title">KETENTUAN - KETENTUAN</div>
-            <ol class="rules-list">
-              <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah.toUpperCase()}</strong>.</li>
-              <li>Siswa wajib mematuhi Tata Tertib Madrasah & Perpustakaan.</li>
-              <li>Siswa bertanggung jawab penuh atas penggunaan kartu ini.</li>
-              <li>Kehilangan kartu harap segera melapor ke Tata Usaha/Kesiswaan.</li>
-              <li>Kartu wajib dibawa setiap hari sekolah/kegiatan madrasah.</li>
-            </ol>
-          </div>
-
-          <div class="back-footer">
-            <div style="text-decoration:underline; margin-bottom:2px;">Contact Person:</div>
-            <div class="row-cp"><span class="lbl">No Telp/HP</span> <span>: ${kontakHP}</span></div>
-            <div class="row-cp"><span class="lbl">Email</span> <span>: ${email}</span></div>
-          </div>
-        </div>
-      </div>
-    `;
+    // 1. Efek visual 'Tekan' (mengecil sedikit saat diklik)
+    element.style.transform = "scale(0.95)";
+    
+    setTimeout(function() {
+      // 2. Logic Tukar Tampilan
+      if (depan.style.display !== 'none') {
+        depan.style.display = 'none';
+        belakang.style.display = 'block';
+      } else {
+        depan.style.display = 'block';
+        belakang.style.display = 'none';
+      }
+      
+      // 3. Kembalikan ukuran normal
+      element.style.transform = "scale(1)";
+    }, 150); // Delay sedikit agar efek tekan terasa
   }
 
   // --- UPDATE: RENDER ALL CARDS (DEPAN & BELAKANG) ---
