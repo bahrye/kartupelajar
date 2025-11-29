@@ -202,4 +202,108 @@
       margin-bottom: -15px; /* Hilangkan gap kosong akibat scaling */
     }
   }
+
+
+  /* 1. KOTAK KARTU (Sama persis dengan depan) */
+  .back-card {
+    width: 335px !important;
+    height: 220px !important;
+    border: 1px solid #000;
+    background: white;
+    border-radius: 8px; /* Sudut kartu melengkung */
+    overflow: hidden;   /* Memotong header agar ikut melengkung di pojok atas */
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 2. HEADER DATAR (SAMA PERSIS DENGAN DEPAN) */
+  .back-header-flat {
+    background-color: #065f28; /* Hijau Madrasah */
+    color: white;
+    
+    /* Ukuran & Padding disamakan dengan .madrasah-header */
+    height: 45px; 
+    padding: 2px 8px; 
+    
+    /* Layout Flexbox 3 Kolom (Logo-Teks-Logo) */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    /* Garis Kuning Lurus (Tidak Melengkung) */
+    border-bottom: 2px solid #ffd700; 
+    
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  /* WADAH LOGO */
+  .back-logo-box {
+      width: 40px; text-align: center; flex-shrink: 0;
+  }
+  .back-logo-box img {
+      width: 30px; height: auto; display: block; margin: 0 auto;
+  }
+
+  /* TEKS HEADER */
+  .back-header-text {
+      flex: 1; text-align: center; line-height: 1.1;
+  }
+  .back-header-text h5 { margin: 0; font-size: 7px; font-weight: bold; }
+  .back-header-text h4 { margin: 0; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+  .back-header-text p { margin: 0; font-size: 6px; }
+
+  /* 3. BODY & FOOTER (Tetap rapi tidak tumpang tindih) */
+  .back-body {
+    flex: 1;
+    padding: 5px 15px 8px 15px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+
+  .rules-title {
+    text-align: center; font-weight: bold; font-size: 10px;
+    margin-top: 5px; text-transform: uppercase; text-decoration: underline;
+  }
+
+  .rules-list {
+    font-size: 7.5px; padding-left: 18px; margin: 5px 0;
+    line-height: 1.3; text-align: justify;
+  }
+  .rules-list li { margin-bottom: 2px; }
+
+  .back-footer {
+    font-size: 8px; font-weight: bold; margin-top: 2px;
+  }
+  .back-footer .row-cp { display: flex; margin-bottom: 1px; }
+  .back-footer .lbl { width: 60px; }
+
+  /* --- PERBAIKAN FONT HEADER BELAKANG (AGAR IDENTIK DENGAN DEPAN) --- */
+  
+  /* 1. Nama Yayasan (Kecil di atas) */
+  .back-header-flat .txt-yayasan { 
+    font-size: 7px; 
+    font-weight: bold; 
+    margin-bottom: 1px; 
+    color: white;
+  }
+
+  /* 2. Nama Sekolah (Besar & Tebal) */
+  .back-header-flat .txt-sekolah { 
+    font-size: 11px; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    margin: 0; 
+    color: white;
+  }
+
+  /* 3. Alamat (Sangat kecil di bawah) */
+  .back-header-flat .txt-alamat { 
+    font-size: 6px; 
+    margin-top: 1px; 
+    line-height: 1.2; /* Jarak antar baris alamat rapat */
+    color: white;
+  }
+
 </style>
