@@ -77,7 +77,25 @@
               <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
                 <thead class="table-light">
                   <tr>
-                    <th>No</th><th>Aksi</th><th>Nama Lengkap</th><th>NISN</th><th>TTL</th><th>L/P</th><th>Alamat</th><th>Foto</th>
+                    <th style="width: 1%;" class="text-center align-middle">
+                      <input type="checkbox" id="checkAll" class="form-check-input" onclick="toggleCheckAll(this)">
+                    </th>
+
+                    <th style="width: 1%;" class="text-center align-middle">No</th>
+
+                    <th style="width: 1%;" class="text-center align-middle">Aksi</th>
+
+                    <th class="text-center align-middle">Nama Lengkap</th>
+
+                    <th style="width: 110px;" class="text-center align-middle">NISN</th>
+
+                    <th style="width: 180px;" class="text-center align-middle">TTL</th>
+
+                    <th style="width: 1%;" class="text-center align-middle">L/P</th>
+
+                    <th style="width: 250px;" class="text-center align-middle">Alamat</th>
+
+                    <th style="width: 70px;" class="text-center align-middle">Foto</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -182,6 +200,17 @@
         </div>
       </div>
 
+      <div id="floatingAction" class="floating-action shadow-lg">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="fw-bold text-white">
+            <span id="selectedCount">0</span> Siswa Dipilih
+          </div>
+          <button class="btn btn-danger btn-sm fw-bold ms-3" onclick="runBulkDelete()">
+            <i class="bi bi-trash-fill"></i> Hapus
+          </button>
+        </div>
+      </div>
+
     </div>
 
     <div class="modal fade" id="studentModal" tabindex="-1">
@@ -247,7 +276,7 @@
             <p>Agar foto otomatis masuk ke data siswa yang tepat, ikuti langkah berikut:</p>
             
             <ol class="list-group list-group-numbered mb-3">
-              <li class="list-group-item">Siapkan semua file foto siswa (JPG/PNG).</li>
+              <li class="list-group-item">Siapkan semua file foto siswa (JPG/PNG). Ukuran rekomendasi foto yaitu 3x4.</li>
               <li class="list-group-item">
                 <strong>Ubah Nama File (Rename)</strong> foto sesuai dengan <strong>NISN</strong> masing-masing siswa.<br>
                 <span class="text-muted small fst-italic">Contoh: Jika NISN siswa adalah <strong>00123456</strong>, nama file harus <strong>00123456.jpg</strong></span>
@@ -311,6 +340,17 @@
             <button type="button" class="btn btn-success fw-bold" onclick="proceedExcelUpload()">
               <i class="bi bi-folder2-open"></i> Pilih File Excel
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalFotoPreview" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+          <div class="modal-body p-0 text-center position-relative">
+            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-dark bg-opacity-50 rounded-circle" data-bs-dismiss="modal" style="z-index: 10;"></button>
+            <img id="imgPreviewFull" src="" class="img-fluid rounded shadow" style="max-height: 85vh; object-fit: contain;">
           </div>
         </div>
       </div>
