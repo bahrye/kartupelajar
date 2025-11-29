@@ -133,30 +133,48 @@
     var tbody = document.querySelector('#studentTable tbody');
     tbody.innerHTML = "";
     
+    document.getElementById('checkAll').checked = false;
+    updateSelectionUI(); 
+
     if(studentList.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Belum ada data siswa.</td></tr>";
+      tbody.innerHTML = "<tr><td colspan='9' class='text-center'>Belum ada data siswa.</td></tr>";
       return;
     }
 
     studentList.forEach((s, index) => {
       var btnEdit = `<button class="btn btn-warning btn-sm me-1" onclick="openModalEdit(${index})"><i class="bi bi-pencil"></i></button>`;
-      var btnDel  = `<button class="btn btn-danger btn-sm" onclick="deleteData(${index})"><i class="bi bi-trash"></i></button>`;
-      // Cek apakah ada foto (panjang string > 20 dianggap URL valid)
-      // Tambahkan atribut onerror untuk menangani gambar error
+      var btnDel  = `<button class="btn btn-outline-danger btn-sm" onclick="deleteData(${index})"><i class="bi bi-trash"></i></button>`;
+      
+      // GANTI BAGIAN VARIABEL 'img' MENJADI SEPERTI INI:
       var img = (s.foto && s.foto.length > 20) 
-        ? `<img src="${s.foto}" width="50" height="60" class="border rounded" style="object-fit:cover; background:#eee;" onerror="this.onerror=null;this.src='https://via.placeholder.com/50?text=Err';">` 
+        ? `<img src="${s.foto}" width="50" height="60" 
+               class="border rounded thumb-clickable" 
+               style="object-fit:cover; background:#eee;" 
+               onclick="openPhotoPreview('${s.foto}')" 
+               onerror="this.onerror=null;this.src='https://via.placeholder.com/50?text=Err';">` 
         : '<span class="text-muted">-</span>';
-      var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
+      
+      // --- PERUBAHAN DISINI (FORMAT TTL) ---
+      // Kita format s.tgl_lahir menggunakan fungsi helper baru
+      var tglCantik = formatTanggalIndo(s.tgl_lahir); 
+      var ttl = `${s.tmp_lahir}, ${tglCantik}`;
+      // -------------------------------------
 
       var row = `<tr>
-        <td>${index+1}</td>
-        <td>${btnEdit}${btnDel}</td>
-        <td class="fw-bold">${s.nama}</td>
-        <td>${s.nisn}</td>
-        <td>${ttl}</td>
-        <td>${s.jk}</td>
-        <td class="small">${s.alamat}</td>
-        <td>${img}</td>
+        <td class="text-center align-middle">
+           <input type="checkbox" class="form-check-input row-check" value="${index}" onclick="updateSelectionUI()">
+        </td>
+        <td class="text-center align-middle">${index+1}</td>
+        <td class="text-center align-middle">${btnEdit}${btnDel}</td>
+        
+        <td class="fw-bold align-middle">${s.nama}</td>
+        <td class="text-center align-middle">${s.nisn}</td>
+        
+        <td class="align-middle">${ttl}</td>
+        
+        <td class="text-center align-middle">${s.jk}</td>
+        <td class="align-middle">${s.alamat}</td>
+        <td class="text-center align-middle">${img}</td>
       </tr>`;
       tbody.innerHTML += row;
     });
@@ -380,14 +398,14 @@
   // 4. Update Tampilan Kartu Belakang (createBackCardHTML)
   function createBackCardHTML(conf) {
     var sekolah = document.getElementById('schoolTitle').innerText || "MADRASAH CONTOH";
-    var yayasan = conf.yayasan || "YAYASAN PENDIDIKAN";
-    var alamat1 = conf.alamat1 || "NSM: ... NPSN: ...";
-    var alamat2 = conf.alamat2 || "Alamat Kota...";
+    var yayasan = conf.yayasan || "";
+    var alamat1 = conf.alamat1 || "";
+    var alamat2 = conf.alamat2 || "";
     
     // UPDATE LOGIC DISINI
     // Gunakan input conf.telp, jika kosong fallback ke conf.nip (untuk jaga2), lalu placeholder
     var kontakHP = conf.telp ? conf.telp : (conf.nip !== '-' ? conf.nip : '0812xxxx'); 
-    var email = conf.email || "admin@sekolah.com";
+    var email = conf.email || "";
     
     var logoKiri = conf.logoKiri;
     var logoKanan = conf.logoKanan;
@@ -873,6 +891,102 @@
     setTimeout(function() {
       document.getElementById('fileImportExcel').click();
     }, 300);
+  }
+
+  // --- LOGIKA HAPUS MASSAL (BULK DELETE) ---
+
+  // 1. Fungsi Klik "Pilih Semua"
+  function toggleCheckAll(source) {
+    var checkboxes = document.querySelectorAll('.row-check');
+    for(var i=0; i<checkboxes.length; i++) {
+      checkboxes[i].checked = source.checked;
+    }
+    updateSelectionUI();
+  }
+
+  // 2. Update UI Pop-up (Hitung yang dipilih)
+  function updateSelectionUI() {
+    var selected = document.querySelectorAll('.row-check:checked');
+    var count = selected.length;
+    var floatBar = document.getElementById('floatingAction');
+    
+    document.getElementById('selectedCount').innerText = count;
+
+    if (count > 0) {
+      floatBar.classList.add('show');
+    } else {
+      floatBar.classList.remove('show');
+      // Uncheck header jika tidak ada yang dipilih
+      document.getElementById('checkAll').checked = false;
+    }
+  }
+
+  // 3. Eksekusi Hapus Massal
+  function runBulkDelete() {
+    var selected = document.querySelectorAll('.row-check:checked');
+    if (selected.length === 0) return;
+
+    if (!confirm("Yakin ingin menghapus " + selected.length + " data siswa yang dipilih?")) return;
+
+    // Ambil Nomor Baris (Row Excel) dari data studentList
+    // Kita ambil value (index array), lalu cari properti .row di studentList
+    var rowsToDelete = [];
+    selected.forEach(function(cb) {
+      var idx = parseInt(cb.value);
+      var rowExcel = studentList[idx].row; // Mengambil nomor baris asli di Sheet
+      rowsToDelete.push(rowExcel);
+    });
+
+    // UI Loading di Tombol
+    var btn = document.querySelector('#floatingAction button');
+    var oriText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = "Processing...";
+
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = oriText;
+      
+      if(res.status === 'success') {
+        showToast(res.message, 'bg-success');
+        // Sembunyikan pop-up
+        document.getElementById('floatingAction').classList.remove('show');
+        // Refresh Tabel
+        loadTableData();
+      } else {
+        alert(res.message);
+      }
+    }).deleteBulkStudents(currentToken, rowsToDelete);
+  }
+
+  // --- HELPER: FORMAT TANGGAL INDONESIA ---
+  function formatTanggalIndo(dateString) {
+    // Input: "2023-06-19" (YYYY-MM-DD)
+    if (!dateString || dateString.length < 10) return dateString;
+
+    var namaBulan = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    var parts = dateString.split('-'); // Pisahkan tahun, bulan, tanggal
+    var tahun = parts[0];
+    var bulan = parseInt(parts[1]); // Ubah "06" jadi 6 (integer)
+    var tanggal = parseInt(parts[2]); // Ubah "01" jadi 1 (hilangkan nol di depan)
+
+    // Output: "19 Juni 2023"
+    return tanggal + ' ' + namaBulan[bulan] + ' ' + tahun;
+  }
+
+  // --- FUNGSI BUKA PREVIEW FOTO ---
+  var modalFoto;
+
+  function openPhotoPreview(url) {
+    if (!modalFoto) {
+      modalFoto = new bootstrap.Modal(document.getElementById('modalFotoPreview'));
+    }
+    // Set sumber gambar modal sesuai url yang diklik
+    document.getElementById('imgPreviewFull').src = url;
+    modalFoto.show();
   }
 
 </script>
