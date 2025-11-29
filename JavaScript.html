@@ -430,9 +430,8 @@
     `;
   }
 
-  // --- FUNGSI RENDER PREVIEW (DENGAN LAYOUT FIX) ---
+  // --- FUNGSI RENDER PREVIEW (SMART FADE - NO BLUR) ---
   function renderPreview() {
-    // 1. Data Dummy & Config
     var dummy = { 
       nama: "PREVIEW SISWA", nisn: "0012345678", 
       tmp_lahir: "Jakarta", tgl_lahir: "2010-01-01", 
@@ -444,54 +443,54 @@
     var htmlDepan = createCardHTML(dummy, conf);
     var htmlBelakang = createBackCardHTML(conf);
 
-    // 2. Cek apakah wadah Flip sudah ada?
-    var flipper = document.getElementById('cardFlipper');
+    // Cek Container
+    var switcher = document.getElementById('cardSwitcher');
     
-    if (!flipper) {
-      // PERBAIKAN DISINI: Tambahkan class 'd-flex flex-column align-items-center'
-      // Ini memaksa susunan Vertikal yang Rapi
+    if (!switcher) {
+      // Struktur HTML Baru (Switch Container)
       document.getElementById('previewContainer').innerHTML = `
         <div class="d-flex flex-column align-items-center justify-content-center p-3">
           
-          <div class="flip-container" onclick="toggleFlipManual()">
-            <div class="flip-inner" id="cardFlipper">
-              <div class="flip-face flip-front" id="viewDepan">
-                 ${htmlDepan}
-              </div>
-              <div class="flip-face flip-back" id="viewBelakang">
-                 ${htmlBelakang}
-              </div>
+          <div class="switch-container" id="cardSwitcher" onclick="toggleSwitchCard()">
+            <div class="switch-face face-front" id="viewDepan">
+               ${htmlDepan}
+            </div>
+            <div class="switch-face face-back" id="viewBelakang">
+               ${htmlBelakang}
             </div>
           </div>
 
           <div class="mt-4 text-center text-muted small user-select-none">
-              <i class="bi bi-arrow-repeat"></i> Klik kartu untuk memutar (Flip)
+              <i class="bi bi-arrow-repeat"></i> Klik kartu untuk melihat sisi belakang
           </div>
 
         </div>
       `;
-      flipper = document.getElementById('cardFlipper');
+      switcher = document.getElementById('cardSwitcher');
     } else {
-      // Update isi saja jika container sudah ada
+      // Update isi jika container sudah ada
       document.getElementById('viewDepan').innerHTML = htmlDepan;
       document.getElementById('viewBelakang').innerHTML = htmlBelakang;
     }
 
-    // 3. Logic Otomatis Deteksi Input (Tetap Sama)
+    // Logic Otomatis (Cek Input User)
     var activeEl = document.activeElement;
     if (activeEl && activeEl.id) {
+      // Jika ngetik HP/Email -> Tampilkan Belakang (tambah class show-back)
       if (activeEl.id === 'confTelp' || activeEl.id === 'confEmail') {
-         flipper.classList.add('flipped');
-      } else if (activeEl.id.startsWith('conf')) {
-         flipper.classList.remove('flipped');
+         switcher.classList.add('show-back');
+      } 
+      // Jika ngetik Config lain -> Tampilkan Depan (hapus class show-back)
+      else if (activeEl.id.startsWith('conf')) {
+         switcher.classList.remove('show-back');
       }
     }
   }
 
-  // Fungsi Manual
-  function toggleFlipManual() {
-    var flipper = document.getElementById('cardFlipper');
-    if(flipper) flipper.classList.toggle('flipped');
+  // Fungsi Toggle Manual
+  function toggleSwitchCard() {
+    var switcher = document.getElementById('cardSwitcher');
+    if(switcher) switcher.classList.toggle('show-back');
   }
 
   // --- FUNGSI TOGGLE KLIK KARTU ---
