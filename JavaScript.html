@@ -402,9 +402,7 @@
     var alamat1 = conf.alamat1 || "";
     var alamat2 = conf.alamat2 || "";
     
-    // UPDATE LOGIC DISINI
-    // Gunakan input conf.telp, jika kosong fallback ke conf.nip (untuk jaga2), lalu placeholder
-    var kontakHP = conf.telp ? conf.telp : (conf.nip !== '-' ? conf.nip : '0812xxxx'); 
+    var kontakHP = conf.telp ? conf.telp : '-';
     var email = conf.email || "";
     
     var logoKiri = conf.logoKiri;
@@ -608,8 +606,11 @@
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
     
+    // Ganti class container utama agar lebih rapi (column ke bawah)
+    container.className = "d-flex flex-column align-items-center w-100";
+    
     if(studentList.length === 0) {
-      container.innerHTML = "<div class='alert alert-warning'>Belum ada data siswa. Silakan input di menu Data Siswa.</div>";
+      container.innerHTML = "<div class='alert alert-warning w-100 text-center'>Belum ada data siswa. Silakan input di menu Data Siswa.</div>";
       return;
     }
 
@@ -619,16 +620,20 @@
     // Loop setiap siswa
     studentList.forEach(s => {
       
-      // [PERUBAHAN DISINI] Gunakan class 'print-row'
-      html += `<div class="print-row">`;
+      // --- PERUBAHAN DISINI ---
+      // Kita bungkus .print-row dengan .view-card-wrapper
+      // Ini membuat setiap baris siswa punya kotak sendiri yang bisa discroll
+      html += `<div class="view-card-wrapper">`;
       
-      // Render Bagian Depan
-      html += createCardHTML(s, conf);
+        html += `<div class="print-row">`;
+          // Render Bagian Depan
+          html += createCardHTML(s, conf);
+          // Render Bagian Belakang
+          html += createBackCardHTML(conf);
+        html += `</div>`;
       
-      // Render Bagian Belakang
-      html += createBackCardHTML(conf);
-      
-      html += `</div>`; // Tutup wrapper
+      html += `</div>`; 
+      // ------------------------
     });
 
     container.innerHTML = html;
