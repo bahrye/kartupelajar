@@ -966,7 +966,7 @@
       background: rgba(255,255,255,0.1);
       border-radius: 4px;
   }
-  
+
   .style-6.back-card .gen-header-text { color: white; margin-top: 0; line-height: 1.2; }
   .style-6.back-card .gen-sekolah { font-size: 12px; font-weight: bold; }
   .style-6.back-card .gen-alamat { font-size: 7px; width: 90%; margin: 0 auto; }
@@ -1151,6 +1151,328 @@
        -webkit-print-color-adjust: exact !important; 
        print-color-adjust: exact !important;
     }
+  }
+
+  /* =======================================================
+   NEW TEMPLATES PACK (STYLES 22 - 35)
+   ======================================================= */
+
+  /* --- STYLE 22: NEUMORPHISM (Soft UI) --- 
+    Efek timbul/tenggelam yang lembut, sangat modern. */
+  .style-22 { background: #e0e5ec; border: 1px solid #fff; color: #4d4d4d; border-radius: 20px; }
+  .style-22 .gen-header { background: #e0e5ec; box-shadow:  5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff; border-radius: 15px; margin: 10px; height: 50px; }
+  .style-22 .gen-header-text { color: #4d4d4d; }
+  .style-22 .gen-photo-box { border: 2px solid #e0e5ec; border-radius: 15px; background: #e0e5ec; box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff; }
+  .style-22 .gen-card-title { color: #4d4d4d; font-weight: 900; letter-spacing: 1px; border: none; text-shadow: 1px 1px 0 #fff; }
+  .style-22.back-card { background: #e0e5ec; }
+
+  /* --- STYLE 23: MIDNIGHT GRADIENT (Deep Blue) --- 
+    Warna gradasi malam yang elegan. */
+  .style-23 { background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); color: white; border: none; }
+  .style-23 .gen-header { background: rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.2); }
+  .style-23 .gen-photo-box { border: 2px solid #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.5); background: transparent; }
+  .style-23 .gen-card-title { color: #00d2ff; border-bottom: 1px solid #00d2ff; }
+  .style-23 table td, .style-23 .gen-yayasan, .style-23 .gen-alamat { color: #eee; }
+  .style-23 .ttd-name { color: #fff; }
+  .style-23.back-card { background: linear-gradient(to top, #0f2027, #203a43); color: #ccc; }
+
+  /* --- STYLE 24: SWISS GRID (Bold Red) --- 
+    Gaya desain internasional Swiss, tegas, font tebal. */
+  .style-24 { background: #f5f5f5; border: 4px solid #d32f2f; font-family: 'Helvetica', Arial, sans-serif; }
+  .style-24 .gen-header { background: #d32f2f; height: 80px; align-items: flex-start; padding-top: 10px; clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%); }
+  .style-24 .gen-header-text { text-align: left; margin-left: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; }
+  .style-24 .gen-photo-box { border: none; border-radius: 0; filter: grayscale(100%); transition: filter 0.3s; box-shadow: 5px 5px 0 #d32f2f; }
+  .style-24 .gen-card-title { background: #000; color: #fff; padding: 5px 10px; font-weight: bold; transform: rotate(-2deg); display: inline-block; }
+  .style-24 .decoration-bar { position: absolute; bottom: 10px; right: 10px; font-size: 30px; color: #d32f2f; font-weight: 900; content: "+"; opacity: 0.2; }
+  .style-24.back-card .gen-header { background: #d32f2f; }
+
+  /* --- STYLE 25: ABSTRACT BLOB (Playful) --- 
+    Bentuk lengkung cair (liquid), warna ceria. */
+  .style-25 { background: #fff; border: 2px solid #ff6b6b; overflow: hidden; }
+  .style-25 .gen-header { background: #ff6b6b; height: 100px; border-radius: 0 0 50% 50% / 0 0 30px 30px; align-items: flex-start; padding-top: 5px; }
+  .style-25 .gen-header-text { color: #fff; }
+  .style-25 .gen-photo-box { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; border: 3px solid #feca57; overflow: hidden; width: 90px; height: 90px; }
+  .style-25 .gen-card-title { color: #ff6b6b; border: 2px dashed #feca57; border-radius: 10px; padding: 2px 8px; }
+  .style-25::before { content: ""; position: absolute; bottom: -20px; right: -20px; width: 100px; height: 100px; background: #48dbfb; border-radius: 50%; opacity: 0.2; z-index: 0; }
+  .style-25.back-card { background: #fff; border-color: #48dbfb; }
+
+  /* --- STYLE 26: PROFESSIONAL SLATE (Corporate) --- 
+    Abu-abu gelap kebiruan, sangat formal dan bisnis. */
+  .style-26 { background: #fff; border-top: 5px solid #34495e; border-bottom: 5px solid #34495e; border-left: 1px solid #ccc; border-right: 1px solid #ccc; }
+  .style-26 .gen-header { background: #ecf0f1; border-bottom: 1px solid #bdc3c7; height: 45px; }
+  .style-26 .gen-header-text { color: #2c3e50; }
+  .style-26 .gen-photo-box { border: 1px solid #34495e; padding: 2px; }
+  .style-26 .gen-card-title { border-left: 4px solid #e74c3c; padding-left: 10px; color: #34495e; font-weight: bold; text-transform: uppercase; }
+  .style-26 .gen-footer { background: #34495e; height: 35px; margin-top: auto; }
+  .style-26 .gen-footer .ttd-name { color: #fff; }
+  .style-26.back-card .gen-header { background: #34495e; }
+  .style-26.back-card .gen-header-text { color: #fff; }
+
+  /* --- STYLE 27: SUNSET VIBES (Orange/Purple) --- 
+    Gradasi horizontal yang hangat. */
+  .style-27 { background: #fff; border: none; border-left: 10px solid #fc4a1a; border-right: 10px solid #f7b733; }
+  .style-27 .gen-header { background: linear-gradient(to right, #fc4a1a, #f7b733); color: #fff; height: 55px; }
+  .style-27 .gen-photo-box { border: 3px solid #f7b733; border-radius: 50%; width: 80px; height: 80px; }
+  .style-27 .gen-card-title { background: -webkit-linear-gradient(#fc4a1a, #f7b733); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; border-bottom: 1px solid #eee; }
+  .style-27.back-card { border-left-color: #f7b733; border-right-color: #fc4a1a; }
+
+  /* --- STYLE 28: HIGH-TECH HUD (Cyan/Black) --- 
+    Tampilan antarmuka digital sci-fi. */
+  .style-28 { background: #0b0c10; color: #66fcf1; border: 1px solid #45a29e; font-family: 'Courier New', monospace; }
+  .style-28 .gen-header { background: rgba(69, 162, 158, 0.2); border-bottom: 1px solid #66fcf1; }
+  .style-28 .gen-header-text { color: #66fcf1; text-shadow: 0 0 5px rgba(102, 252, 241, 0.5); }
+  .style-28 .gen-photo-box { border: 1px solid #66fcf1; position: relative; }
+  .style-28 .gen-photo-box::after { content: ""; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid #fff; border-left: 2px solid #fff; }
+  .style-28 .gen-photo-box::before { content: ""; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid #fff; border-right: 2px solid #fff; z-index: 10; }
+  .style-28 .gen-card-title { border: 1px solid #45a29e; padding: 2px 5px; color: #fff; background: #1f2833; }
+  .style-28 table td { color: #c5c6c7; }
+  .style-28 td.fw-bold { color: #66fcf1; }
+  .style-28.back-card { background: #0b0c10; }
+
+  /* --- STYLE 29: ECO LEAF (Nature Green) --- 
+    Tema alam dengan lengkungan daun. */
+  .style-29 { background: #f1f8e9; border: 1px solid #8bc34a; border-radius: 20px 0 20px 0; }
+  .style-29 .gen-header { background: #558b2f; border-radius: 18px 0 50px 0; height: 60px; }
+  .style-29 .gen-photo-box { border: 3px solid #8bc34a; border-radius: 0 15px 0 15px; }
+  .style-29 .gen-card-title { color: #33691e; border-bottom: 2px solid #8bc34a; font-style: italic; }
+  .style-29 .decoration-bar { position: absolute; bottom: 0; right: 0; width: 60px; height: 60px; background: linear-gradient(135deg, transparent 50%, #c5e1a5 50%); border-radius: 0 0 18px 0; }
+  .style-29.back-card { border-radius: 0 20px 0 20px; }
+
+  /* --- STYLE 30: ROYAL LUXURY (Violet/Gold) --- 
+    Kombinasi ungu tua dan emas. */
+  .style-30 { background: #fff; border: 4px double #ffd700; }
+  .style-30 .gen-header { background: #4a148c; height: 50px; border-bottom: 2px solid #ffd700; }
+  .style-30 .gen-header-text { color: #ffd700; font-family: serif; letter-spacing: 1px; }
+  .style-30 .gen-photo-box { border: 2px solid #ffd700; padding: 3px; background: #4a148c; }
+  .style-30 .gen-card-title { color: #4a148c; font-family: serif; border-bottom: 1px solid #ffd700; font-weight: bold; font-size: 11px; }
+  .style-30 .ttd-name { color: #4a148c; font-weight: bold; }
+  .style-30.back-card { background: #f3e5f5; }
+
+  /* --- STYLE 31: CANDY POP (Pink/Yellow) --- 
+    Warna permen, sangat cocok untuk jenjang TK/SD. */
+  .style-31 { background: #fffde7; border: 3px dashed #ff4081; border-radius: 15px; }
+  .style-31 .gen-header { background: #ff4081; border-radius: 10px 10px 30px 30px; margin: 5px; height: 50px; }
+  .style-31 .gen-photo-box { border: 4px solid #ffeb3b; border-radius: 50%; width: 85px; height: 85px; box-shadow: 0 4px 0 #fbc02d; background: #fff; }
+  .style-31 .gen-card-title { background: #ffeb3b; color: #d81b60; padding: 2px 10px; border-radius: 20px; font-weight: bold; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .style-31.back-card { background: #fce4ec; border-color: #ffeb3b; }
+
+  /* --- STYLE 32: MOSAIC TILES (Geometric) --- 
+    Pola kotak-kotak kecil di header. */
+  .style-32 { border: 1px solid #0277bd; }
+  .style-32 .gen-header { 
+      background-color: #0277bd;
+      background-image: linear-gradient(45deg, #0288d1 25%, transparent 25%, transparent 75%, #0288d1 75%, #0288d1), 
+                        linear-gradient(45deg, #0288d1 25%, transparent 25%, transparent 75%, #0288d1 75%, #0288d1);
+      background-size: 10px 10px; background-position: 0 0, 5px 5px;
+      border-bottom: 3px solid #b3e5fc; height: 55px;
+  }
+  .style-32 .gen-header-text { background: rgba(2, 119, 189, 0.9); padding: 2px 10px; border-radius: 5px; color: #fff; }
+  .style-32 .gen-photo-box { border: 1px solid #0277bd; box-shadow: 4px 4px 0 #b3e5fc; }
+  .style-32 .gen-card-title { color: #01579b; border-bottom: 2px dotted #0277bd; }
+  .style-32.back-card .gen-header { background-color: #0277bd; }
+
+  /* --- STYLE 33: GLASS EFFECT (Translucent) --- 
+    Simulasi efek kaca di atas background warna-warni. */
+  .style-33 { 
+      background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); 
+      border: 1px solid #fff; 
+  }
+  .style-33 .gen-body, .style-33 .gen-header, .style-33 .gen-footer { position: relative; z-index: 2; }
+  .style-33::before {
+      content: ""; position: absolute; top: 20px; right: 20px; width: 100px; height: 100px;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%; z-index: 1;
+  }
+  .style-33 .gen-header { background: rgba(255, 255, 255, 0.4); border-bottom: 1px solid rgba(255,255,255,0.5); }
+  .style-33 .gen-header-text { color: #333; text-shadow: 1px 1px 0 rgba(255,255,255,0.8); }
+  .style-33 .gen-photo-box { background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.6); }
+  .style-33 .gen-card-title { color: #444; background: rgba(255,255,255,0.5); padding: 2px 8px; border-radius: 4px; }
+  .style-33.back-card { background: linear-gradient(120deg, #c2e9fb 0%, #a1c4fd 100%); }
+
+  /* --- STYLE 34: BRUTALISM (Stark B&W) --- 
+    Gaya kasar, font mono, garis tebal hitam putih. */
+  .style-34 { background: #fff; border: 3px solid #000; font-family: 'Courier New', monospace; }
+  .style-34 .gen-header { background: #000; height: 50px; border-bottom: 3px solid #000; }
+  .style-34 .gen-header-text { color: #fff; font-weight: bold; text-transform: uppercase; }
+  .style-34 .gen-photo-box { border: 3px solid #000; border-radius: 0; filter: grayscale(100%); background: #ccc; }
+  .style-34 .gen-card-title { background: #000; color: #fff; display: block; width: 100%; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 5px; }
+  .style-34 table td { border-bottom: 1px solid #000; }
+  .style-34 .gen-footer { border-top: 3px solid #000; height: 40px; margin-top: auto; }
+  .style-34.back-card { background: #eee; }
+
+  /* --- STYLE 35: HOLOGRAPHIC (Iridescent) --- 
+    Border gradasi pelangi yang menarik perhatian. */
+  .style-35 { 
+      background: #fff; 
+      border: 5px solid transparent;
+      border-image: linear-gradient(to bottom right, #b827fc 0%, #2c90fc 25%, #b8fd33 50%, #fec837 75%, #fd1892 100%);
+      border-image-slice: 1;
+  }
+  .style-35 .gen-header { background: linear-gradient(90deg, #b827fc, #2c90fc); color: #fff; height: 50px; }
+  .style-35 .gen-photo-box { border: 2px solid #b827fc; }
+  .style-35 .gen-card-title { 
+      background: linear-gradient(to right, #b827fc, #fd1892); 
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+      font-weight: 900; border-bottom: 1px solid #eee; 
+  }
+  .style-35.back-card .gen-header { background: linear-gradient(90deg, #fd1892, #fec837); }
+
+  /* --- PRINT FIX FOR NEW STYLES --- */
+  @media print {
+      .style-22, .style-23, .style-24, .style-25, .style-26, .style-27, 
+      .style-28, .style-29, .style-30, .style-31, .style-32, .style-33, 
+      .style-34, .style-35 {
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+      }
+  }
+
+  /* =======================================================
+    NEW THEME PACK (STYLES 36 - 48)
+    ======================================================= */
+
+  /* --- TEMA PENDIDIKAN (36 - 40) --- */
+
+  /* STYLE 36: BLACKBOARD (Papan Tulis Kapur) */
+  .style-36 { background: #2f362f; color: #fff; border: 4px solid #8d6e63; font-family: 'Courier New', monospace; }
+  .style-36 .gen-header { border-bottom: 2px dashed #fff; height: 50px; }
+  .style-36 .gen-header-text { font-family: 'Verdana', sans-serif; letter-spacing: 1px; }
+  .style-36 .gen-photo-box { border: 2px solid #fff; padding: 3px; background: transparent; transform: rotate(-1deg); }
+  .style-36 .gen-card-title { color: #fff; font-weight: bold; border: 1px solid #fff; padding: 2px 10px; border-radius: 20px; font-size: 10px; }
+  .style-36 table td, .style-36 .gen-yayasan, .style-36 .gen-alamat { color: #e0e0e0; }
+  .style-36 td.fw-bold { color: #81c784; } /* Warna kapur hijau */
+  .style-36.back-card { background: #2f362f; }
+
+  /* STYLE 37: OLD LIBRARY (Kertas Vintage) */
+  .style-37 { background: #fdf5e6; border: 1px solid #5d4037; color: #3e2723; }
+  .style-37 .gen-header { background: #d7ccc8; border-bottom: 3px double #5d4037; height: 55px; }
+  .style-37 .gen-header-text { font-family: 'Georgia', serif; font-weight: bold; color: #3e2723; }
+  .style-37 .gen-photo-box { border: 1px solid #5d4037; box-shadow: 3px 3px 0 rgba(93, 64, 55, 0.2); }
+  .style-37 .gen-card-title { background: #8d6e63; color: #fff; padding: 2px 15px; border-radius: 0 10px 10px 0; border-left: 5px solid #3e2723; display: inline-block; margin-left: -15px; }
+  .style-37 .decoration-bar { position: absolute; top: 0; right: 20px; width: 15px; height: 40px; background: #c62828; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); } /* Bookmark */
+  .style-37.back-card { background: #fdf5e6; }
+
+  /* STYLE 38: STATIONERY FUN (Pensil & Penggaris) */
+  .style-38 { background: #fff; border: 2px solid #ffb300; border-top: 15px solid #ffb300; } /* Top border like pencil body */
+  .style-38 .gen-header { background: #fff; border-bottom: 2px solid #424242; height: 45px; margin-top: 5px; }
+  .style-38 .gen-header-text { color: #424242; font-weight: 800; }
+  .style-38 .gen-photo-box { border: 2px dashed #ff6f00; border-radius: 10px; }
+  .style-38 .gen-card-title { color: #ff6f00; font-weight: bold; text-decoration: underline; text-decoration-style: wavy; border: none; }
+  /* Ruler markings on bottom */
+  .style-38 .gen-footer { background: repeating-linear-gradient(90deg, #424242, #424242 1px, transparent 1px, transparent 10px); height: 15px; border-top: 1px solid #000; margin-top: auto; opacity: 0.5; }
+  .style-38.back-card { border-top: 15px solid #ffb300; }
+
+  /* STYLE 39: GRADUATION DAY (Academic Blue/Gold) */
+  .style-39 { background: #fff; border: 2px solid #1a237e; border-radius: 5px; }
+  .style-39 .gen-header { background: #1a237e; border-bottom: 3px solid #ffd700; height: 60px; }
+  .style-39 .gen-header-text { font-family: 'Times New Roman', serif; letter-spacing: 0.5px; color: #ffd700; }
+  .style-39 .gen-photo-box { border: 2px solid #1a237e; padding: 2px; }
+  .style-39 .gen-card-title { color: #1a237e; font-weight: bold; border-bottom: 1px solid #1a237e; font-size: 11px; }
+  .style-39 .ttd-name { color: #1a237e; font-weight: bold; }
+  .style-39::before { content: ""; position: absolute; bottom: 10px; right: 10px; width: 40px; height: 40px; background: radial-gradient(circle, #ffd700 10%, transparent 10%); background-size: 10px 10px; opacity: 0.3; }
+  .style-39.back-card { background: #e8eaf6; }
+
+  /* STYLE 40: SCIENCE LAB (Molecules & Hexagons) */
+  .style-40 { background: #fff; border: 1px solid #00acc1; overflow: hidden; }
+  .style-40 .gen-header { background: #00acc1; clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); height: 55px; }
+  .style-40 .gen-photo-box { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); background: #e0f7fa; border: none; width: 85px; height: 95px; } /* Hexagon shape */
+  .style-40 .gen-card-title { color: #00838f; border-left: 4px solid #00acc1; padding-left: 8px; font-weight: bold; }
+  /* Molecule decoration */
+  .style-40::after { content: ""; position: absolute; bottom: -20px; right: -20px; width: 80px; height: 80px; background: transparent; border: 2px solid #b2ebf2; border-radius: 50%; z-index: 0; }
+  .style-40::before { content: ""; position: absolute; bottom: 30px; right: 40px; width: 30px; height: 30px; background: #b2ebf2; border-radius: 50%; opacity: 0.5; z-index: 0; }
+  .style-40.back-card { background: #e0f7fa; }
+
+  /* --- TEMA DUNIA AIR (41 - 44) --- */
+
+  /* STYLE 41: DEEP OCEAN (Dark Blue & Glow) */
+  .style-41 { background: linear-gradient(to bottom, #001f3f, #003366); color: #fff; border: none; }
+  .style-41 .gen-header { background: rgba(0,0,0,0.3); border-bottom: 1px solid #0074d9; }
+  .style-41 .gen-photo-box { border: 2px solid #7fdbff; box-shadow: 0 0 10px #7fdbff; background: transparent; }
+  .style-41 .gen-card-title { color: #7fdbff; border-bottom: 1px solid #7fdbff; text-shadow: 0 0 5px #7fdbff; }
+  .style-41 table td { color: #b3e5fc; }
+  .style-41 td.fw-bold { color: #fff; }
+  .style-41::before { content: "o"; position: absolute; bottom: 20px; right: 50px; color: rgba(255,255,255,0.2); font-size: 20px; }
+  .style-41::after { content: "o"; position: absolute; bottom: 40px; right: 30px; color: rgba(255,255,255,0.2); font-size: 10px; }
+  .style-41.back-card { background: linear-gradient(to top, #001f3f, #003366); color: #b3e5fc; }
+
+  /* STYLE 42: TROPICAL WAVE (Cyan/Teal Beach) */
+  .style-42 { background: #fff; border: 2px solid #00bcd4; border-bottom: none; }
+  .style-42 .gen-header { background: #00bcd4; height: 50px; }
+  .style-42 .gen-photo-box { border: 3px solid #ffeb3b; border-radius: 50%; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+  .style-42 .gen-card-title { color: #0097a7; font-weight: bold; background: #e0f7fa; padding: 2px 8px; border-radius: 10px; }
+  /* Wave Footer */
+  .style-42 .decoration-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 30px; background: #00bcd4; clip-path: polygon(0 100%, 100% 100%, 100% 40%, 75% 0%, 50% 40%, 25% 0%, 0 40%); opacity: 0.6; z-index: 1; }
+  .style-42::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #0097a7; z-index: 0; }
+  .style-42.back-card { border-bottom: 5px solid #0097a7; }
+
+  /* STYLE 43: CORAL REEF (Pink/Orange/Blue) */
+  .style-43 { background: #fff3e0; border: 2px solid #ff7043; border-radius: 15px; }
+  .style-43 .gen-header { background: linear-gradient(90deg, #ff7043, #f06292); border-radius: 12px 12px 0 0; height: 55px; }
+  .style-43 .gen-photo-box { border: 3px dotted #f06292; border-radius: 10px; }
+  .style-43 .gen-card-title { color: #e64a19; border-bottom: 2px dashed #ff7043; }
+  .style-43.back-card { background: #ffe0b2; }
+
+  /* STYLE 44: GLACIAL ICE (Frozen White/Blue) */
+  .style-44 { background: #fcfcfc; border: 1px solid #cfd8dc; }
+  .style-44 .gen-header { background: linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%); border-bottom: 2px solid #b0bec5; height: 50px; }
+  .style-44 .gen-header-text { color: #546e7a; font-weight: 800; text-shadow: 1px 1px 0 #fff; }
+  .style-44 .gen-photo-box { border: 4px solid #fff; outline: 1px solid #b0bec5; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .style-44 .gen-card-title { color: #607d8b; border: 1px solid #cfd8dc; background: #eceff1; padding: 2px 10px; transform: skewX(-10deg); }
+  /* Ice shard decoration */
+  .style-44::before { content: ""; position: absolute; top: 0; right: 50px; width: 40px; height: 100%; background: rgba(255,255,255,0.6); transform: skewX(-20deg); z-index: 0; pointer-events: none; }
+  .style-44.back-card { background: #eceff1; }
+
+  /* --- TEMA DUNIA FANTASI (45 - 48) --- */
+
+  /* STYLE 45: DRAGON SLAYER (Red Scales) */
+  .style-45 { background: #212121; border: 3px solid #b71c1c; color: #fff; }
+  .style-45 .gen-header { background: linear-gradient(to right, #800000, #b71c1c); border-bottom: 2px solid #ff5252; height: 55px; clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%); }
+  .style-45 .gen-photo-box { border: 2px solid #ff5252; box-shadow: 0 0 10px #b71c1c; }
+  .style-45 .gen-card-title { color: #ff5252; font-family: 'Times New Roman', serif; font-weight: bold; font-style: italic; border-bottom: 1px solid #b71c1c; }
+  .style-45 table td { color: #e0e0e0; }
+  .style-45 td.fw-bold { color: #ff8a80; }
+  /* Scale Pattern Background */
+  .style-45 .gen-body { background-image: radial-gradient(#3e2723 15%, transparent 16%), radial-gradient(#3e2723 15%, transparent 16%); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
+  .style-45.back-card { background: #212121; color: #ffcdd2; }
+
+  /* STYLE 46: ARCANE MAGIC (Purple/Runes) */
+  .style-46 { background: #311b92; color: #d1c4e9; border: 2px solid #7c4dff; }
+  .style-46 .gen-header { background: #4527a0; border-bottom: 2px solid #7c4dff; box-shadow: 0 0 15px rgba(124, 77, 255, 0.5); }
+  .style-46 .gen-header-text { color: #b388ff; font-family: serif; letter-spacing: 2px; }
+  .style-46 .gen-photo-box { border: 2px solid #b388ff; border-radius: 50%; box-shadow: 0 0 10px #7c4dff; }
+  .style-46 .gen-card-title { color: #fff; text-shadow: 0 0 5px #7c4dff; border: 1px solid #7c4dff; padding: 2px 8px; background: rgba(0,0,0,0.3); }
+  .style-46 .decoration-bar { position: absolute; top: 10px; right: 10px; font-size: 24px; color: rgba(255,255,255,0.2); content: "⚡"; }
+  .style-46.back-card { background: #311b92; }
+
+  /* STYLE 47: ELVEN FOREST (Nature/Gold) */
+  .style-47 { background: #f1f8e9; border: 2px solid #cddc39; border-radius: 20px 0 20px 0; }
+  .style-47 .gen-header { background: linear-gradient(to right, #33691e, #558b2f); border-radius: 18px 0 0 0; height: 50px; }
+  .style-47 .gen-header-text { color: #f0f4c3; font-family: serif; font-style: italic; }
+  .style-47 .gen-photo-box { border: 2px solid #cddc39; border-radius: 0 15px 0 15px; }
+  .style-47 .gen-card-title { color: #33691e; border-bottom: 1px solid #9e9d24; font-family: serif; }
+  .style-47 .gen-footer { background: url('https://www.transparenttextures.com/patterns/leaves.png'); opacity: 0.8; }
+  .style-47.back-card { background: #f9fbe7; }
+
+  /* STYLE 48: STEAMPUNK (Gears/Brass) */
+  .style-48 { background: #3e2723; border: 4px ridge #d7ccc8; color: #d7ccc8; }
+  .style-48 .gen-header { background: #5d4037; border-bottom: 2px solid #8d6e63; height: 55px; }
+  .style-48 .gen-header-text { color: #ffcc80; font-family: 'Courier New', monospace; font-weight: bold; text-transform: uppercase; }
+  .style-48 .gen-photo-box { border: 4px solid #8d6e63; border-radius: 50%; background: #4e342e; box-shadow: inset 0 0 10px #000; }
+  .style-48 .gen-card-title { color: #ffcc80; border: 1px solid #8d6e63; background: #3e2723; padding: 2px 5px; box-shadow: 2px 2px 0 #000; }
+  .style-48 table td { color: #d7ccc8; }
+  .style-48 td.fw-bold { color: #ffcc80; }
+  /* Gear decoration simulated with CSS radial gradient */
+  .style-48 .decoration-bar { position: absolute; bottom: -20px; right: -20px; width: 80px; height: 80px; background: repeating-conic-gradient(#5d4037 0% 10%, transparent 10% 20%); border-radius: 50%; opacity: 0.3; border: 5px solid #5d4037; }
+  .style-48.back-card { background: #3e2723; }
+
+  /* --- PRINT FIX FOR NEW THEMES --- */
+  @media print {
+      .style-36, .style-37, .style-38, .style-39, .style-40,
+      .style-41, .style-42, .style-43, .style-44,
+      .style-45, .style-46, .style-47, .style-48 {
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
+      }
   }
 
 </style>
