@@ -9,6 +9,14 @@
 
   // --- [BARU] LOGIKA SESI (SESSION MANAGEMENT) ---
   
+  // Konfigurasi: Sesi Timeout 1 Jam (dalam milidetik)
+  // Logika: Jika user aktif, timer ini akan terus di-reset.
+  // Jika user diam total selama 1 jam, sesi akan habis.
+  var SESSION_TIMEOUT = 1 * 60 * 60 * 1000; 
+  
+  var lastActivityUpdate = 0; // Penanda waktu update terakhir agar tidak spam storage
+  var sessionInterval;        // Variabel untuk interval cek background
+
   // 1. Cek Sesi saat halaman pertama kali dimuat
   document.addEventListener('DOMContentLoaded', function() {
     checkSession();
@@ -21,7 +29,7 @@
       var session = JSON.parse(sessionData);
       var now = new Date().getTime();
 
-      // Cek apakah sesi masih berlaku (kurang dari 3 jam)
+      // Cek apakah sesi masih berlaku
       if (now < session.expiry) {
         // Restore data dari storage
         currentToken = session.token;
@@ -30,6 +38,10 @@
         // Langsung masuk dashboard tanpa login lagi
         switchPage('dashboard');
         loadTableData();
+        
+        // [PENTING] Mulai pantau aktifitas user agar sesi tidak mati jika user kerja
+        startActivityMonitor();
+
       } else {
         // Jika expired, hapus data sampah
         localStorage.removeItem('appSekolahSession');
@@ -40,7 +52,7 @@
   // 2. Fungsi Simpan Sesi (Dipanggil saat Login Sukses)
   function saveSession(token, namaSekolah) {
     var now = new Date().getTime();
-    var expiryTime = now + (3 * 60 * 60 * 1000); // 3 Jam dalam milidetik
+    var expiryTime = now + SESSION_TIMEOUT; 
 
     var session = {
       token: token,
@@ -49,12 +61,110 @@
     };
 
     localStorage.setItem('appSekolahSession', JSON.stringify(session));
+    
+    // Mulai monitor aktifitas setelah login
+    startActivityMonitor();
   }
 
-  // 3. Fungsi Logout (Menghapus Sesi)
+  // Variabel global untuk modal logout (agar tidak di-init berulang kali)
+  var modalLogout;
+
+  // 1. Fungsi Pemicu (Hanya Membuka Pop-up)
   function logoutApp() {
-    localStorage.removeItem('appSekolahSession'); // Hapus sesi
-    location.reload(); // Refresh halaman kembali ke login
+    // Inisialisasi modal jika belum ada
+    if (!modalLogout) {
+      modalLogout = new bootstrap.Modal(document.getElementById('modalLogoutConfirm'));
+    }
+    modalLogout.show();
+  }
+
+  // 2. Fungsi Eksekusi (Dijalankan saat tombol "Ya, Keluar" diklik)
+  function executeLogout() {
+    // Sembunyikan modal dulu agar rapi
+    if (modalLogout) modalLogout.hide();
+
+    // --- PROSES PEMBERSIHAN (Sama seperti sebelumnya) ---
+    
+    // A. Hapus Sesi & Interval
+    localStorage.removeItem('appSekolahSession'); 
+    if(sessionInterval) clearInterval(sessionInterval); 
+
+    // B. Reset Variabel Global
+    currentToken = "";
+    studentList = [];
+    
+    // C. Bersihkan Tampilan Dashboard
+    document.getElementById('schoolTitle').innerText = "Sekolah"; 
+    var tbody = document.querySelector('#studentTable tbody');
+    if(tbody) tbody.innerHTML = ""; 
+    var cardContainer = document.getElementById('cardContainer');
+    if(cardContainer) cardContainer.innerHTML = "";
+    
+    // D. Reset Form Login
+    document.getElementById('loginEmail').value = "";
+    document.getElementById('loginPass').value = "";
+
+    // E. Pindah ke Halaman Login (Instan)
+    switchPage('login');
+  }
+
+  // 4. [BARU] Fungsi Monitor Aktifitas User
+  function startActivityMonitor() {
+    // Daftar aksi yang dianggap sebagai "User Sedang Aktif"
+    var events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    
+    // Hapus listener lama (jika ada) agar tidak duplikat
+    events.forEach(function(e) { document.removeEventListener(e, userIsActive); });
+    
+    // Pasang listener baru ke dokumen
+    events.forEach(function(e) { document.addEventListener(e, userIsActive); });
+
+    // Jalankan pengecekan background setiap 1 menit
+    // Ini berfungsi untuk menendang user keluar jika dia meninggalkan laptop (idle)
+    if(sessionInterval) clearInterval(sessionInterval);
+    sessionInterval = setInterval(checkAutoLogout, 60000); 
+  }
+
+  // Logic: User melakukan sesuatu (Gerak mouse, klik, ngetik)
+  function userIsActive() {
+    var now = new Date().getTime();
+    
+    // Throttling: Kita hanya update ke localStorage maksimal 1 menit sekali
+    // Tujuannya agar browser tidak berat karena setiap gerakan mouse menulis data
+    if (now - lastActivityUpdate > 60000) { 
+       updateSessionExpiry();
+       lastActivityUpdate = now;
+    }
+  }
+
+  // Fungsi memperpanjang waktu expiry di localStorage
+  function updateSessionExpiry() {
+    var sessionData = localStorage.getItem('appSekolahSession');
+    if (sessionData) {
+       var session = JSON.parse(sessionData);
+       // Reset waktu kadaluarsa menjadi: Sekarang + 1 Jam
+       session.expiry = new Date().getTime() + SESSION_TIMEOUT; 
+       localStorage.setItem('appSekolahSession', JSON.stringify(session));
+       // console.log("Sesi diperpanjang karena user aktif.");
+    }
+  }
+
+  // Logic: Cek apakah sudah waktunya logout (user diam > 1 jam)
+  function checkAutoLogout() {
+    var sessionData = localStorage.getItem('appSekolahSession');
+    if (sessionData) {
+      var session = JSON.parse(sessionData);
+      var now = new Date().getTime();
+      
+      // Jika waktu sekarang sudah melewati batas expiry yang tersimpan
+      if (now > session.expiry) {
+        console.log("Sesi habis karena tidak aktif selama 1 jam.");
+        logoutApp();
+      }
+    } else {
+      // Jika data sesi tiba-tiba hilang (misal dihapus dari tab lain)
+      logoutApp();
+    }
   }
 
   // --- NAVIGATION ---
