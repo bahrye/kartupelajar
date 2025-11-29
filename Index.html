@@ -75,27 +75,38 @@
                   <div class="card-body">
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Nama Yayasan</label>
-                      <input type="text" id="confYayasan" class="form-control" value="YAYASAN PENDIDIKAN" oninput="renderPreview()">
+                      <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
                     </div>
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
-                      <input type="text" id="confAlamat1" class="form-control" value="NSM: 1212... NPSN: 403..." oninput="renderPreview()">
+                      <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
                     </div>
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
-                      <input type="text" id="confAlamat2" class="form-control" value="Kec. X, Kab. Y" oninput="renderPreview()">
+                      <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
                     </div>
+
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
+                      <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
+                    </div>
+                    
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Email Sekolah</label>
+                      <input type="text" id="confEmail" class="form-control" placeholder="admin@sekolah.com" oninput="renderPreview()">
+                    </div>
+
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Tempat & Tanggal TTD</label>
-                      <input type="text" id="confTgl" class="form-control" value="Jakarta, 14 Juli 2025" oninput="renderPreview()">
+                      <input type="text" id="confTgl" class="form-control" placeholder="Jakarta, 14 Juli 2025" oninput="renderPreview()">
                     </div>
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
-                      <input type="text" id="confKepala" class="form-control" value="NAMA KEPALA S.Pd" oninput="renderPreview()">
+                      <input type="text" id="confKepala" class="form-control" placeholder="NAMA KEPALA S.Pd" oninput="renderPreview()">
                     </div>
                     <div class="mb-2">
                       <label class="form-label small fw-bold">NIP Kepala</label>
-                      <input type="text" id="confNIP" class="form-control" value="-" oninput="renderPreview()">
+                      <input type="text" id="confNIP" class="form-control" placeholder="-" oninput="renderPreview()">
                     </div>
                     <hr>
                     <div class="mb-2">
@@ -113,6 +124,12 @@
                     <div class="mb-2">
                       <label class="form-label small fw-bold">URL Tanda Tangan</label>
                       <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
+                    </div>
+
+                    <div class="mt-4">
+                      <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
+                        <i class="bi bi-save"></i> SIMPAN PENGATURAN
+                      </button>
                     </div>
                   </div>
                 </div>
