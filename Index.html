@@ -413,6 +413,27 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modalLogoutConfirm" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-sm"> <div class="modal-content border-0 shadow-lg">
+          <div class="modal-body text-center p-4">
+            
+            <div class="mb-3 text-danger">
+              <i class="bi bi-box-arrow-right" style="font-size: 3rem;"></i>
+            </div>
+            
+            <h5 class="fw-bold mb-2">Konfirmasi Keluar</h5>
+            <p class="text-muted small mb-4">Apakah Anda yakin ingin mengakhiri sesi dan keluar dari aplikasi?</p>
+            
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-danger fw-bold" onclick="executeLogout()">Ya, Keluar Sekarang</button>
+              <button type="button" class="btn btn-light text-muted" data-bs-dismiss="modal">Batal</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
     <?!= include('JavaScript'); ?>
   </body>
 </html>
