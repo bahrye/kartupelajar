@@ -1,5 +1,4 @@
 // --- KONFIGURASI UTAMA ---
-// Ganti dengan ID Spreadsheet Master Anda
 var MASTER_SHEET_ID = '15ZvHQ2DEgKObLRlwAftz3jE5olP2h49t4bsdAFCYHho'; 
 
 function doGet() {
@@ -14,67 +13,52 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-// --- FUNGSI REGISTRASI (BACKEND) ---
+// --- FUNGSI REGISTRASI ---
 function registerSchool(form) {
-  // Lock untuk mencegah race condition (opsional tapi bagus)
   var lock = LockService.getScriptLock();
   try {
-    lock.waitLock(10000); // Tunggu antrian max 10 detik
+    lock.waitLock(10000); 
   } catch (e) {
-    return {status: 'error', message: 'Server sibuk, coba lagi.'};
+    return {status: 'error', message: 'Server sibuk.'};
   }
 
   try {
     var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
     var sheet = ss.getSheetByName('Users');
-    
-    // Validasi sheet master
-    if (!sheet) {
-      return {status: 'error', message: 'Sheet "Users" tidak ditemukan di Master DB!'};
-    }
-
-    // Cek Email Duplikat
     var data = sheet.getDataRange().getValues();
+    
+    // Cek Email Duplikat
     for(var i=0; i<data.length; i++){
-      // Kolom index 2 adalah email
       if(data[i][2] && data[i][2].toString().toLowerCase() == form.email.toLowerCase()) {
-        return {status: 'error', message: 'Email ini sudah terdaftar!'};
+        return {status: 'error', message: 'Email sudah terdaftar!'};
       }
     }
 
-    // 1. Buat Spreadsheet Baru
+    // Buat Spreadsheet Baru
     var newSS = SpreadsheetApp.create("DB_" + form.namaSekolah);
     var newSSId = newSS.getId();
     
-    // 2. Beri izin akses ke siapapun (opsional, agar gambar bisa diload publik jika perlu)
-    // newSS.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-    // 3. Setup Header Data Siswa
+    // Setup Header Data Siswa
     var sheetSiswa = newSS.getSheets()[0];
     sheetSiswa.setName("DataSiswa");
-    sheetSiswa.appendRow(["NIS", "Nama", "Kelas", "TTL", "Alamat", "FotoURL"]);
-    // Data Dummy
-    sheetSiswa.appendRow(["1001", "Siswa Contoh", "X-A", "Jakarta, 01 Jan 2008", "Jl. Merdeka 1", "https://via.placeholder.com/150"]);
+    sheetSiswa.appendRow(["Nama", "NISN", "TempatLahir", "TglLahir", "JK", "Kelas", "Alamat", "FotoURL"]);
+    
+    // Data Dummy (Format NISN dengan kutip satu agar terbaca teks)
+    sheetSiswa.appendRow(["Siswa Contoh", "'0012345678", "Jakarta", "2008-01-01", "L", "X-A", "Jl. Mawar No 1", "https://via.placeholder.com/150"]);
 
-    // 4. Simpan Akun ke Master
-    sheet.appendRow([
-      new Date(), 
-      form.namaSekolah, 
-      form.email, 
-      form.password, 
-      newSSId
-    ]);
+    // Simpan Akun
+    sheet.appendRow([new Date(), form.namaSekolah, form.email, form.password, newSSId]);
 
-    return {status: 'success', message: 'Registrasi Berhasil! Silakan Login.'};
+    return {status: 'success', message: 'Registrasi Berhasil!'};
 
   } catch(e) {
-    return {status: 'error', message: 'Error Server: ' + e.toString()};
+    return {status: 'error', message: 'Error: ' + e.toString()};
   } finally {
     lock.releaseLock();
   }
 }
 
-// --- FUNGSI LOGIN (BACKEND) ---
+// --- LOGIN ---
 function loginSchool(email, password) {
   try {
     var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
@@ -85,38 +69,144 @@ function loginSchool(email, password) {
       if(data[i][2] == email && data[i][3] == password) {
         return {
           status: 'success', 
-          token: data[i][4], // Spreadsheet ID
+          token: data[i][4], 
           sekolah: data[i][1]
         };
       }
     }
-    return {status: 'error', message: 'Email atau Password salah.'};
+    return {status: 'error', message: 'Email/Password salah.'};
   } catch(e) {
-    return {status: 'error', message: 'Login Error: ' + e.toString()};
+    return {status: 'error', message: 'Login Error.'};
   }
 }
 
-// --- FUNGSI GET DATA SISWA (BACKEND) ---
+// --- CRUD SISWA ---
+
+// 1. READ (Ambil Data)
 function getStudents(spreadsheetId) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
     var sheet = ss.getSheetByName('DataSiswa');
     var data = sheet.getDataRange().getValues();
     
-    if (data.length <= 1) return {status: 'success', data: []}; // Kosong
+    if (data.length <= 1) return {status: 'success', data: []}; 
 
     data.shift(); // Hapus Header
     
-    // Mapping Array ke Object
-    var students = data.map(function(r){
+    var students = data.map(function(r, index){
       return {
-        nis: r[0], nama: r[1], kelas: r[2], 
-        ttl: r[3], alamat: r[4], foto: r[5]
+        row: index + 2, 
+        nama: r[0], 
+        // Ubah ke string agar aman saat dikirim ke frontend
+        nisn: r[1].toString(), 
+        tmp_lahir: r[2],
+        tgl_lahir: r[3] ? Utilities.formatDate(new Date(r[3]), "GMT+7", "yyyy-MM-dd") : "",
+        jk: r[4],
+        kelas: r[5],
+        alamat: r[6], 
+        foto: r[7]
       };
     });
     
     return {status: 'success', data: students};
   } catch(e) {
     return {status: 'error', message: 'Gagal ambil data: ' + e.toString()};
+  }
+}
+
+// --- HELPER UPLOAD FOTO KE DRIVE ---
+function processPhoto(fotoData, fileNamePrefix) {
+  // 1. Jika tidak ada data atau bukan base64, cek apakah itu URL lama yang valid
+  if (!fotoData) return "";
+  if (!fotoData.toString().startsWith("data:")) return fotoData;
+
+  try {
+    // 2. Cari/Buat Folder Khusus
+    var folderName = "APP_KARTU_PELAJAR_FOTO";
+    var folders = DriveApp.getFoldersByName(folderName);
+    var folder;
+    if (folders.hasNext()) {
+      folder = folders.next();
+    } else {
+      folder = DriveApp.createFolder(folderName);
+      // PENTING: Set folder jadi publik agar file di dalamnya bisa diakses browser
+      folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    }
+
+    // 3. Decode Base64 Image
+    var split = fotoData.split('base64,');
+    var contentType = split[0].split(':')[1].split(';')[0]; // contoh: image/jpeg
+    var decoded = Utilities.base64Decode(split[1]);
+    var blob = Utilities.newBlob(decoded, contentType, fileNamePrefix + "_" + new Date().getTime());
+
+    // 4. Simpan File
+    var file = folder.createFile(blob);
+    
+    // 5. Pastikan File Individu juga Publik
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    // 6. GENERATE DIRECT LINK (Bagian Paling Penting!)
+    // Format thumbnail link Google Drive (lh3.googleusercontent.com) jauh lebih cepat dan stabil
+    // "s150" artinya ukuran gambar diset ke 150px (cukup untuk kartu/tabel)
+    // Jika ingin resolusi asli, ganti "s150" menjadi "s0"
+    
+    // Kita gunakan trik ID file untuk membuat link thumbnail
+    var fileId = file.getId();
+    return "https://lh3.googleusercontent.com/d/" + fileId; 
+
+  } catch (e) {
+    // Jika gagal, return string kosong
+    return ""; 
+  }
+}
+
+// 2. CREATE (Tambah Siswa)
+function addStudent(spreadsheetId, s) {
+  try {
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    
+    var nisnText = "'" + s.nisn;
+    
+    // PROSES UPLOAD FOTO
+    var finalFotoUrl = processPhoto(s.foto, s.nama);
+
+    sheet.appendRow([s.nama, nisnText, s.tmp_lahir, s.tgl_lahir, s.jk, s.kelas, s.alamat, finalFotoUrl]);
+    return {status: 'success', message: 'Data berhasil ditambahkan'};
+  } catch(e) {
+    return {status: 'error', message: e.toString()};
+  }
+}
+
+// 3. UPDATE (Edit Siswa)
+function editStudent(spreadsheetId, s) {
+  try {
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    var row = parseInt(s.row);
+    
+    var nisnText = "'" + s.nisn;
+    
+    // PROSES UPLOAD FOTO (Hanya upload jika data yang dikirim adalah Base64 baru)
+    var finalFotoUrl = processPhoto(s.foto, s.nama);
+    
+    var range = sheet.getRange(row, 1, 1, 8);
+    range.setValues([[s.nama, nisnText, s.tmp_lahir, s.tgl_lahir, s.jk, s.kelas, s.alamat, finalFotoUrl]]);
+    
+    return {status: 'success', message: 'Data berhasil diupdate'};
+  } catch(e) {
+    return {status: 'error', message: e.toString()};
+  }
+}
+
+// 4. DELETE (Hapus Siswa)
+function deleteStudent(spreadsheetId, row) {
+  try {
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    sheet.deleteRow(parseInt(row));
+    return {status: 'success', message: 'Data berhasil dihapus'};
+  } catch(e) {
+    return {status: 'error', message: e.toString()};
   }
 }
