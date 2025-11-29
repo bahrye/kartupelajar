@@ -187,8 +187,36 @@
 
           <div class="tab-pane fade" id="generate-pane">
             <div class="alert alert-info no-print text-center">
-              <i class="bi bi-printer"></i> Klik tombol cetak di bawah ini. Pastikan setting printer: <strong>Layout Landscape, Paper Size A4/F4, Scale Default/100%.</strong>
+              <i class="bi bi-printer"></i> Pastikan setting printer: <strong>Layout Landscape (atau Portrait sesuai selera), Paper Size A4, Scale 100%.</strong>
             </div>
+
+            <div class="text-center mb-3 no-print">
+              <label class="fw-bold">Pilih Mode Tampilan:</label>
+              <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
+                <option value="1">1. Madrasah (Hijau - Default)</option>
+                <option value="2">2. Merah Modern (Curve)</option>
+                <option value="3">3. Cokelat (Classic)</option>
+                <option value="4">4. Dark Mode (Elegant)</option>
+                <option value="5">5. Abu-abu (Corporate)</option>
+                <option value="6">6. Biru (Geometric)</option>
+                <option value="7">7. Ungu (Creative)</option>
+                <option value="8">8. Orange (Bright)</option>
+                <option value="9">9. Teal/Cyan (Clean)</option>
+                <option value="10">10. Navy (Official)</option>
+                <option value="11">11. Maroon (Formal)</option>
+                <option value="12">12. Cyber/Tech (Futuristik)</option>
+                <option value="13">13. Emerald (Nature/Leaf)</option>
+                <option value="14">14. Black & Gold (Luxury)</option>
+                <option value="15">15. Retro Paper (Vintage)</option>
+                <option value="16">16. Indigo (Wave Header)</option>
+                <option value="17">17. Crimson (Aggressive)</option>
+                <option value="18">18. Minimalist Border (Clean)</option>
+                <option value="19">19. Pastel Pink/Blue (Soft)</option>
+                <option value="20">20. Hexagon (Polygon Style)</option>
+                <option value="21">21. Full Gradient (Modern Art)</option>
+              </select>
+            </div>
+
             <div class="text-center mb-4 no-print">
                <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
             </div>
