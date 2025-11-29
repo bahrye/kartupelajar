@@ -194,15 +194,12 @@
     #madrasahConfig .input-group-text { width: 100%; border-radius: 5px !important; margin-bottom: 5px; }
     #madrasahConfig .form-control { width: 100%; border-radius: 5px !important; margin-bottom: 10px; }
 
-    /* 5. MAGIC SCALING UNTUK KARTU */
-    /* Karena lebar kartu 335px + padding container > lebar layar HP (360px) */
-    /* Kita kecilkan tampilan kartu hanya di layar HP agar tidak terpotong */
+    /* 5. MAGIC SCALING UNTUK KARTU (LIST MODE) */
     .id-card {
       transform: scale(0.92); /* Perkecil ke 92% */
       margin-bottom: -15px; /* Hilangkan gap kosong akibat scaling */
     }
   }
-
 
   /* 1. KOTAK KARTU (Sama persis dengan depan) */
   .back-card {
@@ -304,6 +301,124 @@
     margin-top: 1px; 
     line-height: 1.2; /* Jarak antar baris alamat rapat */
     color: white;
+  }
+
+  /* --- UPDATE: FITUR 3D PREVIEW & PERBAIKAN LAYOUT --- */
+
+  /* 1. ANIMASI FLIP CARD 3D (Container & Layout Fix) */
+  .flip-container {
+    background-color: transparent;
+    width: 335px;  /* Lebar kartu madrasah */
+    height: 220px; /* Tinggi kartu madrasah */
+    perspective: 1000px; /* Efek 3D */
+    margin: 0 auto; /* Tengah horizontal */
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Bagian dalam yang berputar */
+  .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+
+  /* Class pemicu putaran */
+  .flip-inner.flipped {
+    transform: rotateY(180deg);
+  }
+
+  /* Sisi Depan & Belakang */
+  .flip-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+    background-color: white; /* Wajib putih agar tidak transparan */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    /* PENTING: Paksa rata kiri agar isi kartu tidak ikut center dari container */
+    text-align: left !important; 
+  }
+
+  /* Reset Style Kartu saat di dalam Flip agar tidak berantakan */
+  .flip-face .id-card, 
+  .flip-face .back-card {
+    margin: 0 !important; /* Hapus margin bawaan */
+    box-shadow: none !important; /* Hapus shadow ganda */
+    transform: none !important; /* Reset transformasi lain */
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important; 
+  }
+
+  /* Sisi Depan */
+  .flip-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+  }
+
+  /* Sisi Belakang */
+  .flip-back {
+    transform: rotateY(180deg);
+  }
+
+  /* 2. ALIGNMENT FIX UNTUK ISI KARTU */
+  /* Pastikan tabel data siswa di depan rata kiri & atas */
+  .temp-madrasah .data-area table {
+    text-align: left;
+    width: 100%;
+  }
+  .temp-madrasah .data-area td {
+    vertical-align: top;
+  }
+
+  /* 3. CONTACT PERSON DI BELAKANG (LAYOUT TABEL BARU) */
+  .back-footer-container {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed #ccc; 
+  }
+
+  .cp-title {
+    font-size: 8px; 
+    font-weight: bold; 
+    text-decoration: underline; 
+    margin-bottom: 2px;
+  }
+
+  /* Tabel khusus agar titik dua (:) sejajar rapi */
+  .cp-table {
+    width: 100%;
+    font-size: 8px;
+    font-weight: bold;
+    border-collapse: collapse;
+  }
+  .cp-table td {
+    padding: 0;
+    vertical-align: top;
+    border: none !important;
+  }
+  /* Kolom Label (No HP / Email) */
+  .cp-table td.cp-label {
+    width: 55px; /* Lebar tetap agar sejajar */
+    white-space: nowrap;
+  }
+  /* Kolom Titik Dua */
+  .cp-table td.cp-sep {
+    width: 10px;
+    text-align: center;
+  }
+  /* Kolom Isi */
+  .cp-table td.cp-val {
+    text-align: left;
   }
 
 </style>
