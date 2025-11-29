@@ -105,14 +105,49 @@
     align-items: flex-start;
   }
 
-  /* FOTO SISWA */
+  /* --- UPDATE: FOTO SISWA DENGAN PLACEHOLDER IKON --- */
   .temp-madrasah .photo-area {
     width: 75px; height: 95px; 
-    background: #ccc; border: 1px solid #999; 
-    flex-shrink: 0; object-fit: cover; margin-top: 2px;
+    background: #ffffff; /* Ubah background jadi Putih */
+    border: 1px solid #999; 
+    flex-shrink: 0; margin-top: 2px;
     position: relative; z-index: 2;
+    overflow: hidden;
+
+    /* Flexbox untuk menengahkan ikon dan teks placeholder */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #d1d1d1; /* Warna abu-abu muda untuk ikon placeholder */
   }
-  .temp-madrasah .photo-area img { width: 100%; height: 100%; }
+
+  /* Style untuk Foto Asli (Jika ada) */
+  .temp-madrasah .photo-area img.real-photo { 
+    width: 100%; 
+    height: 100%; 
+    
+    /* UBAH DISINI: 'fill' akan memaksa gambar meregang penuh sesuai kotak */
+    object-fit: fill; 
+    
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 5; 
+    background: white;
+  }
+
+  /* Style untuk Ikon Placeholder */
+  .temp-madrasah .photo-area .ph-icon {
+      font-size: 45px; /* Ukuran ikon */
+      line-height: 1;
+      margin-bottom: -5px;
+  }
+  
+  /* Style untuk Teks 3X4 */
+  .temp-madrasah .photo-area .ph-text {
+      font-size: 10px;
+      font-weight: bold;
+  }
 
   /* PANEL KANAN */
   .temp-madrasah .right-panel {
