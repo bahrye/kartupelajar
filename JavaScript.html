@@ -1,0 +1,138 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // --- GLOBAL VARIABLES ---
+  var currentToken = "";
+  var studentList = [];
+
+  // --- NAVIGATION ---
+  function switchPage(page) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('registerPage').style.display = 'none';
+    document.getElementById('dashboardPage').style.display = 'none';
+
+    if(page === 'login') document.getElementById('loginPage').style.display = 'block';
+    if(page === 'register') document.getElementById('registerPage').style.display = 'block';
+    if(page === 'dashboard') document.getElementById('dashboardPage').style.display = 'block';
+  }
+
+  // --- REGISTER FUNCTION ---
+  function runRegister() {
+    // Ambil Value
+    var nama = document.getElementById('regSekolah').value;
+    var email = document.getElementById('regEmail').value;
+    var pass = document.getElementById('regPass').value;
+
+    if(!nama || !email || !pass) {
+      showToast("Harap isi semua kolom!"); return;
+    }
+
+    // UI Loading
+    var btn = document.getElementById('btnReg');
+    var oriText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "Memproses (Mohon Tunggu)...";
+
+    // Panggil Google Script
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerText = oriText;
+        
+        if(res.status === 'success') {
+          alert(res.message);
+          // Reset form manual
+          document.getElementById('regSekolah').value = "";
+          document.getElementById('regEmail').value = "";
+          document.getElementById('regPass').value = "";
+          switchPage('login');
+        } else {
+          showToast(res.message);
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerText = oriText;
+        showToast("Error Koneksi: " + err.message);
+      })
+      .registerSchool({namaSekolah: nama, email: email, password: pass});
+  }
+
+  // --- LOGIN FUNCTION ---
+  function runLogin() {
+    var email = document.getElementById('loginEmail').value;
+    var pass = document.getElementById('loginPass').value;
+    var btn = document.getElementById('btnLogin');
+
+    btn.disabled = true;
+    btn.innerText = "Validasi...";
+
+    google.script.run
+      .withSuccessHandler(function(res){
+        btn.disabled = false;
+        btn.innerText = "Login";
+
+        if(res.status === 'success') {
+          currentToken = res.token;
+          document.getElementById('schoolTitle').innerText = res.sekolah;
+          switchPage('dashboard');
+          fetchDataSiswa(); // Ambil data
+        } else {
+          showToast(res.message);
+        }
+      })
+      .loginSchool(email, pass);
+  }
+
+  // --- FETCH DATA ---
+  function fetchDataSiswa() {
+    document.getElementById('cardContainer').innerHTML = "<p>Sedang memuat data siswa...</p>";
+    
+    google.script.run.withSuccessHandler(function(res){
+      if(res.status === 'success') {
+        studentList = res.data;
+        renderCards();
+      } else {
+        document.getElementById('cardContainer').innerHTML = "<p class='text-danger'>Gagal: " + res.message + "</p>";
+      }
+    }).getStudents(currentToken);
+  }
+
+  // --- RENDER CARDS ---
+  function renderCards() {
+    var template = document.getElementById('templateSelect').value;
+    var container = document.getElementById('cardContainer');
+    container.innerHTML = "";
+
+    if(studentList.length === 0) {
+      container.innerHTML = "<div class='alert alert-warning'>Belum ada data siswa di Spreadsheet sekolah ini.</div>";
+      return;
+    }
+
+    studentList.forEach(s => {
+      var foto = s.foto && s.foto.includes('http') ? s.foto : 'https://via.placeholder.com/100x120?text=No+Img';
+      
+      var html = `
+        <div class="id-card ${template}">
+          <div class="head-text">${document.getElementById('schoolTitle').innerText}</div>
+          <div class="content">
+            <img src="${foto}" class="p-img">
+            <div class="details">
+              <div><strong>${s.nama}</strong></div>
+              <div>NIS: ${s.nis}</div>
+              <div>Kelas: ${s.kelas}</div>
+              <div class="small">${s.ttl}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      container.innerHTML += html;
+    });
+  }
+
+  function showToast(msg) {
+    document.getElementById('errorMsg').innerText = msg;
+    var toastEl = document.getElementById('toastError');
+    var toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  }
+</script>
