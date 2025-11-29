@@ -633,44 +633,224 @@
     }, 150); // Delay sedikit agar efek tekan terasa
   }
 
-  // --- UPDATE FUNGSI RENDER ALL CARDS ---
+  // --- [UPDATE] FUNGSI RENDER ALL CARDS DENGAN PILIHAN TEMPLATE ---
   function renderAllCards() {
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
-    
-    // Ganti class container utama agar lebih rapi (column ke bawah)
     container.className = "d-flex flex-column align-items-center w-100";
     
-    // [LOGIKA BARU] Cek apakah sedang loading?
     if (isLoading) {
-      container.innerHTML = `
-        <div class="alert alert-info w-100 text-center">
-          <div class="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
-          Sedang mengambil data siswa, mohon tunggu sebentar...
-        </div>`;
+      container.innerHTML = `<div class="alert alert-info">Sedang memuat data...</div>`;
       return;
     }
-
-    // Jika tidak loading, tapi datanya kosong
     if(studentList.length === 0) {
-      container.innerHTML = "<div class='alert alert-warning w-100 text-center'>Belum ada data siswa. Silakan input di menu Data Siswa.</div>";
+      container.innerHTML = "<div class='alert alert-warning'>Belum ada data siswa.</div>";
       return;
     }
 
     var conf = getConfigs();
+    
+    // AMBIL NILAI DARI DROPDOWN (Default 1)
+    var styleMode = document.getElementById('printTemplateMode').value || "1";
+    
     var html = "";
-
-    // Loop setiap siswa (Logic lama tetap dipakai)
     studentList.forEach(s => {
       html += `<div class="view-card-wrapper">`;
       html += `<div class="print-row">`;
-          html += createCardHTML(s, conf);
-          html += createBackCardHTML(conf);
+          // Panggil fungsi Generator Template Baru
+          html += getCardTemplate('front', styleMode, s, conf);
+          html += getCardTemplate('back', styleMode, s, conf);
       html += `</div>`;
       html += `</div>`; 
     });
 
     container.innerHTML = html;
+  }
+
+  // --- [BARU] TEMPLATE ENGINE UTAMA ---
+  // Fungsi ini mengatur HTML berdasarkan ID Style yang dipilih
+  function getCardTemplate(type, styleId, s, conf) {
+    // Persiapan Data Umum
+    var sekolah = document.getElementById('schoolTitle').innerText || "NAMA SEKOLAH";
+    var hasPhoto = (s && s.foto && s.foto.length > 20 && s.foto.includes('http'));
+    var photoHtml = hasPhoto ? `<img src="${s.foto}" class="real-photo">` : '';
+    
+    // TTD & Stempel
+    var ttdHtml = conf.ttd ? `<img src="${conf.ttd}" class="sig-img">` : `<div class="sig-placeholder"></div>`;
+    var stempelHtml = conf.stempel ? `<img src="${conf.stempel}" class="stamp-img">` : ``;
+
+    // Data Teks
+    var ttl = s ? `${s.tmp_lahir}, ${s.tgl_lahir}` : "";
+    var kontak = conf.telp || "-";
+    
+    // --- MODE 1: MADRASAH (DEFAULT LAMA) ---
+    if (styleId === "1") {
+      if (type === 'front') {
+        // (KODE LAMA ANDA SAYA MASUKKAN SINI AGAR TIDAK HILANG)
+        return `
+        <div class="id-card temp-madrasah style-1">
+          <div class="madrasah-header">
+            <div class="logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+            <div class="header-text">
+              <div class="txt-yayasan">${conf.yayasan}</div>
+              <div class="txt-sekolah">${sekolah}</div>
+              <div class="txt-alamat">${conf.alamat1}<br>${conf.alamat2}</div>
+            </div>
+            <div class="logo-box"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
+          </div>
+          <div class="card-title-bar">KARTU PELAJAR</div>
+          <div class="card-body-custom">
+            <div class="photo-area">
+               <i class="bi bi-person-fill ph-icon"></i><div class="ph-text">3 X 4</div>
+               ${photoHtml}
+            </div>
+            <div class="right-panel">
+              <div class="data-area">
+                <table>
+                  <tr><td>Nama</td><td>:</td><td><strong>${s.nama}</strong></td></tr>
+                  <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
+                  <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                  <tr><td>L/P</td><td>:</td><td>${s.jk}</td></tr>
+                  <tr><td>Alamat</td><td>:</td><td>${s.alamat}</td></tr>
+                </table>
+              </div>
+              <div class="signature-area">
+                ${stempelHtml}
+                <div style="position:relative; z-index:2">
+                  <div>${conf.tgl}</div>
+                  <div>Kepala Madrasah,</div>
+                  ${ttdHtml}
+                  <div class="head-name">${conf.kepala}</div>
+                  <div class="head-nip">NIP. ${conf.nip}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      } else {
+        // BELAKANG MODE 1
+        return `
+        <div class="back-card style-1">
+          <div class="back-header-flat">
+             <div class="back-logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+             <div class="back-header-text">
+               <div class="txt-yayasan">${conf.yayasan}</div>
+               <div class="txt-sekolah">${sekolah}</div>
+               <div class="txt-alamat">${conf.alamat1}<br>${conf.alamat2}</div>
+             </div>
+             <div class="back-logo-box"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
+          </div>
+          <div class="back-body">
+            <div>
+              <div class="rules-title">KETENTUAN</div>
+              <ol class="rules-list">
+                <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah}</strong>.</li>
+                <li>Siswa wajib mematuhi Tata Tertib Madrasah.</li>
+                <li>Kartu wajib dibawa setiap hari sekolah.</li>
+                <li>Kehilangan kartu harap lapor ke Tata Usaha.</li>
+              </ol>
+            </div>
+            <div class="back-footer-container">
+              <div class="cp-title">Contact Person:</div>
+              <table class="cp-table">
+                <tr><td class="cp-label">Telp</td><td>:</td><td>${kontak}</td></tr>
+                <tr><td class="cp-label">Email</td><td>:</td><td>${conf.email}</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>`;
+      }
+    }
+    
+    // --- MODE 2 s/d 11 (TEMPLATE GENERIK) ---
+    // Kita gunakan struktur HTML yang sama, tapi CSS class (style-X) yang berbeda
+    // Ini memudahkan pembuatan 10 template sekaligus.
+    
+    var themeClass = "style-" + styleId; // style-2, style-3, dst...
+
+    if (type === 'front') {
+        return `
+        <div class="id-card temp-generic ${themeClass}">
+            <div class="gen-header">
+                <img src="${conf.logoKiri}" class="logo-sm left">
+                <div class="gen-header-text">
+                    <div class="gen-yayasan">${conf.yayasan}</div>
+                    <div class="gen-sekolah">${sekolah}</div>
+                    <div class="gen-alamat">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+                </div>
+                <img src="${conf.logoKanan}" class="logo-sm right">
+            </div>
+
+            <div class="gen-body">
+                <div class="gen-photo-box">
+                    <div class="gen-photo-placeholder">FOTO</div>
+                    ${photoHtml}
+                </div>
+                
+                <div class="gen-data-box">
+                    <div class="gen-card-title">KARTU TANDA PELAJAR</div>
+                    <table class="gen-table">
+                        <tr><td width="50">Nama</td><td width="5">:</td><td class="fw-bold">${s.nama}</td></tr>
+                        <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
+                        <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                        <tr><td>Gender</td><td>:</td><td>${s.jk === 'L' ? 'Laki-laki' : 'Perempuan'}</td></tr>
+                        <tr><td>Alamat</td><td>:</td><td class="alamat-cut">${s.alamat}</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="gen-footer">
+                <div class="gen-ttd-box">
+                    ${stempelHtml}
+                    <div class="ttd-date">${conf.tgl}</div>
+                    <div class="ttd-jabatan">Kepala Sekolah</div>
+                    <div class="ttd-sign-wrap">${ttdHtml}</div>
+                    <div class="ttd-name">${conf.kepala}</div>
+                    <div class="ttd-nip">NIP. ${conf.nip}</div>
+                </div>
+            </div>
+            
+            <div class="decoration-bar"></div>
+        </div>
+        `;
+    } else {
+        // --- TAMPILAN BELAKANG (GENERIK) ---
+        return `
+        <div class="back-card temp-generic-back ${themeClass}">
+            <div class="gen-header back-h">
+                 <img src="${conf.logoKiri}" class="logo-sm left" onerror="this.style.display='none'">
+                 
+                 <div class="gen-header-text text-center">
+                    <div class="gen-yayasan small">${conf.yayasan}</div>
+                    
+                    <div class="gen-sekolah small">${sekolah}</div>
+                    <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+                 </div>
+
+                 <img src="${conf.logoKanan}" class="logo-sm right" onerror="this.style.display='none'">
+            </div>
+            
+            <div class="back-content p-3">
+                <div class="rules-box">
+                    <div class="rules-head">TATA TERTIB PENGGUNAAN KARTU</div>
+                    <ol>
+                        <li>Kartu ini adalah kartu identitas resmi siswa <b>${sekolah}</b>.</li>
+                        <li>Harap membawa kartu ini selama berada di lingkungan sekolah.</li>
+                        <li>Dilarang mencoret atau merusak kartu.</li>
+                        <li>Jika menemukan kartu ini, mohon kembalikan ke alamat sekolah.</li>
+                    </ol>
+                </div>
+                
+                <div class="contact-box mt-3">
+                   <div class="cp-head">INFO KONTAK</div>
+                   <div>Telp: ${kontak}</div>
+                   <div>Email: ${conf.email}</div>
+                </div>
+                
+                </div>
+        </div>
+        `;
+    }
   }
 
   // --- UTILS ---
