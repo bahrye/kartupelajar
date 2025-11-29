@@ -1,8 +1,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // --- GLOBAL VARIABLES ---
   var currentToken = "";
   var studentList = [];
+  var modalSiswa;
 
   // --- NAVIGATION ---
   function switchPage(page) {
@@ -12,213 +12,348 @@
 
     if(page === 'login') document.getElementById('loginPage').style.display = 'block';
     if(page === 'register') document.getElementById('registerPage').style.display = 'block';
-    if(page === 'dashboard') document.getElementById('dashboardPage').style.display = 'block';
-  }
-
-  // --- REGISTER FUNCTION ---
-  function runRegister() {
-    // Ambil Value
-    var nama = document.getElementById('regSekolah').value;
-    var email = document.getElementById('regEmail').value;
-    var pass = document.getElementById('regPass').value;
-
-    if(!nama || !email || !pass) {
-      showToast("Harap isi semua kolom!"); return;
+    if(page === 'dashboard') {
+      document.getElementById('dashboardPage').style.display = 'block';
+      modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
+      renderPreview(); // Init preview
     }
-
-    // UI Loading
-    var btn = document.getElementById('btnReg');
-    var oriText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = "Memproses (Mohon Tunggu)...";
-
-    // Panggil Google Script
-    google.script.run
-      .withSuccessHandler(function(res) {
-        btn.disabled = false;
-        btn.innerText = oriText;
-        
-        if(res.status === 'success') {
-          alert(res.message);
-          // Reset form manual
-          document.getElementById('regSekolah').value = "";
-          document.getElementById('regEmail').value = "";
-          document.getElementById('regPass').value = "";
-          switchPage('login');
-        } else {
-          showToast(res.message);
-        }
-      })
-      .withFailureHandler(function(err) {
-        btn.disabled = false;
-        btn.innerText = oriText;
-        showToast("Error Koneksi: " + err.message);
-      })
-      .registerSchool({namaSekolah: nama, email: email, password: pass});
   }
 
-  // --- LOGIN FUNCTION ---
+  // --- AUTHENTICATION ---
   function runLogin() {
     var email = document.getElementById('loginEmail').value;
     var pass = document.getElementById('loginPass').value;
     var btn = document.getElementById('btnLogin');
+    btn.disabled = true; btn.innerText = "Loading...";
 
-    btn.disabled = true;
-    btn.innerText = "Validasi...";
-
-    google.script.run
-      .withSuccessHandler(function(res){
-        btn.disabled = false;
-        btn.innerText = "Login";
-
+    google.script.run.withSuccessHandler(function(res){
+        btn.disabled = false; btn.innerText = "Login";
         if(res.status === 'success') {
           currentToken = res.token;
           document.getElementById('schoolTitle').innerText = res.sekolah;
           switchPage('dashboard');
-          fetchDataSiswa(); // Ambil data
-        } else {
-          showToast(res.message);
-        }
-      })
-      .loginSchool(email, pass);
+          loadTableData(); // Load Data Awal
+        } else { showToast(res.message, 'bg-danger'); }
+      }).loginSchool(email, pass);
   }
 
-  // --- FETCH DATA ---
-  function fetchDataSiswa() {
-    document.getElementById('cardContainer').innerHTML = "<p>Sedang memuat data siswa...</p>";
+  function runRegister() {
+    var form = {
+      namaSekolah: document.getElementById('regSekolah').value,
+      email: document.getElementById('regEmail').value,
+      password: document.getElementById('regPass').value
+    };
+    if(!form.namaSekolah || !form.email) return showToast("Isi semua data!", 'bg-warning');
+
+    var btn = document.getElementById('btnReg');
+    btn.disabled = true; btn.innerText = "Memproses...";
     
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerText = "Buat Database";
+      if(res.status === 'success') {
+        alert(res.message); switchPage('login');
+      } else { showToast(res.message, 'bg-danger'); }
+    }).registerSchool(form);
+  }
+
+  // --- DATA SISWA & TABLE ---
+  function loadTableData() {
+    var tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Mengambil data...</td></tr>";
+
     google.script.run.withSuccessHandler(function(res){
       if(res.status === 'success') {
         studentList = res.data;
-        renderCards();
+        renderTable();
       } else {
-        document.getElementById('cardContainer').innerHTML = "<p class='text-danger'>Gagal: " + res.message + "</p>";
+        tbody.innerHTML = "<tr><td colspan='8' class='text-danger'>Error: "+res.message+"</td></tr>";
       }
     }).getStudents(currentToken);
   }
 
-  // --- RENDER CARDS (VERSI FINAL + PLACEHOLDER LOGIC) ---
-  function renderCards() {
-    var template = document.getElementById('templateSelect').value;
-    var container = document.getElementById('cardContainer');
-    var namaSekolah = document.getElementById('schoolTitle').innerText;
-    var configPanel = document.getElementById('madrasahConfig');
-
-    // 1. Toggle Panel Config
-    if (template === 'temp-madrasah') {
-      if(configPanel) configPanel.style.display = 'block';
-    } else {
-      if(configPanel) configPanel.style.display = 'none';
-    }
-
-    // 2. Ambil Value Config
-    var yayasan = document.getElementById('confYayasan') ? document.getElementById('confYayasan').value : "YAYASAN PENDIDIKAN";
-    var alamat1 = document.getElementById('confAlamat1') ? document.getElementById('confAlamat1').value : "NSM: ... NPSN: ...";
-    var alamat2 = document.getElementById('confAlamat2') ? document.getElementById('confAlamat2').value : "Alamat Sekolah...";
-    var tglTTD  = document.getElementById('confTgl') ? document.getElementById('confTgl').value : "Jakarta, 14 Juli 2025";
-    var nmKepala= document.getElementById('confKepala') ? document.getElementById('confKepala').value : "Nama Kepala";
-    var nipKepala=document.getElementById('confNIP') ? document.getElementById('confNIP').value : "-";
+  function renderTable() {
+    var tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = "";
     
-    // URL Gambar
-    var logoKiri = document.getElementById('confLogoKiri') ? document.getElementById('confLogoKiri').value : "";
-    var logoKanan= document.getElementById('confLogoKanan') ? document.getElementById('confLogoKanan').value : "";
-    var ttdImg   = document.getElementById('confTTD') ? document.getElementById('confTTD').value : "";
-    var stempelImg = document.getElementById('confStempel') ? document.getElementById('confStempel').value : "";
-
-    container.innerHTML = "";
-
     if(studentList.length === 0) {
-      container.innerHTML = "<div class='alert alert-warning'>Belum ada data siswa.</div>";
+      tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Belum ada data siswa.</td></tr>";
       return;
     }
 
-    studentList.forEach(s => {
-      var foto = s.foto && s.foto.includes('http') ? s.foto : 'https://via.placeholder.com/100x120?text=Foto';
-      
-      // LOGIKA TANDA TANGAN VS KOTAK KOSONG
-      var signatureHTML = "";
-      if (ttdImg && ttdImg.trim() !== "") {
-        // Jika ada URL TTD -> Tampilkan Gambar
-        signatureHTML = `<img src="${ttdImg}" class="sig-img" onerror="this.style.display='none'">`;
-      } else {
-        // Jika URL Kosong -> Tampilkan Kotak Placeholder
-        signatureHTML = `<div class="sig-placeholder"></div>`;
-      }
+    studentList.forEach((s, index) => {
+      var btnEdit = `<button class="btn btn-warning btn-sm me-1" onclick="openModalEdit(${index})"><i class="bi bi-pencil"></i></button>`;
+      var btnDel  = `<button class="btn btn-danger btn-sm" onclick="deleteData(${index})"><i class="bi bi-trash"></i></button>`;
+      // Cek apakah ada foto (panjang string > 20 dianggap URL valid)
+      var img = (s.foto && s.foto.length > 20) 
+        ? `<img src="${s.foto}" width="50" height="60" class="border rounded" style="object-fit:cover; background:#eee;">` 
+        : '<span class="text-muted">-</span>';
+      var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
 
-      var html = "";
-
-      if (template === 'temp-madrasah') {
-        // --- TEMPLATE MADRASAH ---
-        html = `
-          <div class="id-card temp-madrasah">
-            <div class="madrasah-header">
-              <div class="logo-box"><img src="${logoKiri}" onerror="this.style.display='none'"></div>
-              <div class="header-text">
-                <div class="txt-yayasan">${yayasan}</div>
-                <div class="txt-sekolah">${namaSekolah}</div>
-                <div class="txt-alamat">${alamat1}<br>${alamat2}</div>
-              </div>
-              <div class="logo-box"><img src="${logoKanan}" onerror="this.style.display='none'"></div>
-            </div>
-
-            <div class="card-title-bar">KARTU PELAJAR</div>
-
-            <div class="card-body-custom">
-              <div class="photo-area"><img src="${foto}"></div>
-              
-              <div class="right-panel">
-                <div class="data-area">
-                  <table>
-                    <tr><td>Nama</td><td>:</td><td><strong>${s.nama}</strong></td></tr>
-                    <tr><td>NIS/NISN</td><td>:</td><td>${s.nis}</td></tr>
-                    <tr><td>TTL</td><td>:</td><td>${s.ttl}</td></tr>
-                    <tr><td>Kelas</td><td>:</td><td>${s.kelas}</td></tr>
-                    <tr><td>Alamat</td><td>:</td><td>${s.alamat}</td></tr>
-                  </table>
-                </div>
-
-                <div class="signature-area">
-                  <img src="${stempelImg}" class="stamp-img" onerror="this.style.display='none'">
-                  
-                  <div style="position:relative; z-index:2">
-                    <div>${tglTTD}</div>
-                    <div>Kepala Madrasah,</div>
-                    
-                    ${signatureHTML}
-                    
-                    <div class="head-name">${nmKepala}</div>
-                    <div class="head-nip">NIP. ${nipKepala}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        // --- TEMPLATE LAIN ---
-        html = `
-          <div class="id-card ${template}">
-            <div class="head-text">${namaSekolah}</div>
-            <div class="content">
-              <img src="${foto}" class="p-img">
-              <div class="details">
-                <div><strong>${s.nama}</strong></div>
-                <div>NIS: ${s.nis}</div>
-                <div>Kelas: ${s.kelas}</div>
-                <div class="small">${s.ttl}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML += html;
+      var row = `<tr>
+        <td>${index+1}</td>
+        <td>${btnEdit}${btnDel}</td>
+        <td class="fw-bold">${s.nama}</td>
+        <td>${s.nisn}</td>
+        <td>${ttl}</td>
+        <td>${s.jk}</td>
+        <td class="small">${s.alamat}</td>
+        <td>${img}</td>
+      </tr>`;
+      tbody.innerHTML += row;
     });
   }
 
-  function showToast(msg) {
-    document.getElementById('errorMsg').innerText = msg;
-    var toastEl = document.getElementById('toastError');
-    var toast = new bootstrap.Toast(toastEl);
-    toast.show();
+  // --- CRUD MODAL OPERATIONS ---
+  
+  // Fungsi Preview Gambar saat user memilih file
+  function previewImage(input) {
+    var preview = document.getElementById('imgPreview');
+    var txt = document.getElementById('txtNoFoto');
+    
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        txt.style.display = 'none';
+      }
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      // Jika batal pilih, kembalikan ke kondisi sebelumnya (jika ada foto lama)
+      var old = document.getElementById('inpFotoOld').value;
+      if(old) {
+        preview.src = old;
+        preview.style.display = 'block';
+        txt.style.display = 'none';
+      } else {
+        preview.style.display = 'none';
+        txt.style.display = 'block';
+      }
+    }
+  }
+
+  function openModalAdd() {
+    document.getElementById('modalTitle').innerText = "Tambah Siswa";
+    document.getElementById('editRow').value = ""; 
+    
+    document.getElementById('inpNama').value = "";
+    document.getElementById('inpNISN').value = "";
+    document.getElementById('inpTmpLahir').value = "";
+    document.getElementById('inpTglLahir').value = "";
+    document.getElementById('inpJK').value = "L";
+    document.getElementById('inpKelas').value = "";
+    document.getElementById('inpAlamat').value = "";
+    
+    // Reset Foto
+    document.getElementById('inpFotoFile').value = "";
+    document.getElementById('inpFotoOld').value = "";
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('txtNoFoto').style.display = 'block';
+    
+    modalSiswa.show();
+  }
+
+  function openModalEdit(index) {
+    var s = studentList[index];
+    document.getElementById('modalTitle').innerText = "Edit Siswa";
+    document.getElementById('editRow').value = s.row;
+    
+    document.getElementById('inpNama').value = s.nama;
+    document.getElementById('inpNISN').value = s.nisn;
+    document.getElementById('inpTmpLahir').value = s.tmp_lahir;
+    document.getElementById('inpTglLahir').value = s.tgl_lahir;
+    document.getElementById('inpJK').value = s.jk;
+    document.getElementById('inpKelas').value = s.kelas;
+    document.getElementById('inpAlamat').value = s.alamat;
+    
+    // Set Foto Lama
+    document.getElementById('inpFotoFile').value = ""; // Reset input file
+    document.getElementById('inpFotoOld').value = s.foto;
+    
+    if(s.foto && s.foto.length > 5) {
+      document.getElementById('imgPreview').src = s.foto;
+      document.getElementById('imgPreview').style.display = 'block';
+      document.getElementById('txtNoFoto').style.display = 'none';
+    } else {
+      document.getElementById('imgPreview').style.display = 'none';
+      document.getElementById('txtNoFoto').style.display = 'block';
+    }
+    
+    modalSiswa.show();
+  }
+
+  function saveStudent() {
+    var fileInput = document.getElementById('inpFotoFile');
+    var file = fileInput.files[0];
+
+    // Ambil nilai text form dulu
+    var data = {
+      row: document.getElementById('editRow').value,
+      nama: document.getElementById('inpNama').value,
+      nisn: document.getElementById('inpNISN').value,
+      tmp_lahir: document.getElementById('inpTmpLahir').value,
+      tgl_lahir: document.getElementById('inpTglLahir').value,
+      jk: document.getElementById('inpJK').value,
+      kelas: document.getElementById('inpKelas').value,
+      alamat: document.getElementById('inpAlamat').value,
+      foto: document.getElementById('inpFotoOld').value // Default pakai foto lama
+    };
+
+    if(!data.nama) return alert("Nama wajib diisi");
+    
+    // UI Loading
+    var btn = document.getElementById('btnSimpanSiswa');
+    var oriText = btn.innerText;
+    btn.disabled = true; 
+    btn.innerText = "Mengupload...";
+
+    // Helper untuk kirim ke backend
+    var sendToBackend = function(finalData) {
+      var handler = function(res) {
+        btn.disabled = false; btn.innerText = oriText;
+        if(res.status === 'success') {
+          showToast(res.message, 'bg-success');
+          modalSiswa.hide();
+          loadTableData(); 
+        } else {
+          alert(res.message);
+        }
+      };
+
+      if(finalData.row === "") {
+        google.script.run.withSuccessHandler(handler).addStudent(currentToken, finalData);
+      } else {
+        google.script.run.withSuccessHandler(handler).editStudent(currentToken, finalData);
+      }
+    };
+
+    // Cek apakah user upload file baru?
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        // Ganti properti foto dengan data base64 gambar baru
+        data.foto = e.target.result; 
+        sendToBackend(data);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Tidak ada file baru, kirim data apa adanya (pakai foto lama/kosong)
+      sendToBackend(data);
+    }
+  }
+
+  function deleteData(index) {
+    if(!confirm("Hapus siswa " + studentList[index].nama + "?")) return;
+    
+    google.script.run.withSuccessHandler(function(res){
+      if(res.status === 'success') {
+        showToast("Terhapus.", 'bg-success');
+        loadTableData();
+      } else {
+        alert(res.message);
+      }
+    }).deleteStudent(currentToken, studentList[index].row);
+  }
+
+  // --- RENDER CARD LOGIC ---
+  function getConfigs() {
+    return {
+      yayasan: document.getElementById('confYayasan').value,
+      alamat1: document.getElementById('confAlamat1').value,
+      alamat2: document.getElementById('confAlamat2').value,
+      tgl: document.getElementById('confTgl').value,
+      kepala: document.getElementById('confKepala').value,
+      nip: document.getElementById('confNIP').value,
+      logoKiri: document.getElementById('confLogoKiri').value,
+      logoKanan: document.getElementById('confLogoKanan').value,
+      stempel: document.getElementById('confStempel').value,
+      ttd: document.getElementById('confTTD').value,
+    };
+  }
+
+  function createCardHTML(s, conf) {
+    var foto = s.foto && s.foto.includes('http') ? s.foto : 'https://via.placeholder.com/100x120?text=Foto';
+    var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
+    var sekolah = document.getElementById('schoolTitle').innerText;
+
+    // Logic TTD
+    var ttdHtml = conf.ttd ? `<img src="${conf.ttd}" class="sig-img">` : `<div class="sig-placeholder"></div>`;
+    var stempelHtml = conf.stempel ? `<img src="${conf.stempel}" class="stamp-img">` : ``;
+
+    return `
+      <div class="id-card temp-madrasah">
+        <div class="madrasah-header">
+          <div class="logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+          <div class="header-text">
+            <div class="txt-yayasan">${conf.yayasan}</div>
+            <div class="txt-sekolah">${sekolah}</div>
+            <div class="txt-alamat">${conf.alamat1}<br>${conf.alamat2}</div>
+          </div>
+          <div class="logo-box"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
+        </div>
+        <div class="card-title-bar">KARTU PELAJAR</div>
+        <div class="card-body-custom">
+          <div class="photo-area"><img src="${foto}"></div>
+          <div class="right-panel">
+            <div class="data-area">
+              <table>
+                <tr><td>Nama</td><td>:</td><td><strong>${s.nama}</strong></td></tr>
+                <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
+                <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                <tr><td>L/P</td><td>:</td><td>${s.jk}</td></tr>
+                <tr><td>Alamat</td><td>:</td><td>${s.alamat}</td></tr>
+              </table>
+            </div>
+            <div class="signature-area">
+              ${stempelHtml}
+              <div style="position:relative; z-index:2">
+                <div>${conf.tgl}</div>
+                <div>Kepala Madrasah,</div>
+                ${ttdHtml}
+                <div class="head-name">${conf.kepala}</div>
+                <div class="head-nip">NIP. ${conf.nip}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Preview di Tab Pengaturan (Hanya 1 dummy)
+  function renderPreview() {
+    var dummy = {
+      nama: "PREVIEW SISWA", nisn: "0012345678", 
+      tmp_lahir: "Jakarta", tgl_lahir: "2010-01-01", 
+      jk: "L", alamat: "Jl. Contoh No. 1", foto: "https://via.placeholder.com/150"
+    };
+    var conf = getConfigs();
+    document.getElementById('previewContainer').innerHTML = createCardHTML(dummy, conf);
+  }
+
+  // Generate Semua Kartu di Tab Generate
+  function renderAllCards() {
+    var container = document.getElementById('cardContainer');
+    container.innerHTML = "";
+    
+    if(studentList.length === 0) {
+      container.innerHTML = "<div class='alert alert-warning'>Belum ada data siswa. Silakan input di menu Data Siswa.</div>";
+      return;
+    }
+
+    var conf = getConfigs();
+    var html = "";
+    studentList.forEach(s => {
+      html += createCardHTML(s, conf);
+    });
+    container.innerHTML = html;
+  }
+
+  // --- UTILS ---
+  function showToast(msg, bgClass) {
+    var el = document.getElementById('toastNotif');
+    el.className = `toast align-items-center text-white border-0 ${bgClass}`;
+    document.getElementById('toastMsg').innerText = msg;
+    new bootstrap.Toast(el).show();
   }
 </script>
