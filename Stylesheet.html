@@ -36,4 +36,115 @@
   /* TEMPLATE 3: GOLD */
   .temp-gold { background: linear-gradient(135deg, #fff 60%, #fff8e1 100%); border: 2px solid #ffc107; }
   .temp-gold .head-text { background: transparent; color: #b78a02; border-bottom: 1px solid #ffc107; font-family: serif; font-size: 18px; }
+
+  /* TEMPLATE 4: MADRASAH 1 (FINAL PERFECT + STEMPEL TURUN) */
+  .temp-madrasah {
+    border: 1px solid #000;
+    font-family: Arial, sans-serif;
+    display: block !important;
+    position: relative;
+    box-sizing: border-box;
+    width: 335px !important; 
+    height: 220px !important; 
+    background: white;
+    overflow: hidden;
+  }
+
+  /* HEADER KOP */
+  .temp-madrasah .madrasah-header {
+    background-color: #065f28;
+    color: white;
+    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 45px; 
+    border-bottom: 2px solid #ffd700;
+  }
+  
+  .temp-madrasah .logo-box { width: 40px; text-align: center; }
+  .temp-madrasah .logo-box img { width: 30px; height: auto; }
+  
+  .temp-madrasah .header-text { flex: 1; text-align: center; line-height: 1.1; }
+  .temp-madrasah .txt-yayasan { font-size: 7px; font-weight: bold; margin-bottom: 1px; }
+  .temp-madrasah .txt-sekolah { font-size: 11px; font-weight: 900; text-transform: uppercase; margin: 0; }
+  .temp-madrasah .txt-alamat { font-size: 6px; margin-top: 1px; }
+
+  /* JUDUL KARTU */
+  .temp-madrasah .card-title-bar {
+    text-align: center; font-weight: bold; font-size: 11px;
+    margin-top: 3px; margin-bottom: 2px;
+    text-transform: uppercase; text-decoration: underline;
+    height: 15px;
+  }
+
+  /* BODY UTAMA */
+  .temp-madrasah .card-body-custom {
+    display: flex;
+    padding: 0 12px;
+    gap: 10px;
+    height: 150px; 
+    align-items: flex-start;
+  }
+
+  /* FOTO SISWA */
+  .temp-madrasah .photo-area {
+    width: 75px; height: 95px; 
+    background: #ccc; border: 1px solid #999; 
+    flex-shrink: 0; object-fit: cover; margin-top: 2px;
+    position: relative; z-index: 2;
+  }
+  .temp-madrasah .photo-area img { width: 100%; height: 100%; }
+
+  /* PANEL KANAN */
+  .temp-madrasah .right-panel {
+    flex: 1; height: 100%; display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* DATA SISWA */
+  .temp-madrasah .data-area { font-size: 9px; line-height: 1.2; position: relative; z-index: 2; }
+  .temp-madrasah table { width: 100%; border-collapse: collapse; }
+  .temp-madrasah td { padding-bottom: 2px; vertical-align: top; }
+  .temp-madrasah td:first-child { width: 55px; font-weight: normal; }
+
+  /* AREA TANDA TANGAN */
+  .temp-madrasah .signature-area {
+    margin-left: auto; 
+    text-align: left;
+    width: fit-content;
+    min-width: 110px;
+    font-size: 9px;
+    line-height: 1.1;
+    padding-bottom: 5px;
+    position: relative; 
+  }
+  
+  /* GAMBAR TTD */
+  .temp-madrasah .sig-img {
+    max-height: 24px; width: auto; display: block; margin: 1px 0; 
+    position: relative; 
+    z-index: 2; /* Layer tengah */
+  }
+  
+  /* GAMBAR STEMPEL (POSISI DIUBAH DISINI) */
+  .temp-madrasah .stamp-img {
+    position: absolute; 
+    width: 50px; /* Ukuran stempel */
+    height: auto;
+    
+    /* POSISI: Dibuat turun menimpa TTD & Nama */
+    left: -20px; 
+    top: 12px;   /* Turun ke bawah (sebelumnya -5px) */
+    
+    /* LAYER & VISUAL */
+    z-index: 3;  /* Paling atas (menutupi TTD & Nama) */
+    opacity: 0.65; /* Transparan agar nama di bawahnya terbaca */
+    transform: rotate(-8deg); /* Miring sedikit */
+    pointer-events: none; /* Agar tidak menghalangi klik (opsional) */
+  }
+
+  /* Text Identitas */
+  .temp-madrasah .head-name { font-weight: bold; text-decoration: underline; position: relative; z-index: 2; }
+  .temp-madrasah .head-nip { margin-top: 1px; position: relative; z-index: 2; }
 </style>
