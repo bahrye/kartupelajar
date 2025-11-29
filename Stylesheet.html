@@ -484,4 +484,51 @@
     }
   }
 
+  /* FLOATING ACTION BAR */
+  .floating-action {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px); /* Tersembunyi di bawah */
+    background-color: #333;
+    padding: 10px 20px;
+    border-radius: 50px;
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    min-width: 250px;
+  }
+
+  /* KELAS AKTIF UNTUK MEMUNCULKAN POP-UP */
+  .floating-action.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* CHECKBOX DI TABEL */
+  .row-check {
+    cursor: pointer;
+    transform: scale(1.2); /* Memperbesar sedikit checkbox */
+  }
+
+  /* --- FIX: RUANG SCROLL BAWAH --- */
+  /* Memberikan ruang kosong ekstra di bawah tabel */
+  /* agar baris terakhir bisa discroll naik melebihi posisi pop-up */
+  #data-pane {
+    padding-bottom: 100px !important;
+  }
+
+  /* --- EFEK FOTO TABEL --- */
+  .thumb-clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .thumb-clickable:hover {
+    transform: scale(1.1); /* Membesar sedikit saat disentuh kursor */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 5;
+    position: relative;
+  }
+
 </style>
