@@ -234,6 +234,31 @@
       transform: scale(0.92); /* Perkecil ke 92% */
       margin-bottom: -15px; /* Hilangkan gap kosong akibat scaling */
     }
+
+    /* --- [TAMBAHAN BARU] PERBAIKAN LIVE PREVIEW SETTING --- */
+    
+    /* 1. Perkecil padding wadah abu-abu agar lebih lega */
+    #previewContainer {
+      padding: 1rem !important; /* Timpa p-4 menjadi lebih kecil */
+      overflow-x: hidden;       /* Cegah scroll horizontal */
+      width: 100%;              /* Pastikan tidak melebihi layar */
+    }
+
+    /* 2. Perkecil Kartu Preview (Scale Down) */
+    /* Target class .switch-container di dalam #previewContainer */
+    #previewContainer .switch-container {
+      transform: scale(0.85);       /* Perkecil kartu jadi 85% ukuran asli */
+      transform-origin: center top; /* Titik tengah atas agar tetap rapi */
+      margin-bottom: -35px;         /* Hapus ruang kosong di bawah akibat scaling */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Pastikan kartu di dalam switcher tidak kena double scale */
+    #previewContainer .switch-container .id-card,
+    #previewContainer .switch-container .back-card {
+      transform: none !important; 
+    }
   }
 
   /* 1. KOTAK KARTU (Sama persis dengan depan) */
@@ -529,6 +554,83 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     z-index: 5;
     position: relative;
+  }
+
+  /* --- TAMBAHAN: STYLE UNTUK GENERATE KARTU (SCROLLABLE & PRINT) --- */
+  
+  /* 1. TAMPILAN LAYAR (HP/PC) */
+  .view-card-wrapper {
+    width: 100%;
+    overflow-x: auto;      
+    padding: 15px 10px;
+    margin-bottom: 20px;   
+    background: #fff;
+    border: 1px solid #dee2e6; 
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    -webkit-overflow-scrolling: touch; 
+  }
+
+  .view-card-wrapper .print-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;     
+    gap: 20px;             
+    width: max-content;    
+    margin: 0 auto;        
+    align-items: center;   
+  }
+
+  /* 2. SETTING CETAK (PRINT PDF) - FIX HALAMAN BERIKUTNYA */
+  @media print {
+    
+    /* Atur Margin Kertas Utama */
+    @page { 
+      size: A4 portrait;
+      /* UBAH DISINI: 
+         Margin Atas saya set 30mm (3cm). 
+         Ini akan berlaku OTOMATIS untuk HALAMAN 1, 2, 3, dst.
+      */
+      margin: 30mm 10mm 10mm 10mm; 
+    }
+
+    body {
+      /* Reset padding body karena sudah diatur oleh @page margin */
+      padding-top: 0 !important; 
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* Reset wrapper agar background/border hilang saat print */
+    .view-card-wrapper {
+      overflow: visible !important;
+      border: none !important;
+      background: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      
+      /* Jarak antar baris siswa */
+      display: block !important;
+      margin: 0 !important;
+      margin-bottom: 15px !important; 
+      
+      /* Mencegah kartu terpotong ganti halaman */
+      break-inside: avoid; 
+      page-break-inside: avoid;
+    }
+
+    /* Atur baris kartu */
+    .view-card-wrapper .print-row {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important; 
+      
+      /* Jarak Kiri-Kanan (Depan - Belakang) */
+      gap: 10px !important; 
+      
+      /* Scale 0.9 agar muat 4 baris ke bawah */
+      transform: scale(0.9); 
+      transform-origin: top center;
+    }
   }
 
 </style>
