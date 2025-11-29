@@ -84,8 +84,9 @@
       var btnEdit = `<button class="btn btn-warning btn-sm me-1" onclick="openModalEdit(${index})"><i class="bi bi-pencil"></i></button>`;
       var btnDel  = `<button class="btn btn-danger btn-sm" onclick="deleteData(${index})"><i class="bi bi-trash"></i></button>`;
       // Cek apakah ada foto (panjang string > 20 dianggap URL valid)
+      // Tambahkan atribut onerror untuk menangani gambar error
       var img = (s.foto && s.foto.length > 20) 
-        ? `<img src="${s.foto}" width="50" height="60" class="border rounded" style="object-fit:cover; background:#eee;">` 
+        ? `<img src="${s.foto}" width="50" height="60" class="border rounded" style="object-fit:cover; background:#eee;" onerror="this.onerror=null;this.src='https://via.placeholder.com/50?text=Err';">` 
         : '<span class="text-muted">-</span>';
       var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
 
