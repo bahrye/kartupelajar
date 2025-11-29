@@ -303,122 +303,87 @@
     color: white;
   }
 
-  /* --- UPDATE: FITUR 3D PREVIEW & PERBAIKAN LAYOUT --- */
+  /* --- ANIMASI HORIZONTAL SWIPE (GESER SAMPING) --- */
 
-  /* 1. ANIMASI FLIP CARD 3D (Container & Layout Fix) */
-  .flip-container {
-    background-color: transparent;
-    width: 335px;  /* Lebar kartu madrasah */
-    height: 220px; /* Tinggi kartu madrasah */
-    perspective: 1000px; /* Efek 3D */
-    margin: 0 auto; /* Tengah horizontal */
+  /* 1. Wadah Utama */
+  .switch-container {
+    width: 335px;
+    height: 220px;
     position: relative;
-    z-index: 10;
-  }
-
-  /* Bagian dalam yang berputar */
-  .flip-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transform-style: preserve-3d;
+    margin: 0 auto;
     cursor: pointer;
+    perspective: none; /* Tanpa 3D agar teks tajam */
   }
 
-  /* Class pemicu putaran */
-  .flip-inner.flipped {
-    transform: rotateY(180deg);
-  }
-
-  /* Sisi Depan & Belakang */
-  .flip-face {
+  /* 2. Sisi Kartu (Depan & Belakang) */
+  .switch-face {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     border-radius: 8px;
-    background-color: white; /* Wajib putih agar tidak transparan */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    /* PENTING: Paksa rata kiri agar isi kartu tidak ikut center dari container */
-    text-align: left !important; 
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* Shadow sedikit lebih besar */
+    
+    /* Transisi Geser Samping yang Halus (Cubic Bezier) */
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    
+    /* Paksa render teks tajam & rata kiri */
+    text-align: left !important;
+    backface-visibility: hidden; 
   }
 
-  /* Reset Style Kartu saat di dalam Flip agar tidak berantakan */
-  .flip-face .id-card, 
-  .flip-face .back-card {
-    margin: 0 !important; /* Hapus margin bawaan */
-    box-shadow: none !important; /* Hapus shadow ganda */
-    transform: none !important; /* Reset transformasi lain */
-    width: 100% !important;
-    height: 100% !important;
-    border: none !important; 
-  }
-
-  /* Sisi Depan */
-  .flip-front {
-    z-index: 2;
-    transform: rotateY(0deg);
-  }
-
-  /* Sisi Belakang */
-  .flip-back {
-    transform: rotateY(180deg);
-  }
-
-  /* 2. ALIGNMENT FIX UNTUK ISI KARTU */
-  /* Pastikan tabel data siswa di depan rata kiri & atas */
-  .temp-madrasah .data-area table {
-    text-align: left;
-    width: 100%;
-  }
-  .temp-madrasah .data-area td {
-    vertical-align: top;
-  }
-
-  /* 3. CONTACT PERSON DI BELAKANG (LAYOUT TABEL BARU) */
-  .back-footer-container {
-    margin-top: 5px;
-    padding-top: 5px;
-    border-top: 1px dashed #ccc; 
-  }
-
-  .cp-title {
-    font-size: 8px; 
-    font-weight: bold; 
-    text-decoration: underline; 
-    margin-bottom: 2px;
-  }
-
-  /* Tabel khusus agar titik dua (:) sejajar rapi */
-  .cp-table {
-    width: 100%;
-    font-size: 8px;
-    font-weight: bold;
-    border-collapse: collapse;
-  }
-  .cp-table td {
-    padding: 0;
-    vertical-align: top;
+  /* Reset margin bawaan */
+  .switch-face .id-card, 
+  .switch-face .back-card {
+    margin: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
     border: none !important;
   }
-  /* Kolom Label (No HP / Email) */
-  .cp-table td.cp-label {
-    width: 55px; /* Lebar tetap agar sejajar */
-    white-space: nowrap;
+
+  /* --- KONDISI 1: DEPAN MUNCUL (Default) --- */
+  .switch-container .face-front {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    z-index: 10;
   }
-  /* Kolom Titik Dua */
-  .cp-table td.cp-sep {
-    width: 10px;
-    text-align: center;
+  .switch-container .face-back {
+    opacity: 0;
+    /* Posisi awal kartu belakang ada di sebelah kanan (+15%) */
+    transform: translateX(15%) scale(0.95); 
+    z-index: 5;
+    pointer-events: none;
   }
-  /* Kolom Isi */
-  .cp-table td.cp-val {
-    text-align: left;
+
+  /* --- KONDISI 2: BELAKANG MUNCUL (Aktif) --- */
+  .switch-container.show-back .face-front {
+    opacity: 0;
+    /* Kartu depan geser ke kiri (-15%) saat hilang */
+    transform: translateX(-15%) scale(0.95); 
+    z-index: 5;
+    pointer-events: none;
   }
+  .switch-container.show-back .face-back {
+    opacity: 1;
+    /* Kartu belakang masuk ke tengah */
+    transform: translateX(0) scale(1);
+    z-index: 10;
+    pointer-events: auto;
+  }
+
+  /* --- PERBAIKAN ALIGNMENT (TETAP DIPERTAHANKAN) --- */
+  .temp-madrasah .data-area table { text-align: left; width: 100%; }
+  .temp-madrasah .data-area td { vertical-align: top; }
+
+  /* Contact Person Table */
+  .back-footer-container { margin-top: 5px; padding-top: 5px; border-top: 1px dashed #ccc; }
+  .cp-title { font-size: 8px; font-weight: bold; text-decoration: underline; margin-bottom: 2px; }
+  .cp-table { width: 100%; font-size: 8px; font-weight: bold; border-collapse: collapse; }
+  .cp-table td { padding: 0; vertical-align: top; border: none !important; }
+  .cp-table td.cp-label { width: 55px; white-space: nowrap; }
+  .cp-table td.cp-sep { width: 10px; text-align: center; }
+  .cp-table td.cp-val { text-align: left; }
 
 </style>
