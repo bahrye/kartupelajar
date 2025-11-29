@@ -454,3 +454,32 @@ function processBulkPhotos(spreadsheetId, zipBase64) {
     return {status: 'error', message: 'Error ZIP: ' + e.toString()};
   }
 }
+
+// --- 5. BULK DELETE (HAPUS MASSAL) ---
+function deleteBulkStudents(spreadsheetId, rowsToDelete) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000); // Tunggu antrian agar tidak bentrok
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    
+    // PENTING: Urutkan baris dari besar ke kecil (Descending)
+    // Agar saat baris bawah dihapus, index baris atas tidak berubah
+    rowsToDelete.sort(function(a, b){return b - a});
+    
+    for (var i = 0; i < rowsToDelete.length; i++) {
+      var row = parseInt(rowsToDelete[i]);
+      // Pastikan row valid
+      if (row > 0) {
+        sheet.deleteRow(row);
+      }
+    }
+    
+    return {status: 'success', message: rowsToDelete.length + ' data berhasil dihapus.'};
+    
+  } catch(e) {
+    return {status: 'error', message: 'Gagal Hapus Massal: ' + e.toString()};
+  } finally {
+    lock.releaseLock();
+  }
+}
