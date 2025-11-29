@@ -4,6 +4,9 @@
   var studentList = [];
   var modalSiswa;
 
+  // [BARU] Variabel penanda status loading
+  var isLoading = false;
+
   // --- [BARU] LOGIKA SESI (SESSION MANAGEMENT) ---
   
   // 1. Cek Sesi saat halaman pertama kali dimuat
@@ -114,19 +117,47 @@
     }).registerSchool(form);
   }
 
-  // --- DATA SISWA & TABLE ---
+  // --- UPDATE FUNGSI LOAD TABLE DATA ---
   function loadTableData() {
     var tbody = document.querySelector('#studentTable tbody');
-    tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Mengambil data...</td></tr>";
+    
+    // Set status loading
+    isLoading = true;
+    setButtonsDisabled(true); // Matikan tombol
+    
+    tbody.innerHTML = "<tr><td colspan='9' class='text-center'>Mengambil data...</td></tr>";
 
     google.script.run.withSuccessHandler(function(res){
+      // Reset status loading setelah selesai (sukses/gagal)
+      isLoading = false;
+      setButtonsDisabled(false); // Hidupkan tombol kembali
+
       if(res.status === 'success') {
         studentList = res.data;
         renderTable();
+        
+        // Opsional: Jika user sedang membuka tab Generate Kartu, refresh tampilannya otomatis
+        // agar loadingnya hilang dan kartu muncul
+        var generatePane = document.getElementById('generate-pane');
+        if (generatePane && generatePane.classList.contains('active')) {
+             renderAllCards();
+        }
+
       } else {
-        tbody.innerHTML = "<tr><td colspan='8' class='text-danger'>Error: "+res.message+"</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='9' class='text-danger'>Error: "+res.message+"</td></tr>";
       }
     }).getStudents(currentToken);
+  }
+
+  // [BARU] Helper untuk mematikan/menghidupkan tombol aksi
+  function setButtonsDisabled(state) {
+    var btnExcel = document.getElementById('btnUploadExcel');
+    var btnZip = document.getElementById('btnUploadZip');
+    var btnManual = document.getElementById('btnAddManual');
+    
+    if(btnExcel) btnExcel.disabled = state;
+    if(btnZip) btnZip.disabled = state;
+    if(btnManual) btnManual.disabled = state;
   }
 
   function renderTable() {
@@ -602,6 +633,7 @@
     }, 150); // Delay sedikit agar efek tekan terasa
   }
 
+  // --- UPDATE FUNGSI RENDER ALL CARDS ---
   function renderAllCards() {
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
@@ -609,6 +641,17 @@
     // Ganti class container utama agar lebih rapi (column ke bawah)
     container.className = "d-flex flex-column align-items-center w-100";
     
+    // [LOGIKA BARU] Cek apakah sedang loading?
+    if (isLoading) {
+      container.innerHTML = `
+        <div class="alert alert-info w-100 text-center">
+          <div class="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
+          Sedang mengambil data siswa, mohon tunggu sebentar...
+        </div>`;
+      return;
+    }
+
+    // Jika tidak loading, tapi datanya kosong
     if(studentList.length === 0) {
       container.innerHTML = "<div class='alert alert-warning w-100 text-center'>Belum ada data siswa. Silakan input di menu Data Siswa.</div>";
       return;
@@ -617,23 +660,14 @@
     var conf = getConfigs();
     var html = "";
 
-    // Loop setiap siswa
+    // Loop setiap siswa (Logic lama tetap dipakai)
     studentList.forEach(s => {
-      
-      // --- PERUBAHAN DISINI ---
-      // Kita bungkus .print-row dengan .view-card-wrapper
-      // Ini membuat setiap baris siswa punya kotak sendiri yang bisa discroll
       html += `<div class="view-card-wrapper">`;
-      
-        html += `<div class="print-row">`;
-          // Render Bagian Depan
+      html += `<div class="print-row">`;
           html += createCardHTML(s, conf);
-          // Render Bagian Belakang
           html += createBackCardHTML(conf);
-        html += `</div>`;
-      
+      html += `</div>`;
       html += `</div>`; 
-      // ------------------------
     });
 
     container.innerHTML = html;
