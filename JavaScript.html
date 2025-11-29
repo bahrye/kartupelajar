@@ -97,7 +97,7 @@
     }).getStudents(currentToken);
   }
 
-  // --- RENDER CARDS (VERSI FINAL + STEMPEL) ---
+  // --- RENDER CARDS (VERSI FINAL + PLACEHOLDER LOGIC) ---
   function renderCards() {
     var template = document.getElementById('templateSelect').value;
     var container = document.getElementById('cardContainer');
@@ -119,11 +119,10 @@
     var nmKepala= document.getElementById('confKepala') ? document.getElementById('confKepala').value : "Nama Kepala";
     var nipKepala=document.getElementById('confNIP') ? document.getElementById('confNIP').value : "-";
     
-    // URL Gambar (Logo, TTD, Stempel)
+    // URL Gambar
     var logoKiri = document.getElementById('confLogoKiri') ? document.getElementById('confLogoKiri').value : "";
     var logoKanan= document.getElementById('confLogoKanan') ? document.getElementById('confLogoKanan').value : "";
     var ttdImg   = document.getElementById('confTTD') ? document.getElementById('confTTD').value : "";
-    // INPUT BARU
     var stempelImg = document.getElementById('confStempel') ? document.getElementById('confStempel').value : "";
 
     container.innerHTML = "";
@@ -135,6 +134,17 @@
 
     studentList.forEach(s => {
       var foto = s.foto && s.foto.includes('http') ? s.foto : 'https://via.placeholder.com/100x120?text=Foto';
+      
+      // LOGIKA TANDA TANGAN VS KOTAK KOSONG
+      var signatureHTML = "";
+      if (ttdImg && ttdImg.trim() !== "") {
+        // Jika ada URL TTD -> Tampilkan Gambar
+        signatureHTML = `<img src="${ttdImg}" class="sig-img" onerror="this.style.display='none'">`;
+      } else {
+        // Jika URL Kosong -> Tampilkan Kotak Placeholder
+        signatureHTML = `<div class="sig-placeholder"></div>`;
+      }
+
       var html = "";
 
       if (template === 'temp-madrasah') {
@@ -173,7 +183,9 @@
                   <div style="position:relative; z-index:2">
                     <div>${tglTTD}</div>
                     <div>Kepala Madrasah,</div>
-                    <img src="${ttdImg}" class="sig-img" onerror="this.style.display='none'"> 
+                    
+                    ${signatureHTML}
+                    
                     <div class="head-name">${nmKepala}</div>
                     <div class="head-nip">NIP. ${nipKepala}</div>
                   </div>
