@@ -1,12 +1,27 @@
 <style>
   body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  .auth-box { max-width: 400px; width: 100%; margin-top: 50px; }
   
+  /* Container Login agar lebih rapi di HP */
+  .auth-box { 
+    max-width: 400px; 
+    width: 100%; 
+    margin-top: 50px; 
+  }
+
   /* SETUP CETAK */
   @media print {
     .no-print { display: none !important; }
     body, #dashboardPage { background-color: white; margin: 0; padding: 0; }
-    .id-card { break-inside: avoid; page-break-inside: avoid; margin: 10px; border: 1px solid #000; }
+    .id-card { 
+      break-inside: avoid; 
+      page-break-inside: avoid; 
+      margin: 10px; 
+      border: 1px solid #000;
+      /* Reset scale saat print */
+      transform: none !important; 
+      box-shadow: none !important;
+    }
+    .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
   }
 
   /* BASE CARD */
@@ -17,6 +32,9 @@
     background: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     display: flex; flex-direction: column;
+    /* Agar transisi scale halus */
+    transform-origin: center top;
+    transition: transform 0.3s ease;
   }
   .id-card .content { display: flex; align-items: center; padding: 15px; height: 100%; }
   .id-card .p-img { width: 80px; height: 100px; object-fit: cover; border: 1px solid #ddd; background: #eee; }
@@ -120,45 +138,68 @@
     position: relative; 
   }
   
-  /* GAMBAR TTD (EFEK OVERLAP AKTIF DISINI) */
+  /* GAMBAR TTD */
   .temp-madrasah .sig-img {
-    height: 40px; /* Diperbesar sedikit agar menjangkau nama */
+    height: 40px; 
     width: auto; 
     display: block; 
-    
-    /* TRICK OVERLAP: Margin bawah negatif menarik teks nama naik ke atas */
     margin-bottom: -20px; 
-    margin-left: -5px; /* Geser sedikit ke kiri agar pas */
-    
+    margin-left: -5px; 
     position: relative; 
-    z-index: 2; /* TTD di atas nama */
+    z-index: 2; 
   }
 
-  /* KOTAK PLACEHOLDER (JIKA TTD KOSONG) */
+  /* KOTAK PLACEHOLDER */
   .temp-madrasah .sig-placeholder {
-    width: 100px;
-    height: 40px;
-    border: 1px dashed #999; /* Garis putus-putus */
-    background-color: #f9f9f9;
-    margin: 2px 0;
-    position: relative;
-    z-index: 1;
+    width: 100px; height: 40px;
+    border: 1px dashed #999; background-color: #f9f9f9;
+    margin: 2px 0; position: relative; z-index: 1;
   }
   
   /* GAMBAR STEMPEL */
   .temp-madrasah .stamp-img {
     position: absolute; 
-    width: 50px; 
-    height: auto;
-    left: -20px; 
-    top: 15px;   
-    z-index: 3;  
-    opacity: 0.65; 
+    width: 50px; height: auto;
+    left: -20px; top: 15px;   
+    z-index: 3;  opacity: 0.65; 
     transform: rotate(-8deg); 
     pointer-events: none;
   }
 
-  /* Identitas Kepala */
   .temp-madrasah .head-name { font-weight: bold; text-decoration: underline; position: relative; z-index: 1; }
   .temp-madrasah .head-nip { margin-top: 1px; position: relative; z-index: 1; }
+
+  /* --- MOBILE RESPONSIVE TWEAKS --- */
+  @media screen and (max-width: 576px) {
+    /* 1. Reset Margin & Padding Container */
+    .container { padding: 15px !important; }
+    
+    /* 2. Login Box Full Width */
+    .auth-box { margin-top: 20px; box-shadow: none !important; border: 1px solid #eee; }
+
+    /* 3. Dashboard Controls Stack ke Bawah */
+    .card-body.d-flex { 
+      flex-direction: column; 
+      align-items: stretch !important; 
+    }
+    .card-body.d-flex select, 
+    .card-body.d-flex button {
+      width: 100% !important;
+      margin-bottom: 10px;
+    }
+    
+    /* 4. Form Config Madrasah menjadi 1 Kolom */
+    #madrasahConfig .row > div { width: 100% !important; }
+    #madrasahConfig .input-group { flex-direction: column; }
+    #madrasahConfig .input-group-text { width: 100%; border-radius: 5px !important; margin-bottom: 5px; }
+    #madrasahConfig .form-control { width: 100%; border-radius: 5px !important; margin-bottom: 10px; }
+
+    /* 5. MAGIC SCALING UNTUK KARTU */
+    /* Karena lebar kartu 335px + padding container > lebar layar HP (360px) */
+    /* Kita kecilkan tampilan kartu hanya di layar HP agar tidak terpotong */
+    .id-card {
+      transform: scale(0.92); /* Perkecil ke 92% */
+      margin-bottom: -15px; /* Hilangkan gap kosong akibat scaling */
+    }
+  }
 </style>
