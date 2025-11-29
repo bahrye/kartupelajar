@@ -332,7 +332,61 @@
     document.getElementById('previewContainer').innerHTML = createCardHTML(dummy, conf);
   }
 
-  // Generate Semua Kartu di Tab Generate
+  // --- UPDATE FINAL: NAMA SEKOLAH KAPITAL DI RULES ---
+  function createBackCardHTML(conf) {
+    var sekolah = document.getElementById('schoolTitle').innerText || "MADRASAH CONTOH";
+    var yayasan = conf.yayasan || "YAYASAN PENDIDIKAN";
+    var alamat1 = conf.alamat1 || "NSM: ... NPSN: ...";
+    var alamat2 = conf.alamat2 || "Alamat Kota...";
+    
+    var kontakHP = conf.nip !== '-' ? conf.nip : '0812xxxx'; 
+    var email = conf.email || "admin@sekolah.com";
+    var logoKiri = conf.logoKiri;
+    var logoKanan = conf.logoKanan;
+
+    return `
+      <div class="back-card">
+        <div class="back-header-flat">
+           
+           <div class="back-logo-box">
+             <img src="${logoKiri}" onerror="this.style.display='none'">
+           </div>
+
+           <div class="back-header-text">
+             <div class="txt-yayasan">${yayasan}</div>
+             <div class="txt-sekolah">${sekolah}</div>
+             <div class="txt-alamat">${alamat1}<br>${alamat2}</div>
+           </div>
+
+           <div class="back-logo-box">
+             <img src="${logoKanan}" onerror="this.style.display='none'">
+           </div>
+
+        </div>
+
+        <div class="back-body">
+          <div>
+            <div class="rules-title">KETENTUAN - KETENTUAN</div>
+            <ol class="rules-list">
+              <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah.toUpperCase()}</strong>.</li>
+              <li>Siswa wajib mematuhi Tata Tertib Madrasah & Perpustakaan.</li>
+              <li>Siswa bertanggung jawab penuh atas penggunaan kartu ini.</li>
+              <li>Kehilangan kartu harap segera melapor ke Tata Usaha/Kesiswaan.</li>
+              <li>Kartu wajib dibawa setiap hari sekolah/kegiatan madrasah.</li>
+            </ol>
+          </div>
+
+          <div class="back-footer">
+            <div style="text-decoration:underline; margin-bottom:2px;">Contact Person:</div>
+            <div class="row-cp"><span class="lbl">No Telp/HP</span> <span>: ${kontakHP}</span></div>
+            <div class="row-cp"><span class="lbl">Email</span> <span>: ${email}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- UPDATE: RENDER ALL CARDS (DEPAN & BELAKANG) ---
   function renderAllCards() {
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
@@ -344,9 +398,23 @@
 
     var conf = getConfigs();
     var html = "";
+
+    // Loop setiap siswa
     studentList.forEach(s => {
+      // 1. Buat Wrapper untuk Pasangan Kartu (Depan & Belakang)
+      // class 'd-flex' membuat mereka berdampingan (kiri-kanan)
+      // style 'break-inside: avoid' mencegah kartu terpotong saat print pindah halaman
+      html += `<div class="d-flex gap-2 mb-4 align-items-start" style="break-inside: avoid; page-break-inside: avoid;">`;
+      
+      // 2. Render Bagian Depan
       html += createCardHTML(s, conf);
+      
+      // 3. Render Bagian Belakang
+      html += createBackCardHTML(conf);
+      
+      html += `</div>`; // Tutup wrapper
     });
+
     container.innerHTML = html;
   }
 
