@@ -381,12 +381,20 @@
     `;
   }
 
+  // --- UPDATE FUNGSI CREATE CARD HTML ---
   function createCardHTML(s, conf) {
-    var foto = s.foto && s.foto.includes('http') ? s.foto : 'https://via.placeholder.com/100x120?text=Foto';
     var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
     var sekolah = document.getElementById('schoolTitle').innerText;
 
-    // Logic TTD
+    // 1. Logic Cek Foto
+    // Cek apakah string foto valid (panjang > 20 dan mengandung 'http')
+    var hasPhoto = (s.foto && s.foto.length > 20 && s.foto.includes('http'));
+    
+    // Jika ada foto, buat tag IMG dengan class 'real-photo'
+    // Jika tidak ada, kosongkan string ini.
+    var photoImgHtml = hasPhoto ? `<img src="${s.foto}" class="real-photo">` : '';
+
+    // Logic TTD & Stempel (Tetap sama)
     var ttdHtml = conf.ttd ? `<img src="${conf.ttd}" class="sig-img">` : `<div class="sig-placeholder"></div>`;
     var stempelHtml = conf.stempel ? `<img src="${conf.stempel}" class="stamp-img">` : ``;
 
@@ -403,7 +411,13 @@
         </div>
         <div class="card-title-bar">KARTU PELAJAR</div>
         <div class="card-body-custom">
-          <div class="photo-area"><img src="${foto}"></div>
+          
+          <div class="photo-area">
+             <i class="bi bi-person-fill ph-icon"></i>
+             <div class="ph-text">3 X 4</div>
+             
+             ${photoImgHtml}
+          </div>
           <div class="right-panel">
             <div class="data-area">
               <table>
