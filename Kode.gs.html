@@ -1,5 +1,7 @@
 // --- KONFIGURASI UTAMA ---
 var MASTER_SHEET_ID = '15ZvHQ2DEgKObLRlwAftz3jE5olP2h49t4bsdAFCYHho'; 
+// ID Folder Utama (Tempat semua folder sekolah berkumpul)
+var MAIN_PARENT_FOLDER_ID = '1Eu3dCTLw1l8xYs14TgYuYMm3wojo6fAV'; 
 
 function doGet() {
   return HtmlService.createTemplateFromFile('Index')
@@ -13,7 +15,7 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-// --- FUNGSI REGISTRASI ---
+// --- FUNGSI REGISTRASI (DENGAN PEMINDAHAN DATABASE KE FOLDER) ---
 function registerSchool(form) {
   var lock = LockService.getScriptLock();
   try {
@@ -34,25 +36,51 @@ function registerSchool(form) {
       }
     }
 
-    // Buat Spreadsheet Baru
+    // --- 1. SIAPKAN FOLDER UTAMA ---
+    var parentFolder;
+    try {
+      parentFolder = DriveApp.getFolderById(MAIN_PARENT_FOLDER_ID);
+    } catch(e) {
+      return {status: 'error', message: 'Folder Induk Utama tidak ditemukan (Cek ID Folder).'};
+    }
+
+    // Buat Folder Khusus Sekolah Ini
+    var schoolFolderName = "KARTU PELAJAR - " + form.namaSekolah;
+    var schoolFolder = parentFolder.createFolder(schoolFolderName);
+
+    // --- 2. BUAT DATABASE SPREADSHEET ---
+    // Secara default, create() akan meletakkan file di Root (My Drive)
     var newSS = SpreadsheetApp.create("DB_" + form.namaSekolah);
     var newSSId = newSS.getId();
     
-    // Setup Header Data Siswa
+    // >> PINDAHKAN FILE SPREADSHEET KE DALAM FOLDER SEKOLAH <<
+    var fileSS = DriveApp.getFileById(newSSId);
+    fileSS.moveTo(schoolFolder); // Ini perintah kuncinya
+
+    // --- 3. BUAT FOLDER FOTO SISWA ---
+    // Folder ini dibuat DI DALAM folder sekolah
+    var imgFolder = schoolFolder.createFolder("FOTO SISWA");
+    var imgFolderId = imgFolder.getId();
+    
+    // Set Permission Folder Foto (Public View)
+    imgFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    // --- 4. SETUP ISI DATABASE ---
     var sheetSiswa = newSS.getSheets()[0];
     sheetSiswa.setName("DataSiswa");
     sheetSiswa.appendRow(["Nama", "NISN", "TempatLahir", "TglLahir", "JK", "Kelas", "Alamat", "FotoURL"]);
     
-    // Data Dummy (Format NISN dengan kutip satu agar terbaca teks)
+    // Data Dummy
     sheetSiswa.appendRow(["Siswa Contoh", "'0012345678", "Jakarta", "2008-01-01", "L", "X-A", "Jl. Mawar No 1", "https://via.placeholder.com/150"]);
 
-    // Simpan Akun
-    sheet.appendRow([new Date(), form.namaSekolah, form.email, form.password, newSSId]);
+    // --- 5. SIMPAN AKUN KE MASTER SHEET ---
+    // Format: [Date, NamaSekolah, Email, Password, SS_ID, FOLDER_ID_FOTO]
+    sheet.appendRow([new Date(), form.namaSekolah, form.email, form.password, newSSId, imgFolderId]);
 
-    return {status: 'success', message: 'Registrasi Berhasil!'};
+    return {status: 'success', message: 'Registrasi Berhasil! Database & Folder telah dibuat.'};
 
   } catch(e) {
-    return {status: 'error', message: 'Error: ' + e.toString()};
+    return {status: 'error', message: 'Error Register: ' + e.toString()};
   } finally {
     lock.releaseLock();
   }
@@ -80,9 +108,63 @@ function loginSchool(email, password) {
   }
 }
 
+// --- HELPER: GET FOLDER ID ---
+function getSchoolFolderId(schoolSpreadsheetId) {
+  var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  var sheet = ss.getSheetByName('Users');
+  var data = sheet.getDataRange().getValues();
+  
+  for(var i=1; i<data.length; i++){
+    if(data[i][4] == schoolSpreadsheetId) {
+      return data[i][5]; 
+    }
+  }
+  return null;
+}
+
+// --- HELPER UPLOAD FOTO ---
+function processPhoto(fotoData, fileNamePrefix, targetFolderId) {
+  if (!fotoData) return "";
+  if (!fotoData.toString().startsWith("data:")) return fotoData; 
+
+  try {
+    var folder;
+    if (targetFolderId) {
+      folder = DriveApp.getFolderById(targetFolderId);
+    } else {
+      // Fallback
+      var folderName = "APP_KARTU_PELAJAR_FOTO_FALLBACK";
+      var folders = DriveApp.getFoldersByName(folderName);
+      if (folders.hasNext()) {
+        folder = folders.next();
+      } else {
+        folder = DriveApp.createFolder(folderName);
+        folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      }
+    }
+
+    // Decode & Save
+    var split = fotoData.split('base64,');
+    var contentType = split[0].split(':')[1].split(';')[0];
+    var decoded = Utilities.base64Decode(split[1]);
+    
+    var fileName = fileNamePrefix + "_" + new Date().getTime(); 
+    var blob = Utilities.newBlob(decoded, contentType, fileName);
+
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    return "https://drive.google.com/uc?export=view&id=" + file.getId();
+
+  } catch (e) {
+    Logger.log("GAGAL UPLOAD FOTO: " + e.toString());
+    return "UPLOAD_FAILED"; 
+  }
+}
+
 // --- CRUD SISWA ---
 
-// 1. READ (Ambil Data)
+// 1. READ
 function getStudents(spreadsheetId) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
@@ -97,7 +179,6 @@ function getStudents(spreadsheetId) {
       return {
         row: index + 2, 
         nama: r[0], 
-        // Ubah ke string agar aman saat dikirim ke frontend
         nisn: r[1].toString(), 
         tmp_lahir: r[2],
         tgl_lahir: r[3] ? Utilities.formatDate(new Date(r[3]), "GMT+7", "yyyy-MM-dd") : "",
@@ -114,61 +195,15 @@ function getStudents(spreadsheetId) {
   }
 }
 
-// --- HELPER UPLOAD FOTO KE DRIVE (VERSI PERBAIKAN) ---
-function processPhoto(fotoData, fileNamePrefix) {
-  // 1. Cek apakah ini data base64 (foto baru) atau URL lama
-  if (!fotoData) return "";
-  if (!fotoData.toString().startsWith("data:")) return fotoData;
-
-  try {
-    // 2. Cari/Buat Folder Khusus
-    var folderName = "APP_KARTU_PELAJAR_FOTO";
-    var folders = DriveApp.getFoldersByName(folderName);
-    var folder;
-    if (folders.hasNext()) {
-      folder = folders.next();
-    } else {
-      folder = DriveApp.createFolder(folderName);
-      folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    }
-
-    // 3. Decode Base64 & Buat Blob
-    var split = fotoData.split('base64,');
-    var contentType = split[0].split(':')[1].split(';')[0];
-    var decoded = Utilities.base64Decode(split[1]);
-    // Tambahkan timestamp agar nama file unik
-    var fileName = fileNamePrefix + "_" + new Date().getTime(); 
-    var blob = Utilities.newBlob(decoded, contentType, fileName);
-
-    // 4. Simpan File ke Drive
-    var file = folder.createFile(blob);
-    
-    // 5. Pastikan File bisa diakses publik
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-    // 6. KEMBALIKAN LINK YANG VALID (Ini kuncinya)
-    // Menggunakan format export=view agar bisa tampil di tag <img>
-    return "https://drive.google.com/uc?export=view&id=" + file.getId();
-
-  } catch (e) {
-    // Jika error, kita log ke console tapi JANGAN return string kosong begitu saja
-    // Agar kita tahu di mana salahnya.
-    Logger.log("GAGAL UPLOAD FOTO: " + e.toString());
-    // Kembalikan string kosong agar data siswa tetap tersimpan meski foto gagal
-    return ""; 
-  }
-}
-
-// 2. CREATE (Tambah Siswa)
+// 2. CREATE
 function addStudent(spreadsheetId, s) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
     var sheet = ss.getSheetByName('DataSiswa');
-    
     var nisnText = "'" + s.nisn;
     
-    // PROSES UPLOAD FOTO
-    var finalFotoUrl = processPhoto(s.foto, s.nama);
+    var folderId = getSchoolFolderId(spreadsheetId);
+    var finalFotoUrl = processPhoto(s.foto, s.nama, folderId);
 
     sheet.appendRow([s.nama, nisnText, s.tmp_lahir, s.tgl_lahir, s.jk, s.kelas, s.alamat, finalFotoUrl]);
     return {status: 'success', message: 'Data berhasil ditambahkan'};
@@ -177,17 +212,16 @@ function addStudent(spreadsheetId, s) {
   }
 }
 
-// 3. UPDATE (Edit Siswa)
+// 3. UPDATE
 function editStudent(spreadsheetId, s) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
     var sheet = ss.getSheetByName('DataSiswa');
     var row = parseInt(s.row);
-    
     var nisnText = "'" + s.nisn;
     
-    // PROSES UPLOAD FOTO (Hanya upload jika data yang dikirim adalah Base64 baru)
-    var finalFotoUrl = processPhoto(s.foto, s.nama);
+    var folderId = getSchoolFolderId(spreadsheetId);
+    var finalFotoUrl = processPhoto(s.foto, s.nama, folderId);
     
     var range = sheet.getRange(row, 1, 1, 8);
     range.setValues([[s.nama, nisnText, s.tmp_lahir, s.tgl_lahir, s.jk, s.kelas, s.alamat, finalFotoUrl]]);
@@ -198,7 +232,7 @@ function editStudent(spreadsheetId, s) {
   }
 }
 
-// 4. DELETE (Hapus Siswa)
+// 4. DELETE
 function deleteStudent(spreadsheetId, row) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
@@ -208,63 +242,4 @@ function deleteStudent(spreadsheetId, row) {
   } catch(e) {
     return {status: 'error', message: e.toString()};
   }
-}
-
-// --- FITUR PERBAIKAN DATA (Jalankan Manual Sekali Saja) ---
-function fixMissingPhotos() {
-  // Ganti ID Spreadsheet DB Sekolah Anda di sini (bukan Master Sheet ID)
-  // Anda bisa ambil ID ini dari URL Spreadsheet database sekolah yang error.
-  var DB_SPREADSHEET_ID = '1hjqK5Nd1vFEpGPhApI-6oGt7BzdOJ_SIaBoTG5Vr6CU'; 
-
-  var ss = SpreadsheetApp.openById(DB_SPREADSHEET_ID);
-  var sheet = ss.getSheetByName('DataSiswa');
-  var data = sheet.getDataRange().getValues();
-  
-  // Ambil folder foto
-  var folderName = "APP_KARTU_PELAJAR_FOTO";
-  var folders = DriveApp.getFoldersByName(folderName);
-  if (!folders.hasNext()) {
-    Logger.log("Folder foto tidak ditemukan!");
-    return;
-  }
-  var folder = folders.next();
-  var files = folder.getFiles();
-  
-  // Buat index file berdasarkan nama untuk pencarian cepat
-  var fileMap = {};
-  while (files.hasNext()) {
-    var file = files.next();
-    // Key-nya adalah nama file (misal: Budi_167888.jpg)
-    fileMap[file.getName()] = file.getId();
-    // Pastikan akses publik sekalian
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  }
-
-  var updatedCount = 0;
-
-  // Loop data siswa (Mulai dari baris 2 karena header)
-  for (var i = 1; i < data.length; i++) {
-    var namaSiswa = data[i][0]; // Kolom Nama
-    var currentFoto = data[i][7]; // Kolom FotoURL
-    
-    // Hanya perbaiki jika kolom foto kosong atau cuma strip "-"
-    if (!currentFoto || currentFoto.length < 10) {
-      
-      // Cari file di map yang namanya MENGANDUNG nama siswa
-      for (var fileName in fileMap) {
-        if (fileName.indexOf(namaSiswa) > -1) {
-          // KETEMU! Generate Link Baru
-          var newLink = "https://drive.google.com/uc?export=view&id=" + fileMap[fileName];
-          
-          // Update Data di Array
-          sheet.getRange(i + 1, 8).setValue(newLink);
-          Logger.log("Fixing foto untuk: " + namaSiswa);
-          updatedCount++;
-          break; // Lanjut ke siswa berikutnya
-        }
-      }
-    }
-  }
-  
-  Logger.log("Selesai! Total foto diperbaiki: " + updatedCount);
 }
