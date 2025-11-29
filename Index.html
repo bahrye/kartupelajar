@@ -2,147 +2,200 @@
 <html>
   <head>
     <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <?!= include('Stylesheet'); ?>
   </head>
   <body>
     
-    <div class="container py-5">
+    <div class="container py-3 py-md-5">
       
       <div id="loginPage" class="auth-box shadow mx-auto p-4 bg-white rounded">
-        <h3 class="text-center mb-4">Login Kartu Pelajar</h3>
-        
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input type="email" id="loginEmail" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input type="password" id="loginPass" class="form-control">
-        </div>
-        
-        <button id="btnLogin" type="button" onclick="runLogin()" class="btn btn-primary w-100 mb-3">Login</button>
-        
-        <div class="text-center">
-          <span class="text-primary text-decoration-underline" style="cursor:pointer" onclick="switchPage('register')">
-            Daftar Sekolah Baru
-          </span>
-        </div>
+        <h3 class="text-center mb-4">Login App</h3>
+        <div class="mb-3"><label>Email</label><input type="email" id="loginEmail" class="form-control"></div>
+        <div class="mb-3"><label>Password</label><input type="password" id="loginPass" class="form-control"></div>
+        <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 mb-3">Login</button>
+        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('register')" style="cursor:pointer">Daftar Baru</span></div>
       </div>
 
       <div id="registerPage" class="auth-box shadow mx-auto p-4 bg-white rounded" style="display:none;">
-        <h3 class="text-center mb-4">Registrasi Sekolah</h3>
-        
-        <div class="alert alert-warning small">
-          Database sekolah akan dibuat otomatis di Google Drive Anda.
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Nama Sekolah</label>
-          <input type="text" id="regSekolah" class="form-control" placeholder="Contoh: SMA 1 Indonesia">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Email Admin</label>
-          <input type="email" id="regEmail" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input type="password" id="regPass" class="form-control">
-        </div>
-
-        <button id="btnReg" type="button" onclick="runRegister()" class="btn btn-success w-100 mb-3">Buat Database</button>
-
-        <div class="text-center">
-          <span class="text-primary text-decoration-underline" style="cursor:pointer" onclick="switchPage('login')">
-            Kembali ke Login
-          </span>
-        </div>
+        <h3 class="text-center mb-4">Registrasi</h3>
+        <div class="mb-3"><label>Nama Sekolah</label><input type="text" id="regSekolah" class="form-control"></div>
+        <div class="mb-3"><label>Email</label><input type="email" id="regEmail" class="form-control"></div>
+        <div class="mb-3"><label>Password</label><input type="password" id="regPass" class="form-control"></div>
+        <button id="btnReg" onclick="runRegister()" class="btn btn-success w-100 mb-3">Buat Database</button>
+        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('login')" style="cursor:pointer">Kembali Login</span></div>
       </div>
 
       <div id="dashboardPage" style="display:none;">
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-          <h2><span id="schoolTitle">Sekolah</span></h2>
-          <button type="button" onclick="location.reload()" class="btn btn-danger btn-sm">Logout</button>
+          <h4 class="m-0"><i class="bi bi-building-check"></i> <span id="schoolTitle">Sekolah</span></h4>
+          <button onclick="location.reload()" class="btn btn-danger btn-sm">Logout</button>
         </div>
 
-        <div class="card mb-4 no-print">
-          <div class="card-body d-flex gap-3 align-items-center flex-wrap">
-            <select id="templateSelect" class="form-select w-auto" onchange="renderCards()">
-              <option value="temp-blue">1. Biru Modern</option>
-              <option value="temp-red">2. Merah Putih</option>
-              <option value="temp-gold">3. Gold Exclusive</option>
-              <option value="temp-madrasah">4. Madrasah 1</option>
-            </select>
-            <button type="button" onclick="window.print()" class="btn btn-info text-white">Cetak PDF</button>
-            <span class="text-muted small ms-auto">Data dari Spreadsheet Sekolah Anda</span>
-          </div>
-        </div>
+        <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">1. Data Siswa</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="setting-tab" data-bs-toggle="tab" data-bs-target="#setting-pane" type="button">2. Pengaturan</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate-pane" type="button" onclick="renderAllCards()">3. Generate Kartu</button>
+          </li>
+        </ul>
 
-        <div id="madrasahConfig" class="card mb-4 no-print border-warning" style="display:none; background-color: #fffcf0;">
-          <div class="card-header fw-bold text-warning-emphasis">
-            ⚙️ Pengaturan Kop & Tanda Tangan
+        <div class="tab-content" id="myTabContent">
+          
+          <div class="tab-pane fade show active no-print" id="data-pane">
+            <div class="d-flex justify-content-between mb-3">
+              <h5>Tabel Data Siswa</h5>
+              <button class="btn btn-primary btn-sm" onclick="openModalAdd()"><i class="bi bi-plus-circle"></i> Tambah Siswa</button>
+            </div>
+            
+            <div class="table-responsive bg-white shadow-sm rounded p-2">
+              <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>No</th><th>Aksi</th><th>Nama Lengkap</th><th>NISN</th><th>TTL</th><th>L/P</th><th>Alamat</th><th>Foto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  </tbody>
+              </table>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label small">Nama Yayasan (Atas)</label>
-                <input type="text" id="confYayasan" class="form-control form-control-sm" value="YAYASAN PENDIDIKAN CONTOH" oninput="renderCards()">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label small">Baris Alamat 1 (NSM/NPSN)</label>
-                <input type="text" id="confAlamat1" class="form-control form-control-sm" value="NSM: 1212... NPSN: 403..." oninput="renderCards()">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label small">Baris Alamat 2 (Lokasi)</label>
-                <input type="text" id="confAlamat2" class="form-control form-control-sm" value="Kec. Contoh, Kab. Contoh" oninput="renderCards()">
+
+          <div class="tab-pane fade no-print" id="setting-pane">
+            <div class="row">
+              <div class="col-md-5 col-12 mb-4">
+                <div class="card border-warning">
+                  <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
+                  <div class="card-body">
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Nama Yayasan</label>
+                      <input type="text" id="confYayasan" class="form-control" value="YAYASAN PENDIDIKAN" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
+                      <input type="text" id="confAlamat1" class="form-control" value="NSM: 1212... NPSN: 403..." oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi)</label>
+                      <input type="text" id="confAlamat2" class="form-control" value="Kec. X, Kab. Y" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Kota & Tanggal TTD</label>
+                      <input type="text" id="confTgl" class="form-control" value="Jakarta, 14 Juli 2025" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
+                      <input type="text" id="confKepala" class="form-control" value="NAMA KEPALA S.Pd" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">NIP Kepala</label>
+                      <input type="text" id="confNIP" class="form-control" value="-" oninput="renderPreview()">
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">URL Logo Kiri (Kemenag)</label>
+                      <input type="text" id="confLogoKiri" class="form-control" value="https://i.imgur.com/WqGSzFl.png" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">URL Logo Kanan (Sekolah)</label>
+                      <input type="text" id="confLogoKanan" class="form-control" value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">URL Stempel</label>
+                      <input type="text" id="confStempel" class="form-control" placeholder="URL Stempel..." oninput="renderPreview()">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">URL Tanda Tangan</label>
+                      <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div class="col-md-3">
-                <label class="form-label small">Kota & Tgl TTD</label>
-                <input type="text" id="confTgl" class="form-control form-control-sm" value="Jakarta, 14 Juli 2025" oninput="renderCards()">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">Nama Kepala</label>
-                <input type="text" id="confKepala" class="form-control form-control-sm" value="NAMA KEPALA S.Pd" oninput="renderCards()">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label small">NIP Kepala</label>
-                <input type="text" id="confNIP" class="form-control form-control-sm" value="-" oninput="renderCards()">
-              </div>
-              
-              <div class="col-md-12">
-                <div class="input-group input-group-sm mb-2">
-                  <span class="input-group-text">Logo Kiri</span>
-                  <input type="text" id="confLogoKiri" class="form-control" placeholder="Masukkan URL Logo Kemenag..." value="https://i.imgur.com/WqGSzFl.png" oninput="renderCards()">
-                  
-                  <span class="input-group-text">Logo Kanan</span>
-                  <input type="text" id="confLogoKanan" class="form-control" placeholder="Masukkan URL Logo Madrasah..." value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderCards()">
+              <div class="col-md-7 col-12">
+                <div class="sticky-top" style="top: 20px;">
+                  <h6 class="text-muted text-center mb-3">Live Preview Kartu</h6>
+                  <div id="previewContainer" class="d-flex justify-content-center bg-secondary bg-opacity-10 p-4 rounded border">
+                    </div>
+                  <div class="text-center mt-2 small text-muted">
+                    *Ini hanya contoh tampilan dengan data dummy.
+                  </div>
                 </div>
-                
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">TTD</span>
-                  <input type="text" id="confTTD" class="form-control" placeholder="Masukkan URL TTD..." value="" oninput="renderCards()">
-                  
-                  <span class="input-group-text bg-warning">Stempel</span>
-                  <input type="text" id="confStempel" class="form-control" placeholder="Masukkan URL Stempel..." value="" oninput="renderCards()">
-                </div>
-                <div class="form-text small">Tips: Gunakan gambar .png transparan untuk Stempel & TTD.</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4">
+          <div class="tab-pane fade" id="generate-pane">
+            <div class="alert alert-info no-print text-center">
+              <i class="bi bi-printer"></i> Klik tombol cetak di bawah ini. Pastikan setting printer: <strong>Layout Landscape, Paper Size A4/F4, Scale Default/100%.</strong>
+            </div>
+            <div class="text-center mb-4 no-print">
+               <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
+            </div>
+
+            <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4">
+               </div>
           </div>
+
+        </div>
       </div>
 
     </div>
 
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-      <div id="toastError" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="modal fade" id="studentModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Form Siswa</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editRow">
+            <div class="mb-2"><label>Nama Lengkap</label><input type="text" id="inpNama" class="form-control"></div>
+            <div class="mb-2"><label>NISN</label><input type="text" id="inpNISN" class="form-control"></div>
+            <div class="row">
+                <div class="col-6 mb-2"><label>Tempat Lahir</label><input type="text" id="inpTmpLahir" class="form-control"></div>
+                <div class="col-6 mb-2"><label>Tanggal Lahir</label><input type="date" id="inpTglLahir" class="form-control"></div>
+            </div>
+            <div class="row">
+                <div class="col-6 mb-2"><label>Jenis Kelamin</label>
+                  <select id="inpJK" class="form-select"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+                </div>
+                <div class="col-6 mb-2"><label>Kelas</label><input type="text" id="inpKelas" class="form-control" placeholder="X-A"></div>
+            </div>
+            <div class="mb-2"><label>Alamat</label><textarea id="inpAlamat" class="form-control" rows="2"></textarea></div>
+            
+            <div class="mb-2">
+              <label>Foto Siswa</label>
+              <input type="file" id="inpFotoFile" class="form-control" accept="image/*" onchange="previewImage(this)">
+              <input type="hidden" id="inpFotoOld">
+              
+              <div class="mt-2 text-center border rounded p-2 bg-light">
+                <img id="imgPreview" src="" style="max-height: 100px; display: none;" class="mx-auto d-block">
+                <div id="txtNoFoto" class="small text-muted">Belum ada foto dipilih</div>
+              </div>
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="btnSimpanSiswa" onclick="saveStudent()">Simpan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+      <div id="toastNotif" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body" id="errorMsg">Error message here.</div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <div class="toast-body" id="toastMsg">Message</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
       </div>
     </div>
