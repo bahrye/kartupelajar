@@ -164,7 +164,7 @@ function processPhoto(fotoData, fileNamePrefix, targetFolderId) {
 
 // --- CRUD SISWA ---
 
-// 1. READ
+// 1. READ (DENGAN FIX TANGGAL MUNDUR)
 function getStudents(spreadsheetId) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
@@ -176,12 +176,29 @@ function getStudents(spreadsheetId) {
     data.shift(); // Hapus Header
     
     var students = data.map(function(r, index){
+      
+      // --- LOGIKA PERBAIKAN TANGGAL ---
+      var tglFix = "";
+      if (r[3]) {
+        // Buat object Date dari data sheet
+        var d = new Date(r[3]);
+        
+        // TRICK: Set jam ke 12:00 Siang
+        // Masalah tanggal mundur terjadi karena jam default adalah 00:00.
+        // Jika kena timezone offset (-7 jam), dia jadi jam 17:00 HARI SEBELUMNYA.
+        // Dengan set jam 12:00, jika kena offset pun dia masih jam 05:00 PAGI di HARI YANG SAMA.
+        d.setHours(12);
+        
+        tglFix = Utilities.formatDate(d, "GMT+7", "yyyy-MM-dd");
+      }
+      // -------------------------------
+
       return {
         row: index + 2, 
         nama: r[0], 
         nisn: r[1].toString(), 
         tmp_lahir: r[2],
-        tgl_lahir: r[3] ? Utilities.formatDate(new Date(r[3]), "GMT+7", "yyyy-MM-dd") : "",
+        tgl_lahir: tglFix, // Gunakan variabel yang sudah di-fix
         jk: r[4],
         kelas: r[5],
         alamat: r[6], 
@@ -326,5 +343,114 @@ function getSchoolConfig(spreadsheetId) {
     return {status: 'success', data: config};
   } catch(e) {
     return {status: 'error', message: e.toString()};
+  }
+}
+
+// --- FUNGSI IMPORT BULK (EXCEL/CSV SAMA SAJA) ---
+function importBulkStudents(spreadsheetId, dataSiswa) {
+  try {
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    
+    var rowsToInsert = dataSiswa.map(function(s) {
+      // Tambahkan tanda petik pada NISN agar terbaca string di Google Sheets
+      var nisn = "'" + (s.nisn || "");
+      
+      return [
+        s.nama, 
+        nisn, 
+        s.tmp_lahir, 
+        s.tgl_lahir, 
+        s.jk, 
+        s.kelas, 
+        s.alamat, 
+        "" // Foto kosong
+      ];
+    });
+
+    if (rowsToInsert.length > 0) {
+      var lastRow = sheet.getLastRow();
+      sheet.getRange(lastRow + 1, 1, rowsToInsert.length, 8).setValues(rowsToInsert);
+    }
+
+    return {status: 'success', message: 'Berhasil mengimport ' + rowsToInsert.length + ' data siswa.'};
+    
+  } catch(e) {
+    return {status: 'error', message: 'Gagal Import: ' + e.toString()};
+  }
+}
+
+// --- FUNGSI BULK PHOTO UPLOAD ---
+function processBulkPhotos(spreadsheetId, zipBase64) {
+  try {
+    // 1. Decode ZIP dari Base64
+    var blob = Utilities.newBlob(Utilities.base64Decode(zipBase64), 'application/zip', 'photos.zip');
+    
+    // 2. Unzip Files
+    // Utilities.unzip mengembalikan array of blobs
+    var files = Utilities.unzip(blob);
+    
+    if (files.length === 0) {
+      return {status: 'error', message: 'File ZIP kosong atau rusak.'};
+    }
+
+    // 3. Siapkan Spreadsheet & Folder
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    var data = sheet.getDataRange().getValues(); // Ambil semua data siswa
+    var folderId = getSchoolFolderId(spreadsheetId); // Ambil ID folder foto sekolah ini
+    var folder = DriveApp.getFolderById(folderId);
+
+    // 4. Buat Peta (Map) NISN -> Baris Index
+    // Agar pencarian cepat, kita masukkan NISN ke dalam object map
+    // Key: NISN, Value: Nomor Baris (mulai 0 di array data, atau +1 di sheet)
+    var nisnMap = {};
+    for (var i = 1; i < data.length; i++) { // Mulai i=1 karena header
+      var nisn = data[i][1].toString().replace(/'/g, '').trim(); // Bersihkan NISN
+      if (nisn) {
+        nisnMap[nisn] = i + 1; // Simpan index baris (Row Number Excel)
+      }
+    }
+
+    var successCount = 0;
+
+    // 5. Loop setiap file foto dalam ZIP
+    for (var f = 0; f < files.length; f++) {
+      var fileBlob = files[f];
+      var fileName = fileBlob.getName();
+      
+      // Abaikan folder atau file hidden (__MACOSX dll)
+      if (fileName.startsWith('__') || fileBlob.getContentType() === 'application/octet-stream') continue;
+
+      // Ambil nama file tanpa ekstensi (Contoh: "12345.jpg" -> "12345")
+      var cleanName = fileName.split('.').slice(0, -1).join('.');
+      
+      // Cek apakah nama file ini ada di daftar NISN siswa?
+      if (nisnMap[cleanName]) {
+        var row = nisnMap[cleanName];
+        
+        // Simpan File ke Drive
+        // Kita beri nama file baru agar rapi: "NamaSiswa_NISN_Timestamp"
+        // Tapi "cleanName" (NISN) saja juga cukup untuk nama file di Drive
+        fileBlob.setName(cleanName + "_" + new Date().getTime());
+        var newFile = folder.createFile(fileBlob);
+        newFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        
+        var fileUrl = "https://drive.google.com/thumbnail?sz=w800&id=" + newFile.getId();
+
+        // Update Kolom Foto (Kolom H / Index 8)
+        sheet.getRange(row, 8).setValue(fileUrl);
+        
+        successCount++;
+      }
+    }
+
+    return {
+      status: 'success', 
+      message: 'Berhasil memproses ' + files.length + ' file.\n' + successCount + ' foto siswa berhasil dicocokkan & diupload.'
+    };
+
+  } catch (e) {
+    return {status: 'error', message: 'Error ZIP: ' + e.toString()};
   }
 }
