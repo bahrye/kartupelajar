@@ -4,6 +4,56 @@
   var studentList = [];
   var modalSiswa;
 
+  // --- [BARU] LOGIKA SESI (SESSION MANAGEMENT) ---
+  
+  // 1. Cek Sesi saat halaman pertama kali dimuat
+  document.addEventListener('DOMContentLoaded', function() {
+    checkSession();
+  });
+
+  function checkSession() {
+    var sessionData = localStorage.getItem('appSekolahSession');
+    
+    if (sessionData) {
+      var session = JSON.parse(sessionData);
+      var now = new Date().getTime();
+
+      // Cek apakah sesi masih berlaku (kurang dari 3 jam)
+      if (now < session.expiry) {
+        // Restore data dari storage
+        currentToken = session.token;
+        document.getElementById('schoolTitle').innerText = session.sekolah;
+        
+        // Langsung masuk dashboard tanpa login lagi
+        switchPage('dashboard');
+        loadTableData();
+      } else {
+        // Jika expired, hapus data sampah
+        localStorage.removeItem('appSekolahSession');
+      }
+    }
+  }
+
+  // 2. Fungsi Simpan Sesi (Dipanggil saat Login Sukses)
+  function saveSession(token, namaSekolah) {
+    var now = new Date().getTime();
+    var expiryTime = now + (3 * 60 * 60 * 1000); // 3 Jam dalam milidetik
+
+    var session = {
+      token: token,
+      sekolah: namaSekolah,
+      expiry: expiryTime
+    };
+
+    localStorage.setItem('appSekolahSession', JSON.stringify(session));
+  }
+
+  // 3. Fungsi Logout (Menghapus Sesi)
+  function logoutApp() {
+    localStorage.removeItem('appSekolahSession'); // Hapus sesi
+    location.reload(); // Refresh halaman kembali ke login
+  }
+
   // --- NAVIGATION ---
   function switchPage(page) {
     document.getElementById('loginPage').style.display = 'none';
@@ -14,7 +64,10 @@
     if(page === 'register') document.getElementById('registerPage').style.display = 'block';
     if(page === 'dashboard') {
       document.getElementById('dashboardPage').style.display = 'block';
-      modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
+      // Inisialisasi Modal hanya jika belum ada
+      if(!modalSiswa) {
+        modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
+      }
       
       // Load data pengaturan dari server
       loadSettings(); 
@@ -31,10 +84,13 @@
     google.script.run.withSuccessHandler(function(res){
         btn.disabled = false; btn.innerText = "Login";
         if(res.status === 'success') {
+          // [UBAH DISINI] Simpan sesi sebelum pindah halaman
+          saveSession(res.token, res.sekolah);
+          
           currentToken = res.token;
           document.getElementById('schoolTitle').innerText = res.sekolah;
           switchPage('dashboard');
-          loadTableData(); // Load Data Awal
+          loadTableData(); 
         } else { showToast(res.message, 'bg-danger'); }
       }).loginSchool(email, pass);
   }
@@ -530,7 +586,6 @@
     }, 150); // Delay sedikit agar efek tekan terasa
   }
 
-  // --- UPDATE: RENDER ALL CARDS (DEPAN & BELAKANG) ---
   function renderAllCards() {
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
@@ -545,15 +600,14 @@
 
     // Loop setiap siswa
     studentList.forEach(s => {
-      // 1. Buat Wrapper untuk Pasangan Kartu (Depan & Belakang)
-      // class 'd-flex' membuat mereka berdampingan (kiri-kanan)
-      // style 'break-inside: avoid' mencegah kartu terpotong saat print pindah halaman
-      html += `<div class="d-flex gap-2 mb-4 align-items-start" style="break-inside: avoid; page-break-inside: avoid;">`;
       
-      // 2. Render Bagian Depan
+      // [PERUBAHAN DISINI] Gunakan class 'print-row'
+      html += `<div class="print-row">`;
+      
+      // Render Bagian Depan
       html += createCardHTML(s, conf);
       
-      // 3. Render Bagian Belakang
+      // Render Bagian Belakang
       html += createBackCardHTML(conf);
       
       html += `</div>`; // Tutup wrapper
