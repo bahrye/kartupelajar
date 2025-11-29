@@ -114,9 +114,9 @@ function getStudents(spreadsheetId) {
   }
 }
 
-// --- HELPER UPLOAD FOTO KE DRIVE ---
+// --- HELPER UPLOAD FOTO KE DRIVE (VERSI PERBAIKAN) ---
 function processPhoto(fotoData, fileNamePrefix) {
-  // 1. Jika tidak ada data atau bukan base64, cek apakah itu URL lama yang valid
+  // 1. Cek apakah ini data base64 (foto baru) atau URL lama
   if (!fotoData) return "";
   if (!fotoData.toString().startsWith("data:")) return fotoData;
 
@@ -129,33 +129,32 @@ function processPhoto(fotoData, fileNamePrefix) {
       folder = folders.next();
     } else {
       folder = DriveApp.createFolder(folderName);
-      // PENTING: Set folder jadi publik agar file di dalamnya bisa diakses browser
       folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     }
 
-    // 3. Decode Base64 Image
+    // 3. Decode Base64 & Buat Blob
     var split = fotoData.split('base64,');
-    var contentType = split[0].split(':')[1].split(';')[0]; // contoh: image/jpeg
+    var contentType = split[0].split(':')[1].split(';')[0];
     var decoded = Utilities.base64Decode(split[1]);
-    var blob = Utilities.newBlob(decoded, contentType, fileNamePrefix + "_" + new Date().getTime());
+    // Tambahkan timestamp agar nama file unik
+    var fileName = fileNamePrefix + "_" + new Date().getTime(); 
+    var blob = Utilities.newBlob(decoded, contentType, fileName);
 
-    // 4. Simpan File
+    // 4. Simpan File ke Drive
     var file = folder.createFile(blob);
     
-    // 5. Pastikan File Individu juga Publik
+    // 5. Pastikan File bisa diakses publik
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-    // 6. GENERATE DIRECT LINK (Bagian Paling Penting!)
-    // Format thumbnail link Google Drive (lh3.googleusercontent.com) jauh lebih cepat dan stabil
-    // "s150" artinya ukuran gambar diset ke 150px (cukup untuk kartu/tabel)
-    // Jika ingin resolusi asli, ganti "s150" menjadi "s0"
-    
-    // Kita gunakan trik ID file untuk membuat link thumbnail
-    var fileId = file.getId();
-    return "https://lh3.googleusercontent.com/d/" + fileId; 
+    // 6. KEMBALIKAN LINK YANG VALID (Ini kuncinya)
+    // Menggunakan format export=view agar bisa tampil di tag <img>
+    return "https://drive.google.com/uc?export=view&id=" + file.getId();
 
   } catch (e) {
-    // Jika gagal, return string kosong
+    // Jika error, kita log ke console tapi JANGAN return string kosong begitu saja
+    // Agar kita tahu di mana salahnya.
+    Logger.log("GAGAL UPLOAD FOTO: " + e.toString());
+    // Kembalikan string kosong agar data siswa tetap tersimpan meski foto gagal
     return ""; 
   }
 }
@@ -209,4 +208,63 @@ function deleteStudent(spreadsheetId, row) {
   } catch(e) {
     return {status: 'error', message: e.toString()};
   }
+}
+
+// --- FITUR PERBAIKAN DATA (Jalankan Manual Sekali Saja) ---
+function fixMissingPhotos() {
+  // Ganti ID Spreadsheet DB Sekolah Anda di sini (bukan Master Sheet ID)
+  // Anda bisa ambil ID ini dari URL Spreadsheet database sekolah yang error.
+  var DB_SPREADSHEET_ID = '1hjqK5Nd1vFEpGPhApI-6oGt7BzdOJ_SIaBoTG5Vr6CU'; 
+
+  var ss = SpreadsheetApp.openById(DB_SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('DataSiswa');
+  var data = sheet.getDataRange().getValues();
+  
+  // Ambil folder foto
+  var folderName = "APP_KARTU_PELAJAR_FOTO";
+  var folders = DriveApp.getFoldersByName(folderName);
+  if (!folders.hasNext()) {
+    Logger.log("Folder foto tidak ditemukan!");
+    return;
+  }
+  var folder = folders.next();
+  var files = folder.getFiles();
+  
+  // Buat index file berdasarkan nama untuk pencarian cepat
+  var fileMap = {};
+  while (files.hasNext()) {
+    var file = files.next();
+    // Key-nya adalah nama file (misal: Budi_167888.jpg)
+    fileMap[file.getName()] = file.getId();
+    // Pastikan akses publik sekalian
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  }
+
+  var updatedCount = 0;
+
+  // Loop data siswa (Mulai dari baris 2 karena header)
+  for (var i = 1; i < data.length; i++) {
+    var namaSiswa = data[i][0]; // Kolom Nama
+    var currentFoto = data[i][7]; // Kolom FotoURL
+    
+    // Hanya perbaiki jika kolom foto kosong atau cuma strip "-"
+    if (!currentFoto || currentFoto.length < 10) {
+      
+      // Cari file di map yang namanya MENGANDUNG nama siswa
+      for (var fileName in fileMap) {
+        if (fileName.indexOf(namaSiswa) > -1) {
+          // KETEMU! Generate Link Baru
+          var newLink = "https://drive.google.com/uc?export=view&id=" + fileMap[fileName];
+          
+          // Update Data di Array
+          sheet.getRange(i + 1, 8).setValue(newLink);
+          Logger.log("Fixing foto untuk: " + namaSiswa);
+          updatedCount++;
+          break; // Lanjut ke siswa berikutnya
+        }
+      }
+    }
+  }
+  
+  Logger.log("Selesai! Total foto diperbaiki: " + updatedCount);
 }
