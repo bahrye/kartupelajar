@@ -1,0 +1,122 @@
+// --- KONFIGURASI UTAMA ---
+// Ganti dengan ID Spreadsheet Master Anda
+var MASTER_SHEET_ID = '15ZvHQ2DEgKObLRlwAftz3jE5olP2h49t4bsdAFCYHho'; 
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('Index')
+      .evaluate()
+      .setTitle('Aplikasi Kartu Pelajar')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+// --- FUNGSI REGISTRASI (BACKEND) ---
+function registerSchool(form) {
+  // Lock untuk mencegah race condition (opsional tapi bagus)
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000); // Tunggu antrian max 10 detik
+  } catch (e) {
+    return {status: 'error', message: 'Server sibuk, coba lagi.'};
+  }
+
+  try {
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Users');
+    
+    // Validasi sheet master
+    if (!sheet) {
+      return {status: 'error', message: 'Sheet "Users" tidak ditemukan di Master DB!'};
+    }
+
+    // Cek Email Duplikat
+    var data = sheet.getDataRange().getValues();
+    for(var i=0; i<data.length; i++){
+      // Kolom index 2 adalah email
+      if(data[i][2] && data[i][2].toString().toLowerCase() == form.email.toLowerCase()) {
+        return {status: 'error', message: 'Email ini sudah terdaftar!'};
+      }
+    }
+
+    // 1. Buat Spreadsheet Baru
+    var newSS = SpreadsheetApp.create("DB_" + form.namaSekolah);
+    var newSSId = newSS.getId();
+    
+    // 2. Beri izin akses ke siapapun (opsional, agar gambar bisa diload publik jika perlu)
+    // newSS.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    // 3. Setup Header Data Siswa
+    var sheetSiswa = newSS.getSheets()[0];
+    sheetSiswa.setName("DataSiswa");
+    sheetSiswa.appendRow(["NIS", "Nama", "Kelas", "TTL", "Alamat", "FotoURL"]);
+    // Data Dummy
+    sheetSiswa.appendRow(["1001", "Siswa Contoh", "X-A", "Jakarta, 01 Jan 2008", "Jl. Merdeka 1", "https://via.placeholder.com/150"]);
+
+    // 4. Simpan Akun ke Master
+    sheet.appendRow([
+      new Date(), 
+      form.namaSekolah, 
+      form.email, 
+      form.password, 
+      newSSId
+    ]);
+
+    return {status: 'success', message: 'Registrasi Berhasil! Silakan Login.'};
+
+  } catch(e) {
+    return {status: 'error', message: 'Error Server: ' + e.toString()};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- FUNGSI LOGIN (BACKEND) ---
+function loginSchool(email, password) {
+  try {
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Users');
+    var data = sheet.getDataRange().getValues();
+    
+    for(var i=1; i<data.length; i++){
+      if(data[i][2] == email && data[i][3] == password) {
+        return {
+          status: 'success', 
+          token: data[i][4], // Spreadsheet ID
+          sekolah: data[i][1]
+        };
+      }
+    }
+    return {status: 'error', message: 'Email atau Password salah.'};
+  } catch(e) {
+    return {status: 'error', message: 'Login Error: ' + e.toString()};
+  }
+}
+
+// --- FUNGSI GET DATA SISWA (BACKEND) ---
+function getStudents(spreadsheetId) {
+  try {
+    var ss = SpreadsheetApp.openById(spreadsheetId);
+    var sheet = ss.getSheetByName('DataSiswa');
+    var data = sheet.getDataRange().getValues();
+    
+    if (data.length <= 1) return {status: 'success', data: []}; // Kosong
+
+    data.shift(); // Hapus Header
+    
+    // Mapping Array ke Object
+    var students = data.map(function(r){
+      return {
+        nis: r[0], nama: r[1], kelas: r[2], 
+        ttl: r[3], alamat: r[4], foto: r[5]
+      };
+    });
+    
+    return {status: 'success', data: students};
+  } catch(e) {
+    return {status: 'error', message: 'Gagal ambil data: ' + e.toString()};
+  }
+}
