@@ -623,4 +623,256 @@
     document.getElementById('toastMsg').innerText = msg;
     new bootstrap.Toast(el).show();
   }
+
+  // --- FITUR IMPORT & EXPORT EXCEL (VERSI PRO) ---
+
+  // 1. Download Template Excel (Format Text & Auto Width)
+  function downloadTemplateExcel() {
+    // Data Header & Dummy
+    // Perhatikan: NISN diberi tanda petik satu (') di depan pada data dummy
+    // agar user paham itu harus teks.
+    var data = [
+      ["Nama", "NISN", "TempatLahir", "TglLahir", "JK", "Kelas", "Alamat"], 
+      ["Siswa Contoh", "0012345678", "Jakarta", "2010-01-31", "L", "X-A", "Jl. Mawar No 1"]
+    ];
+
+    // Buat Workbook & Worksheet
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(data);
+
+    // --- FORMATTING KOLOM ---
+    // Kita atur lebar kolom agar rapi
+    var wscols = [
+      {wch: 25}, // A: Nama
+      {wch: 15}, // B: NISN
+      {wch: 15}, // C: TmpLahir
+      {wch: 15}, // D: TglLahir
+      {wch: 5},  // E: JK
+      {wch: 10}, // F: Kelas
+      {wch: 30}  // G: Alamat
+    ];
+    ws['!cols'] = wscols;
+
+    // --- PAKSA FORMAT TEXT (PENTING!) ---
+    // Kita loop semua sel yang ada datanya untuk memastikan formatnya Text (@)
+    // Range deteksi otomatis dari data
+    var range = XLSX.utils.decode_range(ws['!ref']);
+    
+    for (var R = 0; R <= range.e.r; ++R) {
+      for (var C = 0; C <= range.e.c; ++C) {
+        var cellAddress = {c: C, r: R};
+        var cellRef = XLSX.utils.encode_cell(cellAddress);
+        
+        if (!ws[cellRef]) continue;
+
+        // Kolom B (NISN, index 1) & D (TglLahir, index 3) -> PAKSA TEXT
+        if (C === 1 || C === 3) {
+          ws[cellRef].z = '@';   // Format cell Excel jadi "Text"
+          ws[cellRef].t = 's';   // Tipe data library jadi "String"
+        }
+      }
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, "TemplateSiswa");
+    XLSX.writeFile(wb, "Template_Data_Siswa.xlsx");
+  }
+
+  // 2. Helper: Konversi Serial Date Excel ke YYYY-MM-DD
+  function excelDateToJSDate(serial) {
+    // Jika input sudah string (misal: "2023-01-01"), kembalikan langsung
+    if (typeof serial === 'string' || serial instanceof String) return serial;
+    
+    // Jika kosong/null
+    if (!serial) return "";
+
+    // Rumus konversi hari Excel ke JS Date
+    // Excel mulai dari 30 Des 1899 (biasanya), JS 1 Jan 1970
+    var utc_days  = Math.floor(serial - 25569);
+    var utc_value = utc_days * 86400;                                 
+    var date_info = new Date(utc_value * 1000);
+
+    // Format ke YYYY-MM-DD
+    // Perlu penyesuaian timezone sedikit karena pembulatan, tapi biasanya aman
+    // Kita ambil bagian YMD nya saja secara manual agar tidak kena geser jam
+    var year = date_info.getFullYear();
+    var month = ("0" + (date_info.getMonth() + 1)).slice(-2);
+    var day = ("0" + date_info.getDate()).slice(-2);
+
+    return `${year}-${month}-${day}`;
+  }
+
+  // 3. Proses Upload Excel (Smart Reading)
+  function processImportExcel(input) {
+    var file = input.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, {type: 'array'});
+      var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      // Ambil data JSON mentah (termasuk format aslinya)
+      var jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1, raw: true});
+
+      parseAndUploadExcel(jsonData);
+    };
+    reader.readAsArrayBuffer(file);
+    input.value = ""; 
+  }
+
+  // 4. Parsing Data & Kirim
+  function parseAndUploadExcel(rows) {
+    // Hapus header
+    if (rows.length > 0) rows.shift();
+
+    var dataUpload = [];
+    
+    rows.forEach(function(row) {
+      // Validasi baris: Minimal kolom Nama (index 0) terisi
+      if (row.length > 0 && row[0]) {
+        
+        // --- LOGIKA NISN (Pastikan jadi String) ---
+        var rawNISN = row[1] ? row[1].toString().trim() : "";
+        // Bersihkan karakter aneh jika ada (misal tanda petik sisa copy paste)
+        rawNISN = rawNISN.replace(/^'|'$/g, '');
+
+        // --- LOGIKA TANGGAL LAHIR (Smart Convert) ---
+        var rawTgl = row[3];
+        var finalTgl = "";
+
+        // Cek apakah Excel mengirim Angka (Serial Date) atau Teks
+        if (typeof rawTgl === 'number') {
+          // Jika angka (misal 44567), convert ke YYYY-MM-DD
+          finalTgl = excelDateToJSDate(rawTgl);
+        } else if (typeof rawTgl === 'string') {
+          // Jika teks, ambil apa adanya (asumsi user tulis YYYY-MM-DD)
+          finalTgl = rawTgl.trim();
+        }
+
+        var obj = {
+          nama: row[0].toString().trim(),
+          nisn: rawNISN,
+          tmp_lahir: row[2] ? row[2].toString().trim() : "",
+          tgl_lahir: finalTgl, // Hasil konversi pintar
+          jk: row[4] ? row[4].toString().trim() : "",
+          kelas: row[5] ? row[5].toString().trim() : "",
+          alamat: row[6] ? row[6].toString().trim() : ""
+        };
+        dataUpload.push(obj);
+      }
+    });
+
+    if (dataUpload.length === 0) {
+      alert("Data kosong atau format tidak terbaca!");
+      return;
+    }
+
+    if(!confirm("Akan mengimport " + dataUpload.length + " data siswa. Lanjutkan?")) return;
+
+    // UI Loading
+    var tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Mengupload & Memproses Data...</td></tr>";
+
+    // Kirim ke Backend
+    google.script.run.withSuccessHandler(function(res){
+      if(res.status === 'success') {
+        alert(res.message);
+        loadTableData();
+      } else {
+        alert("Gagal: " + res.message);
+        loadTableData();
+      }
+    }).importBulkStudents(currentToken, dataUpload);
+  }
+
+  // --- FITUR BULK UPLOAD FOTO (ZIP) ---
+  // --- LOGIC MODAL PANDUAN FOTO ---
+
+  var modalGuide; // Variabel global untuk modal
+
+  function showPhotoGuide() {
+    // Inisialisasi modal jika belum ada
+    if (!modalGuide) {
+      modalGuide = new bootstrap.Modal(document.getElementById('modalPhotoGuide'));
+    }
+    modalGuide.show();
+  }
+
+  function proceedPhotoUpload() {
+    // 1. Sembunyikan Modal
+    if (modalGuide) modalGuide.hide();
+    
+    // 2. Klik Input File yang tersembunyi secara otomatis
+    setTimeout(function() {
+      document.getElementById('filePhotoZip').click();
+    }, 300); // Delay sedikit agar animasi modal selesai
+  }
+
+  function uploadPhotoZip(input) {
+    var file = input.files[0];
+    if (!file) return;
+
+    // Validasi
+    if (file.type.indexOf('zip') === -1 && !file.name.endsWith('.zip')) {
+      alert("Harap upload file format .ZIP");
+      input.value = "";
+      return;
+    }
+
+    // Konfirmasi
+    if(!confirm("Pastikan nama file foto di dalam ZIP sesuai dengan NISN siswa (Contoh: 12345678.jpg).\nLanjutkan upload?")) return;
+
+    var btn = input.previousElementSibling; // Tombol triggernya
+    var oriText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = "<i class='bi bi-hourglass-split'></i> Mengupload...";
+    
+    // Tampilkan loading di tabel agar terlihat prosesnya
+    var tbody = document.querySelector('#studentTable tbody');
+    tbody.innerHTML = "<tr><td colspan='8' class='text-center'>Sedang mengekstrak & mencocokkan foto... (Bisa memakan waktu)</td></tr>";
+
+    // Baca File sebagai Base64
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64Data = e.target.result.split(',')[1]; // Ambil datanya saja tanpa header data:application/zip...
+      
+      // Kirim ke Server
+      google.script.run.withSuccessHandler(function(res){
+        btn.disabled = false; btn.innerHTML = oriText;
+        input.value = ""; // Reset
+        
+        if(res.status === 'success') {
+          alert(res.message);
+          loadTableData(); // Refresh tabel untuk melihat foto baru
+        } else {
+          alert("Gagal: " + res.message);
+          loadTableData();
+        }
+      }).processBulkPhotos(currentToken, base64Data);
+    };
+    
+    reader.readAsDataURL(file);
+  }
+
+  // --- LOGIC MODAL PANDUAN EXCEL ---
+  var modalExcel; // Variabel global
+
+  function showExcelGuide() {
+    if (!modalExcel) {
+      modalExcel = new bootstrap.Modal(document.getElementById('modalExcelGuide'));
+    }
+    modalExcel.show();
+  }
+
+  function proceedExcelUpload() {
+    // 1. Tutup Modal
+    if (modalExcel) modalExcel.hide();
+    
+    // 2. Klik Input File Excel yang tersembunyi
+    setTimeout(function() {
+      document.getElementById('fileImportExcel').click();
+    }, 300);
+  }
+
 </script>
