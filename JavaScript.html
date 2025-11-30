@@ -517,6 +517,7 @@
       logoKanan: document.getElementById('confLogoKanan').value,
       stempel: document.getElementById('confStempel').value,
       ttd: document.getElementById('confTTD').value,
+      bgImage: document.getElementById('confBgImage').value
     };
   }
 
@@ -556,6 +557,7 @@
         if(d.logoKanan) document.getElementById('confLogoKanan').value = d.logoKanan;
         if(d.stempel) document.getElementById('confStempel').value = d.stempel;
         if(d.ttd) document.getElementById('confTTD').value = d.ttd;
+        if(d.bgImage) document.getElementById('confBgImage').value = d.bgImage;
         
         // Render ulang preview setelah data masuk
         renderPreview();
@@ -825,6 +827,98 @@
     // Data Teks
     var ttl = s ? `${s.tmp_lahir}, ${s.tgl_lahir}` : "";
     var kontak = conf.telp || "-";
+
+    // --- LOGIKA UTAMA: DINAS 1 (FINAL REFINEMENT) ---
+    if (styleId === "dinas1") {
+      
+      var bgUrl = conf.bgImage || ""; 
+
+      // --- BAGIAN DEPAN (FRONT) ---
+      if (type === 'front') {
+        return `
+        <div class="id-card style-dinas-1" style="background-image: url('${bgUrl}');">
+            
+            <div class="dinas-header">
+                <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+                <div class="dinas-header-text">
+                    <div class="dh-top text-uppercase">${conf.yayasan}</div>
+                    <div class="dh-mid text-uppercase">${conf.alamat1}</div>
+                    <div class="dh-bot text-uppercase">${sekolah}</div>
+                    <div class="dh-address">${conf.alamat2}</div>
+                </div>
+            </div>
+
+            <div class="dinas-title-wrapper">
+                <div class="dinas-title-box">KARTU PELAJAR</div>
+            </div>
+
+            <div class="dinas-photo-absolute">
+               ${photoHtml}
+            </div>
+
+            <div class="dinas-validity-absolute">
+               * BERLAKU SELAMA MENJADI SISWA
+            </div>
+
+            <div class="dinas-data-absolute">
+                <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr><td width="60">Nama</td><td width="5">:</td><td class="fw-bold text-uppercase">${s.nama}</td></tr>
+                    <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
+                    <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                    <tr><td>Alamat</td><td>:</td><td class="dinas-addr-cut">${s.alamat}</td></tr>
+                </table>
+            </div>
+
+            <div class="dinas-footer-absolute">
+                <div class="dinas-ttd-wrapper">
+                    <div class="loc-date">${conf.tgl}</div>
+                    <div class="head-title">Kepala Sekolah</div>
+                    
+                    <div class="sign-img-wrap">
+                        ${stempelHtml}
+                        ${ttdHtml}
+                    </div>
+                    
+                    <div class="head-name fw-bold">${conf.kepala}</div>
+                    <div class="head-nip">NIP. ${conf.nip}</div>
+                </div>
+            </div>
+
+        </div>`;
+      } 
+      
+      // --- BAGIAN BELAKANG (BACK) ---
+      else {
+        return `
+        <div class="back-card style-dinas-1-back" style="background-image: url('${bgUrl}');">
+            <div class="dinas-header">
+                <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+                <div class="dinas-header-text">
+                    <div class="dh-top text-uppercase">${conf.yayasan}</div>
+                    <div class="dh-mid text-uppercase">${conf.alamat1}</div>
+                    <div class="dh-bot text-uppercase">${sekolahUpper}</div>
+                    <div class="dh-address">${conf.alamat2}</div>
+                </div>
+            </div>
+
+            <div class="dinas-title-wrapper">
+                <div class="dinas-title-box">JANJI SISWA</div>
+            </div>
+
+            <div class="dinas-body-back">
+                <ol class="janji-list">
+                    <li><b>Beriman dan Bertaqwa</b> kepada Tuhan yang Maha Esa.</li>
+                    <li><b>Hormat dan patuh</b> pada orangtua dan guru.</li>
+                    <li><b>Rajin belajar</b> dan bekerja keras.</li>
+                    <li><b>Menjaga nama baik</b> diri dan sekolah.</li>
+                    <li><b>Tidak mengotori</b>, mencoret meja, kursi, tembok, dan fasilitas lain yang ada di sekolah.</li>
+                    <li><b>Sanggup mematuhi</b> tata tertib sekolah dan sanggup menerima sanksi bila melanggar.</li>
+                </ol>
+            </div>
+        </div>
+        `;
+      }
+    }
     
     // --- MODE 1: MADRASAH (DEFAULT LAMA) ---
     if (styleId === "1") {
