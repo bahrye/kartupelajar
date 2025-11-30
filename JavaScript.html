@@ -891,7 +891,7 @@
     }, 150); // Delay sedikit agar efek tekan terasa
   }
 
-  // --- [UPDATE] FUNGSI RENDER ALL CARDS DENGAN PILIHAN TEMPLATE ---
+  // --- [UPDATE FIX] RENDER CARDS DENGAN HTML GUIDE ---
   function renderAllCards() {
     var container = document.getElementById('cardContainer');
     container.innerHTML = "";
@@ -907,19 +907,38 @@
     }
 
     var conf = getConfigs();
-    
-    // AMBIL NILAI DARI DROPDOWN (Default 1)
     var styleMode = document.getElementById('printTemplateMode').value || "1";
     
     var html = "";
     studentList.forEach(s => {
+      var cardFront = getCardTemplate('front', styleMode, s, conf);
+      var cardBack = getCardTemplate('back', styleMode, s, conf);
+
+      // Wrapper Utama
       html += `<div class="view-card-wrapper">`;
-      html += `<div class="print-row">`;
-          // Panggil fungsi Generator Template Baru
-          html += getCardTemplate('front', styleMode, s, conf);
-          html += getCardTemplate('back', styleMode, s, conf);
-      html += `</div>`;
-      html += `</div>`; 
+      
+      // --- BAGIAN BARU: HEADER GUIDE (FISIK HTML) ---
+      // Ini akan membuat icon gunting & lipat punya tempat sendiri dan tidak lari-lari
+      html +=   `<div class="meta-guides">
+                   <div class="guide-scissor">&#9988;</div>
+                   <div class="guide-fold">&#8644; LIPAT</div>
+                 </div>`;
+      // ----------------------------------------------
+
+      html +=   `<div class="print-row">`;
+      
+      // Depan
+      html +=     `<div class="cut-wrapper front-wrap">`;
+      html +=        cardFront;
+      html +=     `</div>`;
+
+      // Belakang
+      html +=     `<div class="cut-wrapper back-wrap">`;
+      html +=        cardBack;
+      html +=     `</div>`;
+
+      html +=   `</div>`; // end print-row
+      html += `</div>`;   // end view-card-wrapper
     });
 
     container.innerHTML = html;
