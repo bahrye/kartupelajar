@@ -169,21 +169,48 @@
 
   // --- NAVIGATION ---
   function switchPage(page) {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('registerPage').style.display = 'none';
-    document.getElementById('dashboardPage').style.display = 'none';
+    // 1. Definisikan variabel elemen
+    var container = document.getElementById('authContainer'); // Pembungkus Baru
+    var pLogin    = document.getElementById('loginPage');
+    var pRegister = document.getElementById('registerPage');
+    var pDash     = document.getElementById('dashboardPage');
 
-    if(page === 'login') document.getElementById('loginPage').style.display = 'block';
-    if(page === 'register') document.getElementById('registerPage').style.display = 'block';
-    if(page === 'dashboard') {
-      document.getElementById('dashboardPage').style.display = 'block';
-      // Inisialisasi Modal hanya jika belum ada
-      if(!modalSiswa) {
-        modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
+    // 2. SEMBUNYIKAN SEMUANYA DULU (Reset)
+    // PENTING: Sembunyikan container agar tidak menutupi dashboard
+    if (container) container.style.display = 'none'; 
+    if (pLogin)    pLogin.style.display = 'none';
+    if (pRegister) pRegister.style.display = 'none';
+    if (pDash)     pDash.style.display = 'none';
+
+    // 3. TAMPILKAN HALAMAN YANG DIPILIH
+    if (page === 'login') {
+      // Jika login, kita butuh container (background) + form login
+      if (container) container.style.display = 'flex'; 
+      if (pLogin)    pLogin.style.display = 'block';
+    } 
+    else if (page === 'register') {
+      // Jika register, kita butuh container (background) + form register
+      if (container) container.style.display = 'flex';
+      if (pRegister) pRegister.style.display = 'block';
+    } 
+    else if (page === 'dashboard') {
+      // Jika dashboard, Container HARUS SEMBUNYI (sudah di-hide di langkah no 2)
+      // Kita hanya munculkan dashboardPage
+      if (pDash) {
+        pDash.style.display = 'block';
+        
+        // Logika tambahan dashboard Anda (Modal & Settings)
+        if(!modalSiswa) {
+           // Pastikan elemen modal ada sebelum di-init
+           var elModal = document.getElementById('studentModal');
+           if(elModal) modalSiswa = new bootstrap.Modal(elModal);
+        }
+        
+        // Cek apakah fungsi loadSettings ada sebelum dipanggil
+        if (typeof loadSettings === 'function') {
+           loadSettings(); 
+        }
       }
-      
-      // Load data pengaturan dari server
-      loadSettings(); 
     }
   }
 
