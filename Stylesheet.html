@@ -1920,4 +1920,29 @@
   .bp-body-back ol { margin-left: 15px; padding: 0; }
   .bp-body-back li { margin-bottom: 3px; text-align: justify; }
 
+  /* --- TAMBAHAN KHUSUS PRINT: PAKSA GARIS TEPI HITAM --- */
+  @media print {
+    /* Paksa Style Dinas & Custom Background punya border hitam */
+    .style-dinas-1, 
+    .style-dinas-1-back,
+    .style-biru-putih,
+    .style-biru-putih.back-card,
+    .temp-generic, 
+    .temp-generic-back,
+    .id-card, 
+    .back-card {
+        border: 1px solid #000 !important; /* Garis hitam tipis untuk panduan gunting */
+        box-shadow: none !important;       /* Hilangkan bayangan saat print */
+        
+        /* Pastikan ukuran tetap presisi meski ada border */
+        box-sizing: border-box !important; 
+    }
+
+    /* Khusus style yang background-nya gelap/hitam (Dark Mode), 
+      kita bisa ubah bordernya jadi abu-abu agar terlihat (opsional) */
+    .style-4, .style-12, .style-14, .style-23, .style-28, .style-34, .style-45 {
+        border: 1px solid #999 !important; 
+    }
+  }
+
 </style>
