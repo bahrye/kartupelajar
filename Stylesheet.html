@@ -1804,4 +1804,112 @@
       .dinas-validity-absolute { color: #d32f2f !important; }
   }
 
+
+  /* ============================================== */
+  /* STYLE BARU: BIRU PUTIH (Custom Layout)         */
+  /* ============================================== */
+
+  .style-biru-putih {
+      width: 335px !important;
+      height: 220px !important;
+      border-radius: 10px !important; /* Radius agak besar sesuai gambar */
+      border: none !important;
+      background-size: 100% 100% !important;
+      background-repeat: no-repeat !important;
+      position: relative;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      color: #333;
+      box-shadow: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+  }
+
+  /* 1. JUDUL DI POJOK KIRI ATAS (Area Biru) */
+  .bp-header-title {
+      position: absolute;
+      top: 14px;       /* Sesuaikan dengan posisi bar biru */
+      left: 20px;
+      color: #fff;     /* Teks Putih */
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      z-index: 10;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  }
+
+  /* 2. SUB-JUDUL (Tahun Ajaran) DI AREA KUNING */
+  .bp-header-subtitle {
+      position: absolute;
+      top: 40px;       /* Di bawah bar biru */
+      left: 20px;
+      color: #333;     /* Teks Gelap agar kontras di kuning */
+      font-size: 7px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      z-index: 10;
+  }
+
+  /* 3. FOTO (Kiri Tengah) */
+  .bp-photo-box {
+      position: absolute;
+      top: 65px;
+      left: 25px;
+      width: 85px;
+      height: 105px;
+      background: #eee;
+      border-radius: 6px; /* Foto rounded sedikit */
+      overflow: hidden;
+      z-index: 5;
+  }
+  .bp-photo-box img {
+      width: 100%; height: 100%; object-fit: cover;
+  }
+
+  /* 4. DATA SISWA (Kanan Tengah) */
+  .bp-data-box {
+      position: absolute;
+      top: 65px;
+      left: 125px;     /* Di sebelah kanan foto */
+      width: 190px;
+      z-index: 5;
+  }
+  .bp-data-box table {
+      width: 100%;
+      font-size: 10px;
+      line-height: 1.6; /* Spasi antar baris agak lebar biar rapi */
+  }
+  .bp-data-box td {
+      vertical-align: top;
+      color: #000;
+  }
+  .addr-cut {
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* 5. FOOTER NAMA SEKOLAH (Kanan Bawah - Area Biru) */
+  .bp-footer-school {
+      position: absolute;
+      bottom: 12px;
+      right: 25px;    /* Rata Kanan */
+      text-align: right;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      z-index: 10;
+  }
+
+  /* 6. STYLE UNTUK BELAKANG */
+  .bp-body-back {
+      padding-top: 70px; /* Dorong ke bawah melewati header */
+      padding-left: 20px;
+      padding-right: 20px;
+      font-size: 9px;
+  }
+  .bp-body-back ol { margin-left: 15px; padding: 0; }
+  .bp-body-back li { margin-bottom: 3px; text-align: justify; }
+
 </style>
