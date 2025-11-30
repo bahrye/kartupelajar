@@ -479,3 +479,34 @@ function deleteBulkStudents(spreadsheetId, rowsToDelete) {
     lock.releaseLock();
   }
 }
+
+// --- FITUR ADMIN: LOAD TEMPLATE DARI MASTER SHEET ---
+function getGlobalTemplates() {
+  try {
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID); // Mengakses Database Utama
+    var sheet = ss.getSheetByName('Templates');
+    
+    // Jika sheet belum dibuat admin, kembalikan array kosong
+    if (!sheet) return [];
+    
+    var data = sheet.getDataRange().getValues();
+    
+    // Hapus header (baris 1)
+    if (data.length > 0) data.shift();
+    
+    // Format data agar ringan dikirim ke frontend: [{name, url}, ...]
+    var templates = data.map(function(row){
+      return {
+        name: row[0], // Kolom A: Nama Template
+        url: row[1]   // Kolom B: URL Background
+      };
+    });
+    
+    // Filter baris kosong
+    return templates.filter(function(t){ return t.name && t.url });
+    
+  } catch (e) {
+    // Jika error (misal koneksi), return kosong saja agar aplikasi tetap jalan
+    return [];
+  }
+}
