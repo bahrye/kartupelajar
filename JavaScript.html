@@ -624,7 +624,9 @@
 
   // --- UPDATE FUNGSI CREATE CARD HTML ---
   function createCardHTML(s, conf) {
-    var ttl = `${s.tmp_lahir}, ${s.tgl_lahir}`;
+    // Gunakan fungsi formatTanggalAngka
+    var tglFix = formatTanggalAngka(s.tgl_lahir);
+    var ttl = `${s.tmp_lahir}, ${tglFix}`;
     var sekolah = document.getElementById('schoolTitle').innerText;
 
     // 1. Logic Cek Foto
@@ -825,7 +827,7 @@
     var stempelHtml = conf.stempel ? `<img src="${conf.stempel}" class="stamp-img">` : ``;
 
     // Data Teks
-    var ttl = s ? `${s.tmp_lahir}, ${s.tgl_lahir}` : "";
+    var ttl = s ? `${s.tmp_lahir}, ${formatTanggalAngka(s.tgl_lahir)}` : "";
     var kontak = conf.telp || "-";
 
     // --- LOGIKA UTAMA: DINAS 1 (FINAL REFINEMENT) ---
@@ -846,6 +848,7 @@
                     <div class="dh-bot text-uppercase">${sekolah}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
+                <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
             </div>
 
             <div class="dinas-title-wrapper">
@@ -899,6 +902,7 @@
                     <div class="dh-bot text-uppercase">${sekolahUpper}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
+                <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
             </div>
 
             <div class="dinas-title-wrapper">
@@ -1434,6 +1438,20 @@
 
     // Output: "19 Juni 2023"
     return tanggal + ' ' + namaBulan[bulan] + ' ' + tahun;
+  }
+
+  // --- FUNGSI BARU: FORMAT TANGGAL ANGKA (DD-MM-YYYY) ---
+  function formatTanggalAngka(dateString) {
+    // Input dari server: "1996-06-19" (YYYY-MM-DD)
+    if (!dateString || dateString.length < 10) return dateString;
+
+    var parts = dateString.split('-'); // Pisahkan berdasarkan strip
+    var tahun = parts[0];
+    var bulan = parts[1];
+    var tanggal = parts[2];
+
+    // Output: "19-06-1996"
+    return tanggal + '-' + bulan + '-' + tahun;
   }
 
   // --- FUNGSI BUKA PREVIEW FOTO ---
