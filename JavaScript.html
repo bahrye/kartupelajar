@@ -169,26 +169,14 @@
 
   // --- NAVIGATION ---
   function switchPage(page) {
-    // Sembunyikan semua dulu
-    document.getElementById('authContainer').style.display = 'none'; // Wrapper Login/Reg
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('registerPage').style.display = 'none';
-    document.getElementById('dashboardPage').style.display = 'none'; // Halaman Utama
+    document.getElementById('dashboardPage').style.display = 'none';
 
-    if(page === 'login') {
-      document.getElementById('authContainer').style.display = 'flex'; // Munculkan Wrapper Background
-      document.getElementById('loginPage').style.display = 'block';
-    }
-    
-    if(page === 'register') {
-      document.getElementById('authContainer').style.display = 'flex'; // Munculkan Wrapper Background
-      document.getElementById('registerPage').style.display = 'block';
-    }
-    
+    if(page === 'login') document.getElementById('loginPage').style.display = 'block';
+    if(page === 'register') document.getElementById('registerPage').style.display = 'block';
     if(page === 'dashboard') {
-      // Background Dashboard biasanya putih/abu biasa, jadi sembunyikan wrapper gradient
       document.getElementById('dashboardPage').style.display = 'block';
-      
       // Inisialisasi Modal hanya jika belum ada
       if(!modalSiswa) {
         modalSiswa = new bootstrap.Modal(document.getElementById('studentModal'));
