@@ -510,3 +510,31 @@ function getGlobalTemplates() {
     return [];
   }
 }
+
+// --- FUNGSI BARU: AMBIL BACKGROUND DEFAULT UNTUK PREVIEW ---
+function getDefaultPreviewBg() {
+  try {
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Templates');
+    if (!sheet) return ""; // Return kosong jika sheet tidak ada
+
+    var data = sheet.getDataRange().getValues();
+    
+    // Loop dari baris ke-2 (index 1) untuk mencari tanda "YA" di kolom C (index 2)
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var marker = row[2] ? row[2].toString().toUpperCase() : ""; // Kolom C
+      
+      if (marker === "YA") {
+        return row[1]; // Kembalikan URL dari Kolom B
+      }
+    }
+    
+    // Jika tidak ada yang ditandai YA, kembalikan URL baris pertama sebagai fallback
+    if (data.length > 1) return data[1][1];
+    
+    return "";
+  } catch (e) {
+    return "";
+  }
+}
