@@ -1937,26 +1937,140 @@
   .bp-body-back ol { margin-left: 15px; padding: 0; }
   .bp-body-back li { margin-bottom: 3px; text-align: justify; }
 
-  /* --- TAMBAHAN KHUSUS PRINT: PAKSA GARIS TEPI HITAM --- */
+
+  /* --- [BAGIAN 1] STYLE GLOBAL (BERLAKU DI WEB & PRINT) --- */
+
+  /* 1. HAPUS TUNTAS ELEMENT LAMA */
+  .cut-wrapper::before, .cut-wrapper::after,
+  .cut-wrapper.front-wrap::before, .cut-wrapper.front-wrap::after {
+      content: none !important;
+      display: none !important;
+  }
+
+  /* 2. Wrapper Utama per Siswa */
+  .view-card-wrapper {
+    position: relative;
+    display: block;
+    width: fit-content;
+    margin: 20px auto; 
+    background: transparent;
+  }
+
+  /* 3. Baris Kartu */
+  .view-card-wrapper .print-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    align-items: center;
+    gap: 0px !important; 
+  }
+
+  /* --- [PERBAIKAN UTAMA DISINI: HEADER PANDUAN] --- */
+  
+  .meta-guides {
+    position: relative;
+    width: 100%;
+    /* Tinggi area ditambah sedikit agar ikon leluasa */
+    height: 20px; 
+    /* Hilangkan margin bawah agar ikon gunting terlihat 'nempel' di garis */
+    margin-bottom: 0px; 
+    font-family: Arial, sans-serif;
+    z-index: 20; /* Pastikan di atas layer kartu */
+  }
+
+  /* Ikon Gunting (Kiri) */
+  .guide-scissor {
+    position: absolute;
+    /* Geser sedikit ke kiri agar lurus dengan garis vertikal */
+    left: -2px; 
+    /* Turunkan sedikit (negatif kecil) agar 'mulut' gunting menyentuh garis */
+    bottom: -4px; 
+    
+    font-size: 16px;
+    color: #333;
+    line-height: 1;
+    background: #fff; /* Background putih untuk menimpa sudut garis */
+    padding-right: 2px;
+  }
+
+  /* Teks Lipat (Tengah) */
+  .guide-fold {
+    position: absolute;
+    left: 50%;
+    /* Set 0 atau 1px agar DUDUK DI ATAS garis (tidak menabrak/di bawah) */
+    bottom: 0px; 
+    
+    transform: translateX(-50%); 
+    font-size: 9px;
+    font-weight: bold;
+    color: #000;
+    background: #fff; 
+    padding: 0 5px; /* Padding kiri kanan biar teks lega */
+    white-space: nowrap;
+  }
+
+  /* 4. Kotak Garis Putus-putus */
+  .cut-wrapper {
+    position: relative;
+    border: 1px dashed #000; 
+    padding: 5px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cut-wrapper.front-wrap {
+    border-right: 1px dashed #000; 
+    border-radius: 8px 0 0 8px;    
+    z-index: 1;
+  }
+
+  .cut-wrapper.back-wrap {
+    border-left: none;          
+    border-radius: 0 8px 8px 0; 
+  }
+
+
+  /* --- [BAGIAN 2] KHUSUS PRINT (SETTINGAN KERTAS) --- */
   @media print {
-    /* Paksa Style Dinas & Custom Background punya border hitam */
-    .style-dinas-1, 
-    .style-dinas-1-back,
-    .style-biru-putih,
-    .style-biru-putih.back-card,
-    .temp-generic, 
-    .temp-generic-back,
-    .id-card, 
-    .back-card {
-        border: 1px solid #000 !important; /* Garis hitam tipis untuk panduan gunting */
-        box-shadow: none !important;       /* Hilangkan bayangan saat print */
-        
-        /* Pastikan ukuran tetap presisi meski ada border */
-        box-sizing: border-box !important; 
+    /* Setting Kertas A4 Margin 5mm */
+    @page { 
+      size: A4 portrait;
+      margin: 5mm !important; 
+    }
+    
+    body {
+      padding: 0 !important; 
+      margin: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
 
-    /* Khusus style yang background-nya gelap/hitam (Dark Mode), 
-      kita bisa ubah bordernya jadi abu-abu agar terlihat (opsional) */
+    /* Penyesuaian Wrapper saat Print */
+    .view-card-wrapper {
+      margin: 0 auto !important;
+      margin-bottom: 10px !important; 
+      break-inside: avoid; 
+      page-break-inside: avoid;
+
+      /* SKALA MAKSIMAL (Agar muat 4 & Terbaca Jelas) */
+      transform: scale(0.98); 
+      transform-origin: top center;
+    }
+
+    /* Pastikan warna border tercetak */
+    .cut-wrapper { border-color: #000 !important; }
+
+    /* Reset border kartu asli (Tipiskan) */
+    .style-dinas-1, .style-dinas-1-back,
+    .style-biru-putih, .style-biru-putih.back-card,
+    .temp-generic, .temp-generic-back,
+    .id-card, .back-card {
+        border: 1px solid #ddd !important; 
+        box-shadow: none !important;
+    }
+    
+    /* Tema Gelap Exception */
     .style-4, .style-12, .style-14, .style-23, .style-28, .style-34, .style-45 {
         border: 1px solid #999 !important; 
     }
