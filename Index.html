@@ -12,262 +12,293 @@
   </head>
   <body>
     
-    <div class="container py-3 py-md-5">
+    <div id="authContainer" class="login-wrapper">
       
-      <div id="loginPage" class="auth-box shadow mx-auto p-4 bg-white rounded">
-        <h3 class="text-center mb-4">Login App</h3>
-        <div class="mb-3"><label>Email</label><input type="email" id="loginEmail" class="form-control"></div>
-        <div class="mb-3"><label>Password</label><input type="password" id="loginPass" class="form-control"></div>
-        <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 mb-3">Login</button>
-        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('register')" style="cursor:pointer">Daftar Baru</span></div>
-      </div>
-
-      <div id="registerPage" class="auth-box shadow mx-auto p-4 bg-white rounded" style="display:none;">
-        <h3 class="text-center mb-4">Registrasi</h3>
-        <div class="mb-3"><label>Nama Sekolah</label><input type="text" id="regSekolah" class="form-control"></div>
-        <div class="mb-3"><label>Email</label><input type="email" id="regEmail" class="form-control"></div>
-        <div class="mb-3"><label>Password</label><input type="password" id="regPass" class="form-control"></div>
-        <button id="btnReg" onclick="runRegister()" class="btn btn-success w-100 mb-3">Buat Database</button>
-        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('login')" style="cursor:pointer">Kembali Login</span></div>
-      </div>
-
-      <div id="dashboardPage" style="display:none;">
-        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-          <h4 class="m-0"><i class="bi bi-building-check"></i> <span id="schoolTitle">Sekolah</span></h4>
-          <button onclick="logoutApp()" class="btn btn-danger btn-sm">Logout</button>
+      <div id="loginPage" class="auth-box shadow">
+        <div class="auth-header">
+          <div class="auth-icon-circle">
+            <i class="bi bi-person-workspace"></i>
+          </div>
+          <h3 class="auth-title">Welcome Back!</h3>
+          <p class="auth-subtitle">Silahkan login untuk mengelola kartu pelajar</p>
         </div>
 
-        <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">1. Data Siswa</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="setting-tab" data-bs-toggle="tab" data-bs-target="#setting-pane" type="button">2. Pengaturan</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate-pane" type="button" onclick="renderAllCards()">3. Generate Kartu</button>
-          </li>
-        </ul>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted ps-1">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+            <input type="email" id="loginEmail" class="form-control" placeholder="name@school.com">
+          </div>
+        </div>
 
-        <div class="tab-content" id="myTabContent">
-          
-          <div class="tab-pane fade show active no-print" id="data-pane">
-            <div class="d-flex justify-content-between mb-3 align-items-center">
-              <h5>Tabel Data Siswa</h5>
-              <div class="d-flex gap-2">
-  
-                <button id="btnUploadExcel" class="btn btn-success btn-sm" onclick="showExcelGuide()">
-                  <i class="bi bi-file-earmark-excel"></i> Upload Excel
-                </button>
-                
-                <button id="btnUploadZip" class="btn btn-warning btn-sm" onclick="showPhotoGuide()">
-                  <i class="bi bi-images"></i> Upload Foto (ZIP)
-                </button>
-                
-                <button id="btnAddManual" class="btn btn-primary btn-sm" onclick="openModalAdd()">
-                  <i class="bi bi-plus-circle"></i> Tambah Manual
-                </button>
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted ps-1">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+            <input type="password" id="loginPass" class="form-control" placeholder="••••••••">
+          </div>
+        </div>
 
-                <input type="file" id="fileImportExcel" accept=".xlsx, .xls" style="display: none;" onchange="processImportExcel(this)">
-                <input type="file" id="filePhotoZip" accept=".zip" style="display: none;" onchange="uploadPhotoZip(this)">
-              </div>
-            </div>
-            
-            <div class="table-responsive bg-white shadow-sm rounded p-2">
-              <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width: 1%;" class="text-center align-middle">
-                      <input type="checkbox" id="checkAll" class="form-check-input" onclick="toggleCheckAll(this)">
-                    </th>
+        <button id="btnLogin" onclick="runLogin()" class="btn btn-primary-gradient w-100 mb-4">
+          <i class="bi bi-box-arrow-in-right me-2"></i> MASUK APLIKASI
+        </button>
+        
+        <div class="text-center text-muted small">
+          Belum punya akun sekolah? <br>
+          <span class="link-auth" onclick="switchPage('register')">Daftarkan Sekolah Baru</span>
+        </div>
+      </div>
 
-                    <th style="width: 1%;" class="text-center align-middle">No</th>
+      <div id="registerPage" class="auth-box shadow" style="display:none;">
+        <div class="auth-header">
+          <div class="auth-icon-circle" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <i class="bi bi-building-add"></i>
+          </div>
+          <h3 class="auth-title">Buat Database</h3>
+          <p class="auth-subtitle">Registrasi database sekolah baru</p>
+        </div>
 
-                    <th style="width: 1%;" class="text-center align-middle">Aksi</th>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted ps-1">Nama Sekolah</label>
+          <div class="input-group">
+            <span class="input-group-text text-success"><i class="bi bi-building"></i></span>
+            <input type="text" id="regSekolah" class="form-control" placeholder="Contoh: MTS Negeri 1...">
+          </div>
+        </div>
 
-                    <th class="text-center align-middle">Nama Lengkap</th>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-muted ps-1">Email Admin</label>
+          <div class="input-group">
+            <span class="input-group-text text-success"><i class="bi bi-envelope"></i></span>
+            <input type="email" id="regEmail" class="form-control" placeholder="admin@sekolah.com">
+          </div>
+        </div>
 
-                    <th style="width: 110px;" class="text-center align-middle">NISN</th>
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-muted ps-1">Password Baru</label>
+          <div class="input-group">
+            <span class="input-group-text text-success"><i class="bi bi-key"></i></span>
+            <input type="password" id="regPass" class="form-control" placeholder="••••••••">
+          </div>
+        </div>
 
-                    <th style="width: 180px;" class="text-center align-middle">TTL</th>
+        <button id="btnReg" onclick="runRegister()" class="btn btn-primary-gradient w-100 mb-4" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+          <i class="bi bi-database-add me-2"></i> PROSES REGISTRASI
+        </button>
+        
+        <div class="text-center text-muted small">
+          Sudah terdaftar? <br>
+          <span class="link-auth text-success" onclick="switchPage('login')">Kembali ke Login</span>
+        </div>
+      </div>
 
-                    <th style="width: 1%;" class="text-center align-middle">L/P</th>
+    </div>
+    <div id="dashboardPage" style="display:none;" class="container py-3 py-md-5">
+      <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <h4 class="m-0"><i class="bi bi-building-check"></i> <span id="schoolTitle">Sekolah</span></h4>
+        <button onclick="logoutApp()" class="btn btn-danger btn-sm">Logout</button>
+      </div>
 
-                    <th style="width: 250px;" class="text-center align-middle">Alamat</th>
+      <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">1. Data Siswa</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="setting-tab" data-bs-toggle="tab" data-bs-target="#setting-pane" type="button">2. Pengaturan</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate-pane" type="button" onclick="renderAllCards()">3. Generate Kartu</button>
+        </li>
+      </ul>
 
-                    <th style="width: 70px;" class="text-center align-middle">Foto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  </tbody>
-              </table>
+      <div class="tab-content" id="myTabContent">
+        
+        <div class="tab-pane fade show active no-print" id="data-pane">
+          <div class="d-flex justify-content-between mb-3 align-items-center">
+            <h5>Tabel Data Siswa</h5>
+            <div class="d-flex gap-2">
+              <button id="btnUploadExcel" class="btn btn-success btn-sm" onclick="showExcelGuide()">
+                <i class="bi bi-file-earmark-excel"></i> Upload Excel
+              </button>
+              <button id="btnUploadZip" class="btn btn-warning btn-sm" onclick="showPhotoGuide()">
+                <i class="bi bi-images"></i> Upload Foto (ZIP)
+              </button>
+              <button id="btnAddManual" class="btn btn-primary btn-sm" onclick="openModalAdd()">
+                <i class="bi bi-plus-circle"></i> Tambah Manual
+              </button>
+              <input type="file" id="fileImportExcel" accept=".xlsx, .xls" style="display: none;" onchange="processImportExcel(this)">
+              <input type="file" id="filePhotoZip" accept=".zip" style="display: none;" onchange="uploadPhotoZip(this)">
             </div>
           </div>
+          <div class="table-responsive bg-white shadow-sm rounded p-2">
+            <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 1%;" class="text-center align-middle"><input type="checkbox" id="checkAll" class="form-check-input" onclick="toggleCheckAll(this)"></th>
+                  <th style="width: 1%;" class="text-center align-middle">No</th>
+                  <th style="width: 1%;" class="text-center align-middle">Aksi</th>
+                  <th class="text-center align-middle">Nama Lengkap</th>
+                  <th style="width: 110px;" class="text-center align-middle">NISN</th>
+                  <th style="width: 180px;" class="text-center align-middle">TTL</th>
+                  <th style="width: 1%;" class="text-center align-middle">L/P</th>
+                  <th style="width: 250px;" class="text-center align-middle">Alamat</th>
+                  <th style="width: 70px;" class="text-center align-middle">Foto</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
 
-          <div class="tab-pane fade no-print" id="setting-pane">
-            <div class="row">
-              <div class="col-md-5 col-12 mb-4">
-                <div class="card border-warning">
-                  <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
-                  <div class="card-body">
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Nama Yayasan</label>
-                      <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
-                      <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
-                      <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
-                    </div>
+        <div class="tab-pane fade no-print" id="setting-pane">
+          <div class="row">
+            <div class="col-md-5 col-12 mb-4">
+              <div class="card border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Nama Yayasan</label>
+                    <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
+                    <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
+                    <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
+                    <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Email Sekolah</label>
+                    <input type="text" id="confEmail" class="form-control" placeholder="admin@sekolah.com" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Tempat & Tanggal TTD</label>
+                    <input type="text" id="confTgl" class="form-control" placeholder="Jakarta, 14 Juli 2025" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
+                    <input type="text" id="confKepala" class="form-control" placeholder="NAMA KEPALA S.Pd" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">NIP Kepala</label>
+                    <input type="text" id="confNIP" class="form-control" placeholder="-" oninput="renderPreview()">
+                  </div>
+                  <hr>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Logo Kiri (Kemenag)</label>
+                    <input type="text" id="confLogoKiri" class="form-control" value="https://i.imgur.com/WqGSzFl.png" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Logo Kanan (Sekolah)</label>
+                    <input type="text" id="confLogoKanan" class="form-control" value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Stempel</label>
+                    <input type="text" id="confStempel" class="form-control" placeholder="URL Stempel..." oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Tanda Tangan</label>
+                    <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
+                  </div>
 
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
-                      <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
-                    </div>
-                    
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Email Sekolah</label>
-                      <input type="text" id="confEmail" class="form-control" placeholder="admin@sekolah.com" oninput="renderPreview()">
-                    </div>
-
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Tempat & Tanggal TTD</label>
-                      <input type="text" id="confTgl" class="form-control" placeholder="Jakarta, 14 Juli 2025" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
-                      <input type="text" id="confKepala" class="form-control" placeholder="NAMA KEPALA S.Pd" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">NIP Kepala</label>
-                      <input type="text" id="confNIP" class="form-control" placeholder="-" oninput="renderPreview()">
-                    </div>
-                    <hr>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Logo Kiri (Kemenag)</label>
-                      <input type="text" id="confLogoKiri" class="form-control" value="https://i.imgur.com/WqGSzFl.png" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Logo Kanan (Sekolah)</label>
-                      <input type="text" id="confLogoKanan" class="form-control" value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Stempel</label>
-                      <input type="text" id="confStempel" class="form-control" placeholder="URL Stempel..." oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Tanda Tangan</label>
-                      <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
-                    </div>
-
-                    <div class="mt-4">
-                      <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
-                        <i class="bi bi-save"></i> SIMPAN PENGATURAN
-                      </button>
-                    </div>
+                  <div class="mt-4">
+                    <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
+                      <i class="bi bi-save"></i> SIMPAN PENGATURAN
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div class="col-md-7 col-12">
-                <div class="sticky-top" style="top: 20px;">
-                  <h6 class="text-muted text-center mb-3">Live Preview Kartu</h6>
-                  <div id="previewContainer" class="d-flex justify-content-center bg-secondary bg-opacity-10 p-4 rounded border">
-                    </div>
-                  <div class="text-center mt-2 small text-muted">
-                    *Ini hanya contoh tampilan dengan data dummy.
-                  </div>
-                </div>
+            </div>
+            <div class="col-md-7 col-12">
+              <div class="sticky-top" style="top: 20px;">
+                <h6 class="text-muted text-center mb-3">Live Preview Kartu</h6>
+                <div id="previewContainer" class="d-flex justify-content-center bg-secondary bg-opacity-10 p-4 rounded border"></div>
+                <div class="text-center mt-2 small text-muted">*Ini hanya contoh tampilan dengan data dummy.</div>
               </div>
             </div>
           </div>
-
-          <div class="tab-pane fade" id="generate-pane">
-            <div class="alert alert-info no-print text-center">
-              <i class="bi bi-printer"></i> Pastikan setting printer: <strong>Layout Landscape (atau Portrait sesuai selera), Paper Size A4, Scale 100%.</strong>
-            </div>
-
-            <div class="text-center mb-3 no-print">
-              <label class="fw-bold">Pilih Mode Tampilan:</label>
-              <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
-                <option value="1">1. Madrasah (Hijau - Default)</option>
-                <option value="2">2. Merah Modern (Curve)</option>
-                <option value="3">3. Cokelat (Classic)</option>
-                <option value="4">4. Dark Mode (Elegant)</option>
-                <option value="5">5. Abu-abu (Corporate)</option>
-                <option value="6">6. Biru (Geometric)</option>
-                <option value="7">7. Ungu (Creative)</option>
-                <option value="8">8. Orange (Bright)</option>
-                <option value="9">9. Teal/Cyan (Clean)</option>
-                <option value="10">10. Navy (Official)</option>
-                <option value="11">11. Maroon (Formal)</option>
-                <option value="12">12. Cyber/Tech (Futuristik)</option>
-                <option value="13">13. Emerald (Nature/Leaf)</option>
-                <option value="14">14. Black & Gold (Luxury)</option>
-                <option value="15">15. Retro Paper (Vintage)</option>
-                <option value="16">16. Indigo (Wave Header)</option>
-                <option value="17">17. Crimson (Aggressive)</option>
-                <option value="18">18. Minimalist Border (Clean)</option>
-                <option value="19">19. Pastel Pink/Blue (Soft)</option>
-                <option value="20">20. Hexagon (Polygon Style)</option>
-                <option value="21">21. Full Gradient (Modern Art)</option>
-                <option value="22">22. Neumorphism (Soft UI)</option>
-                <option value="23">23. Midnight Gradient (Deep Blue)</option>
-                <option value="24">24. Swiss Grid (Bold Red)</option>
-                <option value="25">25. Abstract Blob (Playful)</option>
-                <option value="26">26. Professional Slate (Corporate)</option>
-                <option value="27">27. Sunset Vibes (Orange/Purple)</option>
-                <option value="28">28. High-Tech HUD (Cyan/Black)</option>
-                <option value="29">29. Eco Leaf (Nature Green)</option>
-                <option value="30">30. Royal Luxury (Violet/Gold)</option>
-                <option value="31">31. Candy Pop (Pink/Yellow)</option>
-                <option value="32">32. Mosaic Tiles (Geometric)</option>
-                <option value="33">33. Glass Effect (Translucent)</option>
-                <option value="34">34. Brutalism (Stark B&W)</option>
-                <option value="35">35. Holographic (Iridescent)</option>
-                <option value="36">36. Blackboard Classroom (Chalk Style)</option>
-                <option value="37">37. Old Library (Vintage Paper)</option>
-                <option value="38">38. Stationery Fun (Pencil & Ruler)</option>
-                <option value="39">39. Graduation Day (Academic Blue)</option>
-                <option value="40">40. Science Lab (Molecules)</option>
-
-                <option value="41">41. Deep Ocean (Bioluminescence)</option>
-                <option value="42">42. Tropical Wave (Sunny Beach)</option>
-                <option value="43">43. Coral Reef (Colorful)</option>
-                <option value="44">44. Glacial Ice (Frozen)</option>
-
-                <option value="45">45. Dragon Slayer (Scales & Fire)</option>
-                <option value="46">46. Arcane Magic (Mystic Runes)</option>
-                <option value="47">47. Elven Forest (Nature Magic)</option>
-                <option value="48">48. Steampunk (Gears & Brass)</option>
-              </select>
-            </div>
-
-            <div class="text-center mb-4 no-print">
-               <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
-            </div>
-
-            <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4">
-               </div>
-          </div>
-
         </div>
-      </div>
 
-      <div id="floatingAction" class="floating-action shadow-lg">
-        <div class="d-flex align-items-center justify-content-between">
-          <div class="fw-bold text-white">
-            <span id="selectedCount">0</span> Siswa Dipilih
+        <div class="tab-pane fade" id="generate-pane">
+          <div class="alert alert-info no-print text-center">
+            <i class="bi bi-printer"></i> Pastikan setting printer: <strong>Layout Landscape (atau Portrait sesuai selera), Paper Size A4, Scale 100%.</strong>
           </div>
-          <button class="btn btn-danger btn-sm fw-bold ms-3" onclick="runBulkDelete()">
-            <i class="bi bi-trash-fill"></i> Hapus
-          </button>
+          <div class="text-center mb-3 no-print">
+            <label class="fw-bold">Pilih Mode Tampilan:</label>
+            <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
+              <option value="1">1. Madrasah (Hijau - Default)</option>
+              <option value="2">2. Merah Modern (Curve)</option>
+              <option value="3">3. Cokelat (Classic)</option>
+              <option value="4">4. Dark Mode (Elegant)</option>
+              <option value="5">5. Abu-abu (Corporate)</option>
+              <option value="6">6. Biru (Geometric)</option>
+              <option value="7">7. Ungu (Creative)</option>
+              <option value="8">8. Orange (Bright)</option>
+              <option value="9">9. Teal/Cyan (Clean)</option>
+              <option value="10">10. Navy (Official)</option>
+              <option value="11">11. Maroon (Formal)</option>
+              <option value="12">12. Cyber/Tech (Futuristik)</option>
+              <option value="13">13. Emerald (Nature/Leaf)</option>
+              <option value="14">14. Black & Gold (Luxury)</option>
+              <option value="15">15. Retro Paper (Vintage)</option>
+              <option value="16">16. Indigo (Wave Header)</option>
+              <option value="17">17. Crimson (Aggressive)</option>
+              <option value="18">18. Minimalist Border (Clean)</option>
+              <option value="19">19. Pastel Pink/Blue (Soft)</option>
+              <option value="20">20. Hexagon (Polygon Style)</option>
+              <option value="21">21. Full Gradient (Modern Art)</option>
+              <option value="22">22. Neumorphism (Soft UI)</option>
+              <option value="23">23. Midnight Gradient (Deep Blue)</option>
+              <option value="24">24. Swiss Grid (Bold Red)</option>
+              <option value="25">25. Abstract Blob (Playful)</option>
+              <option value="26">26. Professional Slate (Corporate)</option>
+              <option value="27">27. Sunset Vibes (Orange/Purple)</option>
+              <option value="28">28. High-Tech HUD (Cyan/Black)</option>
+              <option value="29">29. Eco Leaf (Nature Green)</option>
+              <option value="30">30. Royal Luxury (Violet/Gold)</option>
+              <option value="31">31. Candy Pop (Pink/Yellow)</option>
+              <option value="32">32. Mosaic Tiles (Geometric)</option>
+              <option value="33">33. Glass Effect (Translucent)</option>
+              <option value="34">34. Brutalism (Stark B&W)</option>
+              <option value="35">35. Holographic (Iridescent)</option>
+              <option value="36">36. Blackboard Classroom (Chalk Style)</option>
+              <option value="37">37. Old Library (Vintage Paper)</option>
+              <option value="38">38. Stationery Fun (Pencil & Ruler)</option>
+              <option value="39">39. Graduation Day (Academic Blue)</option>
+              <option value="40">40. Science Lab (Molecules)</option>
+              <option value="41">41. Deep Ocean (Bioluminescence)</option>
+              <option value="42">42. Tropical Wave (Sunny Beach)</option>
+              <option value="43">43. Coral Reef (Colorful)</option>
+              <option value="44">44. Glacial Ice (Frozen)</option>
+              <option value="45">45. Dragon Slayer (Scales & Fire)</option>
+              <option value="46">46. Arcane Magic (Mystic Runes)</option>
+              <option value="47">47. Elven Forest (Nature Magic)</option>
+              <option value="48">48. Steampunk (Gears & Brass)</option>
+            </select>
+          </div>
+          <div class="text-center mb-4 no-print">
+             <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
+          </div>
+          <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4"></div>
         </div>
-      </div>
 
+      </div>
+    </div>
+
+    <div id="floatingAction" class="floating-action shadow-lg">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold text-white">
+          <span id="selectedCount">0</span> Siswa Dipilih
+        </div>
+        <button class="btn btn-danger btn-sm fw-bold ms-3" onclick="runBulkDelete()">
+          <i class="bi bi-trash-fill"></i> Hapus
+        </button>
+      </div>
     </div>
 
     <div class="modal fade" id="studentModal" tabindex="-1">
@@ -292,18 +323,15 @@
                 <div class="col-6 mb-2"><label>Kelas</label><input type="text" id="inpKelas" class="form-control" placeholder="X-A"></div>
             </div>
             <div class="mb-2"><label>Alamat</label><textarea id="inpAlamat" class="form-control" rows="2"></textarea></div>
-            
             <div class="mb-2">
               <label>Foto Siswa</label>
               <input type="file" id="inpFotoFile" class="form-control" accept="image/*" onchange="previewImage(this)">
               <input type="hidden" id="inpFotoOld">
-              
               <div class="mt-2 text-center border rounded p-2 bg-light">
                 <img id="imgPreview" src="" style="max-height: 100px; display: none;" class="mx-auto d-block">
                 <div id="txtNoFoto" class="small text-muted">Belum ada foto dipilih</div>
               </div>
             </div>
-            
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -331,20 +359,13 @@
           </div>
           <div class="modal-body">
             <p>Agar foto otomatis masuk ke data siswa yang tepat, ikuti langkah berikut:</p>
-            
             <ol class="list-group list-group-numbered mb-3">
               <li class="list-group-item">Siapkan semua file foto siswa (JPG/PNG). Ukuran rekomendasi foto yaitu 3x4.</li>
-              <li class="list-group-item">
-                <strong>Ubah Nama File (Rename)</strong> foto sesuai dengan <strong>NISN</strong> masing-masing siswa.<br>
-                <span class="text-muted small fst-italic">Contoh: Jika NISN siswa adalah <strong>00123456</strong>, nama file harus <strong>00123456.jpg</strong></span>
-              </li>
-              <li class="list-group-item">Pilih semua foto tersebut, lalu jadikan satu file <strong>ZIP</strong> (Compressed).</li>
-              <li class="list-group-item">Upload file ZIP tersebut melalui tombol di bawah ini.</li>
+              <li class="list-group-item"><strong>Ubah Nama File (Rename)</strong> foto sesuai dengan <strong>NISN</strong> siswa.<br><span class="text-muted small fst-italic">Contoh: NISN <strong>00123456</strong> nama file <strong>00123456.jpg</strong></span></li>
+              <li class="list-group-item">Pilih semua foto tersebut, jadikan satu file <strong>ZIP</strong>.</li>
+              <li class="list-group-item">Upload file ZIP tersebut.</li>
             </ol>
-
-            <div class="alert alert-info small">
-              <i class="bi bi-lightbulb"></i> <strong>Tips:</strong> Pastikan NISN di data Excel/Sistem sudah sesuai dengan nama file foto.
-            </div>
+            <div class="alert alert-info small"><i class="bi bi-lightbulb"></i> <strong>Tips:</strong> Pastikan NISN di data Excel/Sistem sudah sesuai dengan nama file foto.</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -365,32 +386,16 @@
           </div>
           <div class="modal-body">
             <p>Ikuti langkah berikut untuk memasukkan data siswa secara massal:</p>
-            
-          <ol class="list-group list-group-numbered mb-4">
-            
-            <li class="list-group-item d-flex align-items-center">
-              <div class="ms-1">
-                Download Template Excel
-                <button class="btn btn-outline-success btn-sm py-0 px-2 ms-2" onclick="downloadTemplateExcel()">
-                  <i class="bi bi-download"></i> Download
-                </button>
-              </div>
-            </li>
-            
-            <li class="list-group-item">
-              Isi data siswa pada file Template tersebut.
-              <div class="alert alert-warning py-1 px-2 mt-2 mb-0 small">
-                <i class="bi bi-exclamation-triangle"></i> <strong>PENTING:</strong>
-                <ul class="mb-0 ps-3">
-                  <li>Format <strong>NISN</strong> harus Teks (gunakan tanda kutip satu <code>'</code> di depan jika berubah jadi angka ilmiah).</li>
-                  <li>Format <strong>Tanggal Lahir</strong>: Gunakan format Date Excel atau tulis Teks <code>YYYY-MM-DD</code>.</li>
-                </ul>
-              </div>
-            </li>
-            
-            <li class="list-group-item">Simpan file, lalu upload melalui tombol di bawah.</li>
-          </ol>
-
+            <ol class="list-group list-group-numbered mb-4">
+              <li class="list-group-item d-flex align-items-center">
+                <div class="ms-1">Download Template Excel <button class="btn btn-outline-success btn-sm py-0 px-2 ms-2" onclick="downloadTemplateExcel()"><i class="bi bi-download"></i> Download</button></div>
+              </li>
+              <li class="list-group-item">
+                Isi data siswa pada file Template tersebut.
+                <div class="alert alert-warning py-1 px-2 mt-2 mb-0 small"><i class="bi bi-exclamation-triangle"></i> <strong>PENTING:</strong><ul class="mb-0 ps-3"><li>Format <strong>NISN</strong> harus Teks (pakai kutip ' jika perlu).</li><li>Format <strong>Tanggal Lahir</strong>: YYYY-MM-DD.</li></ul></div>
+              </li>
+              <li class="list-group-item">Simpan file, lalu upload di bawah.</li>
+            </ol>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -414,21 +419,16 @@
     </div>
 
     <div class="modal fade" id="modalLogoutConfirm" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-dialog-centered modal-sm"> <div class="modal-content border-0 shadow-lg">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
           <div class="modal-body text-center p-4">
-            
-            <div class="mb-3 text-danger">
-              <i class="bi bi-box-arrow-right" style="font-size: 3rem;"></i>
-            </div>
-            
+            <div class="mb-3 text-danger"><i class="bi bi-box-arrow-right" style="font-size: 3rem;"></i></div>
             <h5 class="fw-bold mb-2">Konfirmasi Keluar</h5>
-            <p class="text-muted small mb-4">Apakah Anda yakin ingin mengakhiri sesi dan keluar dari aplikasi?</p>
-            
+            <p class="text-muted small mb-4">Apakah Anda yakin ingin mengakhiri sesi?</p>
             <div class="d-grid gap-2">
               <button type="button" class="btn btn-danger fw-bold" onclick="executeLogout()">Ya, Keluar Sekarang</button>
               <button type="button" class="btn btn-light text-muted" data-bs-dismiss="modal">Batal</button>
             </div>
-
           </div>
         </div>
       </div>
