@@ -480,13 +480,12 @@ function deleteBulkStudents(spreadsheetId, rowsToDelete) {
   }
 }
 
-// --- FITUR ADMIN: LOAD TEMPLATE DARI MASTER SHEET ---
+// [Kode.gs]
 function getGlobalTemplates() {
   try {
-    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID); // Mengakses Database Utama
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
     var sheet = ss.getSheetByName('Templates');
     
-    // Jika sheet belum dibuat admin, kembalikan array kosong
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
@@ -494,19 +493,19 @@ function getGlobalTemplates() {
     // Hapus header (baris 1)
     if (data.length > 0) data.shift();
     
-    // Format data agar ringan dikirim ke frontend: [{name, url}, ...]
     var templates = data.map(function(row){
       return {
-        name: row[0], // Kolom A: Nama Template
-        url: row[1]   // Kolom B: URL Background
+        name: row[0],         // Kolom A: Nama
+        url: row[1],          // Kolom B: URL Background
+        // Kolom C digunakan untuk Default Preview (dilewati di sini)
+        layoutType: row[3]    // Kolom D: KATA KUNCI (Dinas / BiruPutih)
       };
     });
     
-    // Filter baris kosong
+    // Filter yang kosong
     return templates.filter(function(t){ return t.name && t.url });
     
   } catch (e) {
-    // Jika error (misal koneksi), return kosong saja agar aplikasi tetap jalan
     return [];
   }
 }
