@@ -690,26 +690,24 @@
     align-items: center;   
   }
 
-  /* 2. SETTING CETAK (PRINT PDF) - FIX HALAMAN BERIKUTNYA */
+  /* --- UPDATE SETTING CETAK (AGAR MUAT 4-5 SISWA/HALAMAN) --- */
   @media print {
     
-    /* Atur Margin Kertas Utama */
+    /* 1. ATUR MARGIN KERTAS YANG LEBIH HEMAT */
     @page { 
       size: A4 portrait;
-      /* UBAH DISINI: 
-         Margin Atas saya set 30mm (3cm). 
-         Ini akan berlaku OTOMATIS untuk HALAMAN 1, 2, 3, dst.
-      */
-      margin: 30mm 10mm 10mm 10mm; 
+      /* Margin Atas/Bawah diperkecil jadi 10mm (1cm) agar muat lebih banyak */
+      margin: 10mm 10mm 10mm 10mm; 
     }
 
     body {
-      /* Reset padding body karena sudah diatur oleh @page margin */
       padding-top: 0 !important; 
-      -webkit-print-color-adjust: exact;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      background-color: white !important;
     }
 
-    /* Reset wrapper agar background/border hilang saat print */
+    /* 2. RESET WRAPPER AGAR TIDAK MAKAN TEMPAT */
     .view-card-wrapper {
       overflow: visible !important;
       border: none !important;
@@ -717,28 +715,51 @@
       box-shadow: none !important;
       padding: 0 !important;
       
-      /* Jarak antar baris siswa */
+      /* Jarak antar baris siswa diperkecil drastis */
       display: block !important;
       margin: 0 !important;
-      margin-bottom: 15px !important; 
+      margin-bottom: 2px !important; /* Jarak antar siswa sangat rapat */
       
-      /* Mencegah kartu terpotong ganti halaman */
+      /* Mencegah kartu terpotong pindah halaman */
       break-inside: avoid; 
       page-break-inside: avoid;
     }
 
-    /* Atur baris kartu */
+    /* 3. ATUR BARIS KARTU & SKALA */
     .view-card-wrapper .print-row {
       display: flex !important;
       flex-direction: row !important;
       justify-content: center !important; 
+      align-items: flex-start !important;
       
       /* Jarak Kiri-Kanan (Depan - Belakang) */
-      gap: 10px !important; 
+      gap: 5px !important; 
       
-      /* Scale 0.9 agar muat 4 baris ke bawah */
-      transform: scale(0.9); 
+      /* --- KUNCI UTAMA: PERKECIL SKALA KE 0.85 --- */
+      /* Skala 0.85 cukup besar terbaca tapi muat 4-5 baris di A4 */
+      transform: scale(0.85); 
       transform-origin: top center;
+      
+      /* Kompensasi margin negatif karena scaling (agar baris bawah naik) */
+      margin-bottom: -30px !important; 
+    }
+
+    /* 4. PAKSA BACKGROUND IMAGE TERCETAK (Untuk Template Custom) */
+    .style-biru-putih, 
+    .style-biru-putih.back-card,
+    .style-dinas-1, 
+    .style-dinas-1-back,
+    .id-card, 
+    .back-card {
+        /* Wajib ada agar gambar background muncul di PDF */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        
+        /* Tambahkan border tipis untuk panduan potong */
+        border: 1px dotted #999 !important; 
+        box-shadow: none !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
     }
   }
 
@@ -1586,31 +1607,22 @@
 
   /* --- STYLE DINAS 1 (FINAL POLISH - RAPI & KOMPAK) --- */
   
-  .style-dinas-1 {
-      /* 1. Samakan Lebar & Tinggi dengan kontainer utama (220px) agar tidak ada celah putih di bawah */
+  .style-dinas-1, .style-dinas-1-back {
       width: 335px !important;
-      height: 220px !important; 
-      
-      /* 2. Hapus border agar gambar menyatu sampai ujung */
-      border: none !important; 
-      
-      /* 3. Pastikan radius sudut sama dengan standar kartu */
+      height: 220px !important;
       border-radius: 8px !important;
       
-      /* 4. Background Settings Full */
-      background-size: 100% 100% !important;
-      background-position: center center !important;
+      /* KUNCI AGAR GAMBAR PAS */
+      background-size: cover !important; /* atau 100% 100% */
+      background-position: center !important;
       background-repeat: no-repeat !important;
-      background-color: transparent !important; /* Ubah jadi transparan */
+      background-color: white !important; /* Fallback warna putih */
       
-      /* 5. Properti Wajib Lainnya */
       position: relative; 
-      font-family: 'Arial', sans-serif;
       overflow: hidden;
       color: #000;
-      box-sizing: border-box;
       
-      /* Pastikan background tercetak */
+      /* Agar tercetak */
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
   }
@@ -1766,23 +1778,6 @@
   }
   .head-name { text-decoration: underline; margin-bottom: 1px; }
 
-  /* BELAKANG */
-  .style-dinas-1-back {
-      /* Samakan settingan dengan depan */
-      width: 335px !important; 
-      height: 220px !important; /* Samakan tinggi 220px */
-      
-      border: none !important; /* Hapus border */
-      border-radius: 8px !important; /* Radius sudut */
-      
-      background-size: 100% 100% !important; 
-      background-position: center center !important;
-      background-repeat: no-repeat !important;
-      background-color: transparent !important;
-
-      position: relative; overflow: hidden;
-      color: #000; box-sizing: border-box; 
-  }
   .dinas-body-back { 
       /* Ubah padding-top (angka pertama) jadi 22px agar teks naik ke atas */
       padding: 24px 20px 5px 20px; 
@@ -1809,18 +1804,22 @@
   /* STYLE BARU: BIRU PUTIH (Custom Layout)         */
   /* ============================================== */
 
-  .style-biru-putih {
+  .style-biru-putih, .style-biru-putih.back-card {
       width: 335px !important;
       height: 220px !important;
       border-radius: 10px !important;
-      border: none !important;
-      background-size: 100% 100% !important;
+      
+      /* KUNCI AGAR GAMBAR PAS */
+      background-size: cover !important;
+      background-position: center !important;
       background-repeat: no-repeat !important;
+      background-color: white !important;
+      
       position: relative;
-      font-family: 'Segoe UI', sans-serif;
       overflow: hidden;
       color: #333;
-      box-shadow: none;
+      
+      /* Agar tercetak */
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
   }
