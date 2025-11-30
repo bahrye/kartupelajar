@@ -1812,7 +1812,7 @@
   .style-biru-putih {
       width: 335px !important;
       height: 220px !important;
-      border-radius: 10px !important; /* Radius agak besar sesuai gambar */
+      border-radius: 10px !important;
       border: none !important;
       background-size: 100% 100% !important;
       background-repeat: no-repeat !important;
@@ -1828,9 +1828,9 @@
   /* 1. JUDUL DI POJOK KIRI ATAS (Area Biru) */
   .bp-header-title {
       position: absolute;
-      top: 14px;       /* Sesuaikan dengan posisi bar biru */
+      top: 8px;        
       left: 20px;
-      color: #fff;     /* Teks Putih */
+      color: #fff;
       font-size: 16px;
       font-weight: 900;
       letter-spacing: 2px;
@@ -1840,11 +1840,12 @@
   }
 
   /* 2. SUB-JUDUL (Tahun Ajaran) DI AREA KUNING */
+  /* REVISI: Turunkan sedikit (Top ditambah) */
   .bp-header-subtitle {
       position: absolute;
-      top: 40px;       /* Di bawah bar biru */
+      top: 31px;       /* REVISI: Turun dari 28px ke 33px */
       left: 20px;
-      color: #333;     /* Teks Gelap agar kontras di kuning */
+      color: #333;
       font-size: 7px;
       font-weight: bold;
       letter-spacing: 1px;
@@ -1859,7 +1860,7 @@
       width: 85px;
       height: 105px;
       background: #eee;
-      border-radius: 6px; /* Foto rounded sedikit */
+      border-radius: 6px;
       overflow: hidden;
       z-index: 5;
   }
@@ -1871,14 +1872,14 @@
   .bp-data-box {
       position: absolute;
       top: 65px;
-      left: 125px;     /* Di sebelah kanan foto */
+      left: 125px;
       width: 190px;
       z-index: 5;
   }
   .bp-data-box table {
       width: 100%;
       font-size: 10px;
-      line-height: 1.6; /* Spasi antar baris agak lebar biar rapi */
+      line-height: 1.6;
   }
   .bp-data-box td {
       vertical-align: top;
@@ -1889,22 +1890,29 @@
   }
 
   /* 5. FOOTER NAMA SEKOLAH (Kanan Bawah - Area Biru) */
+  /* REVISI: Naikkan sedikit (Bottom ditambah) & Geser kiri (Right ditambah) */
   .bp-footer-school {
       position: absolute;
-      bottom: 12px;
-      right: 25px;    /* Rata Kanan */
+      bottom: 27px;    /* REVISI: Naik dari 23px ke 27px */
+      right: 45px;     /* REVISI: Geser kiri dari 25px ke 45px */
       text-align: right;
       color: #fff;
-      font-size: 14px;
+      font-size: 10px; 
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
       z-index: 10;
+      
+      /* Agar nama sekolah panjang tetap rapi di satu baris */
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
   }
 
   /* 6. STYLE UNTUK BELAKANG */
   .bp-body-back {
-      padding-top: 70px; /* Dorong ke bawah melewati header */
+      padding-top: 60px; 
       padding-left: 20px;
       padding-right: 20px;
       font-size: 9px;
