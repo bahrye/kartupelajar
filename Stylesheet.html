@@ -693,15 +693,18 @@
   /* --- UPDATE SETTING CETAK (AGAR MUAT 4-5 SISWA/HALAMAN) --- */
   @media print {
     
-    /* 1. ATUR MARGIN KERTAS YANG LEBIH HEMAT */
+    /* 1. HILANGKAN MARGIN HALAMAN (Cara ampuh hapus Header/Footer Browser) */
     @page { 
       size: A4 portrait;
-      /* Margin Atas/Bawah diperkecil jadi 10mm (1cm) agar muat lebih banyak */
-      margin: 10mm 10mm 10mm 10mm; 
+      margin: 0 !important; /* Margin 0 membuat browser menyembunyikan header/footer otomatis */
     }
 
+    /* 2. PINDAHKAN MARGIN KE PADDING BODY */
     body {
-      padding-top: 0 !important; 
+      /* Kita gunakan padding sebagai pengganti margin agar konten tidak mepet tepi kertas */
+      padding: 10mm 10mm 10mm 10mm !important; 
+      
+      margin: 0 !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
       background-color: white !important;
@@ -715,14 +718,20 @@
       box-shadow: none !important;
       padding: 0 !important;
       
-      /* Jarak antar baris siswa diperkecil drastis */
+      /* --- UBAH DISINI (Langkah 1) --- */
       display: block !important;
       margin: 0 !important;
-      margin-bottom: 2px !important; /* Jarak antar siswa sangat rapat */
+      
+      /* Sebelumnya 2px, ubah jadi 15px atau 20px agar ada jarak antar baris siswa */
+      margin-bottom: 20px !important; 
       
       /* Mencegah kartu terpotong pindah halaman */
       break-inside: avoid; 
       page-break-inside: avoid;
+      
+      /* OPSIONAL: Tambahkan garis putus-putus sebagai panduan potong antar baris */
+      border-bottom: 1px dashed #ccc !important; 
+      padding-bottom: 10px !important;
     }
 
     /* 3. ATUR BARIS KARTU & SKALA */
@@ -735,13 +744,13 @@
       /* Jarak Kiri-Kanan (Depan - Belakang) */
       gap: 5px !important; 
       
-      /* --- KUNCI UTAMA: PERKECIL SKALA KE 0.85 --- */
       /* Skala 0.85 cukup besar terbaca tapi muat 4-5 baris di A4 */
       transform: scale(0.85); 
       transform-origin: top center;
       
-      /* Kompensasi margin negatif karena scaling (agar baris bawah naik) */
-      margin-bottom: -30px !important; 
+      /* --- UBAH DISINI (Langkah 2) --- */
+      /* Sebelumnya -30px (ini yang bikin nempel). Ubah jadi 0px atau 5px */
+      margin-bottom: 0px !important; 
     }
 
     /* 4. PAKSA BACKGROUND IMAGE TERCETAK (Untuk Template Custom) */
