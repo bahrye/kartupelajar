@@ -1587,18 +1587,32 @@
   /* --- STYLE DINAS 1 (FINAL POLISH - RAPI & KOMPAK) --- */
   
   .style-dinas-1 {
+      /* 1. Samakan Lebar & Tinggi dengan kontainer utama (220px) agar tidak ada celah putih di bawah */
       width: 335px !important;
-      height: 215px !important;
-      border: 1px solid #ccc;
+      height: 220px !important; 
+      
+      /* 2. Hapus border agar gambar menyatu sampai ujung */
+      border: none !important; 
+      
+      /* 3. Pastikan radius sudut sama dengan standar kartu */
+      border-radius: 8px !important;
+      
+      /* 4. Background Settings Full */
       background-size: 100% 100% !important;
-      background-repeat: no-repeat;
-      background-position: center;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      background-color: transparent !important; /* Ubah jadi transparan */
+      
+      /* 5. Properti Wajib Lainnya */
       position: relative; 
       font-family: 'Arial', sans-serif;
       overflow: hidden;
       color: #000;
       box-sizing: border-box;
-      background-color: white;
+      
+      /* Pastikan background tercetak */
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
   }
 
   /* HEADER */
@@ -1637,22 +1651,42 @@
       border-radius: 6px; border: 1px solid #fff;
   }
 
-  /* KOTAK FOTO (UKURAN DIKURANGI) */
+  /* KOTAK FOTO DINAS (DENGAN PLACEHOLDER) */
   .dinas-photo-absolute {
       position: absolute;
-      top: 85px;       /* Naik sedikit */
+      top: 85px;
       left: 15px;      
-      width: 75px !important;   /* Lebar dikurangi */
-      height: 95px !important;  /* Tinggi dikurangi agar muat teks bawah */
+      width: 75px !important;
+      height: 95px !important;
+      
       background: #fff;
       border: 1px solid #999;
-      padding: 3px;
+      padding: 3px; /* Bingkai putih di dalam border */
+      
       z-index: 5;
       overflow: hidden;
       box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+
+      /* FLEXBOX: Agar ikon & teks 3x4 rata tengah */
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
   }
+  /* LOGIKA FOTO ASLI: Posisi Absolute agar menimpa placeholder */
   .dinas-photo-absolute img {
-      width: 100% !important; height: 100% !important; object-fit: cover; display: block;
+      position: absolute;
+      z-index: 10; /* Pastikan foto di atas ikon */
+      
+      /* Ukuran disesuaikan dengan padding 3px container */
+      width: calc(100% - 6px) !important; 
+      height: calc(100% - 6px) !important;
+      top: 3px;
+      left: 3px;
+      
+      object-fit: cover;
+      background: white; /* Mencegah ikon terlihat jika foto transparan */
+      display: block;
   }
 
   /* MASA BERLAKU (JELAS DI BAWAH FOTO) */
@@ -1734,10 +1768,20 @@
 
   /* BELAKANG */
   .style-dinas-1-back {
-      width: 335px !important; height: 215px !important; border: 1px solid #ccc;
-      background-size: 100% 100% !important; background-repeat: no-repeat;
-      background-position: center; position: relative; overflow: hidden;
-      color: #000; box-sizing: border-box; background-color: white;
+      /* Samakan settingan dengan depan */
+      width: 335px !important; 
+      height: 220px !important; /* Samakan tinggi 220px */
+      
+      border: none !important; /* Hapus border */
+      border-radius: 8px !important; /* Radius sudut */
+      
+      background-size: 100% 100% !important; 
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      background-color: transparent !important;
+
+      position: relative; overflow: hidden;
+      color: #000; box-sizing: border-box; 
   }
   .dinas-body-back { 
       /* Ubah padding-top (angka pertama) jadi 22px agar teks naik ke atas */
