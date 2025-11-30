@@ -225,11 +225,7 @@
                     <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
                   </div>
 
-                  <div class="mb-2">
-                    <label class="form-label small fw-bold text-primary">URL Background Kartu (PNG/JPG)</label>
-                    <input type="text" id="confBgImage" class="form-control border-primary" placeholder="Link Gambar Desain Kartu Kosong..." oninput="renderPreview()">
-                    <div class="form-text x-small">Upload desain mentah (tanpa teks) ukuran 1000x650px.</div>
-                  </div>
+                  <input type="hidden" id="confBgImage" value="">
 
                   <div class="mt-4">
                     <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
@@ -363,9 +359,16 @@
               <input type="file" id="inpFotoFile" class="form-control" accept="image/*" onchange="previewImage(this)">
               <input type="hidden" id="inpFotoOld">
               
-              <div class="mt-2 text-center border rounded p-2 bg-light">
-                <img id="imgPreview" src="" style="max-height: 100px; display: none;" class="mx-auto d-block">
+              <div class="mt-2 text-center border rounded p-2 bg-light position-relative" style="min-height: 120px; display: flex; align-items: center; justify-content: center;">
+                
+                <img id="imgPreview" src="" style="max-height: 100px; display: none;" class="mx-auto d-block rounded shadow-sm">
+                
                 <div id="txtNoFoto" class="small text-muted">Belum ada foto dipilih</div>
+
+                <button type="button" id="btnHapusFoto" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow" style="display:none; border-radius: 50%; width: 32px; height: 32px;" onclick="hapusFotoSiswa()" title="Hapus Foto">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+
               </div>
             </div>
             
