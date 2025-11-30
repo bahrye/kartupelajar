@@ -207,6 +207,12 @@
                     <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
                   </div>
 
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold text-primary">URL Background Kartu (PNG/JPG)</label>
+                    <input type="text" id="confBgImage" class="form-control border-primary" placeholder="Link Gambar Desain Kartu Kosong..." oninput="renderPreview()">
+                    <div class="form-text x-small">Upload desain mentah (tanpa teks) ukuran 1000x650px.</div>
+                  </div>
+
                   <div class="mt-4">
                     <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
                       <i class="bi bi-save"></i> SIMPAN PENGATURAN
@@ -237,6 +243,7 @@
           <div class="text-center mb-3 no-print">
             <label class="fw-bold">Pilih Mode Tampilan:</label>
             <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
+              <option value="dinas1">★ DINAS 1 (Custom Background)</option>
               <option value="1">1. Madrasah (Hijau - Default)</option>
               <option value="2">2. Merah Modern (Curve)</option>
               <option value="3">3. Cokelat (Classic)</option>
