@@ -263,30 +263,28 @@ function deleteStudent(spreadsheetId, row) {
 
 // --- KONFIGURASI SEKOLAH (SETTINGS) ---
 
-// 1. SIMPAN CONFIG
 function saveSchoolConfig(spreadsheetId, configForm) {
   try {
     var ss = SpreadsheetApp.openById(spreadsheetId);
     var sheet = ss.getSheetByName('Config');
     
-    // Jika sheet Config belum ada, buat baru
     if (!sheet) {
       sheet = ss.insertSheet('Config');
-      // Buat Header: Key, Value
       sheet.appendRow(['Key', 'Value']); 
     }
     
-    // Kita akan menggunakan format Key-Value sederhana
-    // List key yang akan disimpan
+    // Tambahkan 'schoolType' ke dalam map
     var dataMap = {
+      'schoolType': configForm.schoolType, // <--- TAMBAHAN PENTING
+      'dinas': configForm.dinas,
       'yayasan': configForm.yayasan,
       'alamat1': configForm.alamat1,
       'alamat2': configForm.alamat2,
       'tgl': configForm.tgl,
       'kepala': configForm.kepala,
-      'nip': configForm.nip,           // Harus Teks
-      'telp': configForm.telp,         // Harus Teks (BARU)
-      'email': configForm.email,       // (BARU)
+      'nip': configForm.nip,
+      'telp': configForm.telp,
+      'email': configForm.email,
       'logoKiri': configForm.logoKiri,
       'logoKanan': configForm.logoKanan,
       'stempel': configForm.stempel,
@@ -294,7 +292,7 @@ function saveSchoolConfig(spreadsheetId, configForm) {
       'bgImage': configForm.bgImage
     };
 
-    // Hapus data lama (mulai baris 2) agar bersih
+    // ... sisa kode di bawah ini sama seperti sebelumnya ...
     if (sheet.getLastRow() > 1) {
       sheet.getRange(2, 1, sheet.getLastRow()-1, 2).clearContent();
     }
@@ -302,17 +300,14 @@ function saveSchoolConfig(spreadsheetId, configForm) {
     var rows = [];
     for (var key in dataMap) {
       var val = dataMap[key] || "";
-      // Paksa format text dengan menambahkan tanda petik satu (') di depan jika NIP atau Telp
       if (key === 'nip' || key === 'telp') {
         val = "'" + val; 
       }
       rows.push([key, val]);
     }
 
-    // Tulis ke sheet
     if (rows.length > 0) {
       var range = sheet.getRange(2, 1, rows.length, 2);
-      // Set kolom B menjadi Plain Text dulu agar angka 0 di depan tidak hilang
       sheet.getRange(2, 2, rows.length, 1).setNumberFormat('@'); 
       range.setValues(rows);
     }
