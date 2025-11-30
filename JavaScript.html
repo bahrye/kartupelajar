@@ -3,6 +3,8 @@
   var currentToken = "";
   var studentList = [];
   var modalSiswa;
+  // [JavaScript.html - Bagian Atas]
+  var globalTemplateMap = {}; // Untuk menyimpan data layoutType berdasarkan URL
 
   // [BARU] Variabel penanda status loading
   var isLoading = false;
@@ -625,43 +627,33 @@
     }).getSchoolConfig(currentToken);
   }
 
-  // --- [UPDATE] FUNGSI ISI DROPDOWN DARI DATABASE UTAMA ---
+  // [JavaScript.html]
   function loadDynamicTemplates() {
     var select = document.getElementById('printTemplateMode');
-    
-    // Cek apakah opsi dinamis sudah pernah dimuat?
     if (select.getAttribute('data-loaded') === 'true') return;
 
     google.script.run.withSuccessHandler(function(templates){
-       if (templates && templates.length > 0) {
-         
-         // 1. Tambahkan Pembatas (Separator)
-         var separator = document.createElement('option');
-         separator.disabled = true;
-         // Kita beri nama ini agar jelas bahwa opsi di bawahnya adalah bawaan aplikasi
-         separator.innerText = "────────── TEMPLATE BAWAAN ──────────";
-         
-         // Masukkan separator di posisi paling atas (index 0)
-         // Ini akan mendorong opsi "1. Madrasah" ke bawah
-         select.add(separator, 0);
+      if (templates && templates.length > 0) {
+        var separator = document.createElement('option');
+        separator.disabled = true;
+        separator.innerText = "────────── TEMPLATE CUSTOM ──────────";
+        select.add(separator, 0);
 
-         // 2. Loop data dari database dan masukkan Paling Atas (Di atas Separator)
-         // Kita loop terbalik agar urutannya tetap rapi saat di-insert di index 0
-         for (var i = templates.length - 1; i >= 0; i--) {
-            var opt = document.createElement('option');
-            opt.value = templates[i].url; // VALUE-nya adalah URL GAMBAR
-            opt.innerText = "★ " + templates[i].name; 
+        for (var i = templates.length - 1; i >= 0; i--) {
+            var t = templates[i];
             
-            // Selalu masukkan di index 0 (Paling Atas)
-            select.add(opt, 0);
-         }
-         
-         // Opsional: Langsung pilih template pusat yang paling atas
-         select.selectedIndex = 0;
+            // SIMPAN TIPE LAYOUT KE MAP GLOBAL (Key: URL, Value: Type)
+            // Default ke 'Dinas' jika kosong
+            globalTemplateMap[t.url] = t.layoutType || 'Dinas'; 
 
-         // Tandai bahwa sudah diload
-         select.setAttribute('data-loaded', 'true');
-       }
+            var opt = document.createElement('option');
+            opt.value = t.url; 
+            opt.innerText = "★ " + t.name + " (" + (t.layoutType||'Std') + ")"; 
+            select.add(opt, 0);
+        }
+        select.selectedIndex = 0;
+        select.setAttribute('data-loaded', 'true');
+      }
     }).getGlobalTemplates();
   }
 
@@ -933,149 +925,200 @@
     container.innerHTML = html;
   }
 
-  // --- [BARU] TEMPLATE ENGINE UTAMA ---
-  // Fungsi ini mengatur HTML berdasarkan ID Style yang dipilih
   function getCardTemplate(type, styleId, s, conf) {
-    // Persiapan Data Umum
+    // --- 1. Persiapan Data Umum ---
     var sekolahRaw = document.getElementById('schoolTitle').innerText || "NAMA SEKOLAH";
-    // [UPDATE] Paksa Kapital untuk tampilan belakang
-    var sekolahUpper = sekolahRaw.toUpperCase(); 
-    
-    // Untuk depan, biarkan sesuai input atau kapital juga (opsional, disini saya buat default input)
-    // Jika ingin depan juga kapital semua, ganti sekolahRaw jadi sekolahUpper di bagian 'front'
+    var sekolahUpper = sekolahRaw.toUpperCase();
+    // Gunakan huruf kapital semua untuk konsistensi, atau sesuaikan kebutuhan
     var sekolah = sekolahRaw; 
 
+    // Cek validitas foto
     var hasPhoto = (s && s.foto && s.foto.length > 20 && s.foto.includes('http'));
     var photoHtml = hasPhoto ? `<img src="${s.foto}" class="real-photo">` : '';
-    
-    // TTD & Stempel
+
+    // Elemen Tanda Tangan & Stempel
     var ttdHtml = conf.ttd ? `<img src="${conf.ttd}" class="sig-img">` : `<div class="sig-placeholder"></div>`;
     var stempelHtml = conf.stempel ? `<img src="${conf.stempel}" class="stamp-img">` : ``;
 
-    // Data Teks
+    // Format Tanggal Lahir
     var ttl = s ? `${s.tmp_lahir}, ${formatTanggalAngka(s.tgl_lahir)}` : "";
     var kontak = conf.telp || "-";
 
-    // --- [BARU] LOGIKA CEK APAKAH CUSTOM BACKGROUND (URL) ---
-    // Jika styleId berisi "http" (URL dari database) ATAU "dinas1", kita pakai layout Custom
+    // --- 2. Logika Cek Custom Background ---
+    // Jika styleId berisi URL (http...) atau keyword 'dinas1', maka ini adalah template custom
     var isCustomBg = (styleId.indexOf('http') === 0) || (styleId === 'dinas1');
 
     if (isCustomBg) {
-      
-      // Tentukan URL Backgroundnya
       var bgUrl = "";
-      if (styleId === 'dinas1') {
-        // Jika dinas1, ambil dari config sekolah (hidden input)
-        bgUrl = conf.bgImage || ""; 
-      } else {
-        // Jika dari database, styleId itu sendiri adalah URL-nya
-        bgUrl = styleId;
-      }
-
-      // [LOGIC HEADER] Tentukan Isi Baris Kedua Header (Sama seperti sebelumnya)
-      var headerLine2 = "";
-      if (conf.schoolType === 'umum') {
-          headerLine2 = conf.dinas || "DINAS PENDIDIKAN"; 
-      } else {
-          headerLine2 = conf.alamat1 || ""; 
-      }
-
-      // --- BAGIAN DEPAN (FRONT) ---
-      if (type === 'front') {
-        return `
-        <div class="id-card style-dinas-1" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
-            
-            <div class="dinas-header">
-                <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
-                <div class="dinas-header-text">
-                    <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    <div class="dh-mid text-uppercase">${headerLine2}</div>
-                    <div class="dh-bot text-uppercase">${sekolah}</div>
-                    <div class="dh-address">${conf.alamat2}</div>
-                </div>
-                <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
-            </div>
-
-            <div class="dinas-title-wrapper">
-                <div class="dinas-title-box">KARTU PELAJAR</div>
-            </div>
-
-            <div class="dinas-photo-absolute">
-              <i class="bi bi-person-fill" style="font-size: 40px; color: #d1d1d1; line-height: 1;"></i>
-              <div style="font-size: 9px; font-weight: bold; color: #d1d1d1;">3 X 4</div>
-              
-              ${photoHtml}
-            </div>
-
-            <div class="dinas-validity-absolute">
-              * BERLAKU SELAMA MENJADI SISWA
-            </div>
-
-            <div class="dinas-data-absolute">
-                <table cellspacing="0" cellpadding="0" border="0" width="100%">
-                    <tr><td width="60">Nama</td><td width="5">:</td><td class="fw-bold text-uppercase">${s.nama}</td></tr>
-                    <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
-                    <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
-                    <tr><td>Alamat</td><td>:</td><td class="dinas-addr-cut">${s.alamat}</td></tr>
-                </table>
-            </div>
-
-            <div class="dinas-footer-absolute">
-                <div class="dinas-ttd-wrapper">
-                    <div class="loc-date">${conf.tgl}</div>
-                    <div class="head-title">Kepala Sekolah</div>
-                    
-                    <div class="sign-img-wrap">
-                        ${stempelHtml}
-                        ${ttdHtml}
-                    </div>
-                    
-                    <div class="head-name fw-bold">${conf.kepala}</div>
-                    <div class="head-nip">NIP. ${conf.nip}</div>
-                </div>
-            </div>
-
-        </div>`;
-      } 
       
-      // --- BAGIAN BELAKANG (BACK) ---
-      else {
-        return `
-        <div class="back-card style-dinas-1-back" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
-            <div class="dinas-header">
-                <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
-                <div class="dinas-header-text">
-                    <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    <div class="dh-mid text-uppercase">${headerLine2}</div>
-                    <div class="dh-bot text-uppercase">${sekolahUpper}</div>
-                    <div class="dh-address">${conf.alamat2}</div>
-                </div>
-                <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
-            </div>
+      // Tentukan URL Background
+      if (styleId === 'dinas1') {
+        bgUrl = conf.bgImage || ""; // Dari setting manual
+      } else {
+        bgUrl = styleId; // Dari database template
+      }
 
-            <div class="dinas-title-wrapper">
-                <div class="dinas-title-box">JANJI SISWA</div>
-            </div>
+      // Ambil Tipe Layout dari Map Global (yang diisi saat loadDynamicTemplates)
+      // Jika tidak ada di map, default ke 'Dinas'
+      var layoutType = (globalTemplateMap && globalTemplateMap[styleId]) ? globalTemplateMap[styleId] : 'Dinas';
+      
+      // Bersihkan spasi jika ada
+      layoutType = layoutType.trim();
 
-            <div class="dinas-body-back">
-                <ol class="janji-list">
+      // =========================================================
+      // OPSI A: LAYOUT "BiruPutih" (Judul Kiri Atas, Sekolah Kanan Bawah)
+      // =========================================================
+      if (layoutType === 'BiruPutih') {
+        if (type === 'front') {
+          return `
+          <div class="id-card style-biru-putih" style="background-image: url('${bgUrl}');">
+              
+              <div class="bp-header-title">KARTU PELAJAR</div>
+              <div class="bp-header-subtitle">TAHUN AJARAN 2024/2025</div>
+
+              <div class="bp-photo-box">
+                ${photoHtml}
+              </div>
+
+              <div class="bp-data-box">
+                <table cellspacing="0" cellpadding="0">
+                  <tr><td width="50">Nomor</td><td width="10">:</td><td>${s.nisn}</td></tr>
+                  <tr><td>Nama</td><td>:</td><td><b>${s.nama}</b></td></tr>
+                  <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                  <tr><td>Alamat</td><td>:</td><td class="addr-cut">${s.alamat}</td></tr>
+                </table>
+              </div>
+
+              <div class="bp-footer-school">${sekolahUpper}</div>
+
+          </div>`;
+        } 
+        else {
+          // Tampilan Belakang BiruPutih
+          return `
+          <div class="back-card style-biru-putih" style="background-image: url('${bgUrl}');">
+              <div class="bp-header-title" style="left:0; width:100%; text-align:center;">JANJI SISWA</div>
+              
+              <div class="bp-body-back">
+                  <ol>
                     <li><b>Beriman dan Bertaqwa</b> kepada Tuhan yang Maha Esa.</li>
                     <li><b>Hormat dan patuh</b> pada orangtua dan guru.</li>
                     <li><b>Rajin belajar</b> dan bekerja keras.</li>
                     <li><b>Menjaga nama baik</b> diri dan sekolah.</li>
-                    <li><b>Tidak mengotori</b>, mencoret meja, kursi, tembok, dan fasilitas lain yang ada di sekolah.</li>
-                    <li><b>Sanggup mematuhi</b> tata tertib sekolah dan sanggup menerima sanksi bila melanggar.</li>
-                </ol>
-            </div>
-        </div>
-        `;
+                    <li><b>Sanggup mematuhi</b> tata tertib sekolah.</li>
+                  </ol>
+              </div>
+
+              <div class="bp-footer-school">${sekolahUpper}</div>
+          </div>`;
+        }
+      }
+
+      // =========================================================
+      // OPSI B: LAYOUT "Dinas" (Format Standar Kop Tengah)
+      // =========================================================
+      else { 
+        // Tentukan Baris Kedua Header (Dinas vs Yayasan)
+        var headerLine2 = "";
+        if (conf.schoolType === 'umum') {
+            headerLine2 = conf.dinas || "DINAS PENDIDIKAN"; 
+        } else {
+            headerLine2 = conf.alamat1 || ""; 
+        }
+
+        if (type === 'front') {
+          return `
+          <div class="id-card style-dinas-1" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
+              
+              <div class="dinas-header">
+                  <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+                  <div class="dinas-header-text">
+                      <div class="dh-top text-uppercase">${conf.yayasan}</div>
+                      <div class="dh-mid text-uppercase">${headerLine2}</div>
+                      <div class="dh-bot text-uppercase">${sekolah}</div>
+                      <div class="dh-address">${conf.alamat2}</div>
+                  </div>
+                  <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
+              </div>
+
+              <div class="dinas-title-wrapper">
+                  <div class="dinas-title-box">KARTU PELAJAR</div>
+              </div>
+
+              <div class="dinas-photo-absolute">
+                <i class="bi bi-person-fill" style="font-size: 40px; color: #d1d1d1; line-height: 1;"></i>
+                <div style="font-size: 9px; font-weight: bold; color: #d1d1d1;">3 X 4</div>
+                ${photoHtml}
+              </div>
+
+              <div class="dinas-validity-absolute">
+                * BERLAKU SELAMA MENJADI SISWA
+              </div>
+
+              <div class="dinas-data-absolute">
+                  <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr><td width="60">Nama</td><td width="5">:</td><td class="fw-bold text-uppercase">${s.nama}</td></tr>
+                      <tr><td>NISN</td><td>:</td><td>${s.nisn}</td></tr>
+                      <tr><td>TTL</td><td>:</td><td>${ttl}</td></tr>
+                      <tr><td>Alamat</td><td>:</td><td class="dinas-addr-cut">${s.alamat}</td></tr>
+                  </table>
+              </div>
+
+              <div class="dinas-footer-absolute">
+                  <div class="dinas-ttd-wrapper">
+                      <div class="loc-date">${conf.tgl}</div>
+                      <div class="head-title">Kepala Sekolah</div>
+                      
+                      <div class="sign-img-wrap">
+                          ${stempelHtml}
+                          ${ttdHtml}
+                      </div>
+                      
+                      <div class="head-name fw-bold">${conf.kepala}</div>
+                      <div class="head-nip">NIP. ${conf.nip}</div>
+                  </div>
+              </div>
+          </div>`;
+        } 
+        else {
+          // Belakang Dinas
+          return `
+          <div class="back-card style-dinas-1-back" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
+              <div class="dinas-header">
+                  <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
+                  <div class="dinas-header-text">
+                      <div class="dh-top text-uppercase">${conf.yayasan}</div>
+                      <div class="dh-mid text-uppercase">${headerLine2}</div>
+                      <div class="dh-bot text-uppercase">${sekolahUpper}</div>
+                      <div class="dh-address">${conf.alamat2}</div>
+                  </div>
+                  <div class="dinas-logo-right"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
+              </div>
+
+              <div class="dinas-title-wrapper">
+                  <div class="dinas-title-box">JANJI SISWA</div>
+              </div>
+
+              <div class="dinas-body-back">
+                  <ol class="janji-list">
+                      <li><b>Beriman dan Bertaqwa</b> kepada Tuhan yang Maha Esa.</li>
+                      <li><b>Hormat dan patuh</b> pada orangtua dan guru.</li>
+                      <li><b>Rajin belajar</b> dan bekerja keras.</li>
+                      <li><b>Menjaga nama baik</b> diri dan sekolah.</li>
+                      <li><b>Tidak mengotori</b>, mencoret meja, kursi, tembok, dan fasilitas lain yang ada di sekolah.</li>
+                      <li><b>Sanggup mematuhi</b> tata tertib sekolah dan sanggup menerima sanksi bila melanggar.</li>
+                  </ol>
+              </div>
+          </div>
+          `;
+        }
       }
     }
     
-    // --- MODE 1: MADRASAH (DEFAULT LAMA) ---
+    // --- 3. Mode Default: Madrasah (Style 1) ---
     if (styleId === "1") {
       if (type === 'front') {
-         return `
+        return `
         <div class="id-card temp-madrasah style-1">
           <div class="madrasah-header">
             <div class="logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
@@ -1089,8 +1132,8 @@
           <div class="card-title-bar">KARTU PELAJAR</div>
           <div class="card-body-custom">
             <div class="photo-area">
-               <i class="bi bi-person-fill ph-icon"></i><div class="ph-text">3 X 4</div>
-               ${photoHtml}
+              <i class="bi bi-person-fill ph-icon"></i><div class="ph-text">3 X 4</div>
+              ${photoHtml}
             </div>
             <div class="right-panel">
               <div class="data-area">
@@ -1116,61 +1159,16 @@
           </div>
         </div>`;
       } else {
-        // [UPDATE] BAGIAN BELAKANG MODE 1 (PRINT)
-        return `
-        <div class="back-card style-1">
-          <div class="back-header-flat">
-             <div class="back-logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
-             <div class="back-header-text">
-               <div class="txt-yayasan">${conf.yayasan}</div>
-               <div class="txt-sekolah">${sekolahUpper}</div>
-               <div class="txt-alamat">${conf.alamat1}<br>${conf.alamat2}</div>
-             </div>
-             <div class="back-logo-box"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
-          </div>
-          <div class="back-body">
-            <div>
-              <div class="rules-title">TATA TERTIB PENGGUNAAN KARTU</div>
-              
-              <ol class="rules-list" style="text-align: justify; padding-right: 10px;">
-                <li>Kartu ini berlaku sebagai Identitas Siswa & Anggota Perpustakaan selama aktif di <strong>${sekolahUpper}</strong>.</li>
-                <li>Siswa/Anggota wajib mematuhi segala Peraturan Tata Tertib Madrasah & Perpustakaan.</li>
-                <li>Siswa bertanggung jawab penuh atas penggunaan dan pemeliharaan kartu ini.</li>
-                <li>Madrasah berhak mencabut status kesiswaan/keanggotaan jika terbukti melanggar tata tertib.</li>
-                <li>Apabila kartu hilang/ditemukan, harap segera melapor ke Bagian Kesiswaan/Perpustakaan.</li>
-              </ol>
-            </div>
-
-            <div class="back-footer-container">
-              <div class="cp-title">Contact Person:</div>
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-weight: bold; margin-top: 3px; border-top: 1px dotted #ccc; padding-top: 2px;">
-                  <div style="display: flex; align-items: center; gap: 4px;">
-                      <span>Telp :</span> <span>${kontak}</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 4px;">
-                      <span>Email :</span> <span>${conf.email || '-'}</span>
-                  </div>
-              </div>
-            </div>
-
-          </div>
-        </div>`;
+        return createBackCardHTML(conf); // Gunakan helper lama untuk belakang style 1
       }
     }
-    
-    // --- MODE 2 s/d 48 (TEMPLATE GENERIK) ---
-    var themeClass = "style-" + styleId; 
 
-    // [LOGIKA BARU] Atur Isi Kop Berdasarkan Tipe Sekolah
+    // --- 4. Mode Template Generik (Style 2 - 48) ---
+    var themeClass = "style-" + styleId; 
     var headerContent = "";
     
+    // Atur Kop berdasarkan tipe sekolah
     if (conf.schoolType === 'umum') {
-      // --- FORMAT DINAS (4 Baris) ---
-      // Baris 1: Pemerintah Kab/Kota (dari input Yayasan)
-      // Baris 2: Dinas Pendidikan (dari input Dinas)
-      // Baris 3: Nama Sekolah
-      // Baris 4: Alamat (Hanya alamat 2/Lokasi)
       headerContent = `
         <div class="gen-yayasan" style="line-height:1;">${conf.yayasan}</div>
         <div class="gen-yayasan" style="font-size: 8px; font-weight: bold; margin-bottom: 2px;">${conf.dinas || 'DINAS PENDIDIKAN'}</div>
@@ -1178,7 +1176,6 @@
         <div class="gen-alamat">${conf.alamat2}</div>
       `;
     } else {
-      // --- FORMAT MADRASAH (Standar) ---
       headerContent = `
         <div class="gen-yayasan">${conf.yayasan}</div>
         <div class="gen-sekolah">${sekolah}</div>
@@ -1191,11 +1188,7 @@
         <div class="id-card temp-generic ${themeClass}">
             <div class="gen-header">
                 <img src="${conf.logoKiri}" class="logo-sm left">
-                
-                <div class="gen-header-text">
-                    ${headerContent} 
-                </div>
-
+                <div class="gen-header-text">${headerContent}</div>
                 <img src="${conf.logoKanan}" class="logo-sm right">
             </div>
 
@@ -1204,7 +1197,6 @@
                     <div class="gen-photo-placeholder">FOTO</div>
                     ${photoHtml}
                 </div>
-                
                 <div class="gen-data-box">
                     <div class="gen-card-title">KARTU TANDA PELAJAR</div>
                     <table class="gen-table">
@@ -1227,59 +1219,50 @@
                     <div class="ttd-nip">NIP. ${conf.nip}</div>
                 </div>
             </div>
-            
             <div class="decoration-bar"></div>
         </div>
         `;
     } else {
-        // --- TAMPILAN BELAKANG (GENERIK) ---
-        
-        // [LOGIKA BARU] Header Belakang
+        // Header Belakang Generik
         var headerBackContent = "";
-        
         if (conf.schoolType === 'umum') {
-             headerBackContent = `
+            headerBackContent = `
                 <div class="gen-yayasan small" style="line-height:1;">${conf.yayasan}</div>
                 <div class="gen-yayasan small fw-bold" style="margin-bottom:1px;">${conf.dinas || ''}</div>
                 <div class="gen-sekolah small">${sekolahUpper}</div> 
                 <div class="gen-alamat small">${conf.alamat2}</div>
-             `;
+            `;
         } else {
-             headerBackContent = `
+            headerBackContent = `
                 <div class="gen-yayasan small">${conf.yayasan}</div>
                 <div class="gen-sekolah small">${sekolahUpper}</div> 
                 <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
-             `;
+            `;
         }
 
         return `
         <div class="back-card temp-generic-back ${themeClass}">
             <div class="gen-header back-h">
-                 <img src="${conf.logoKiri}" class="logo-sm left" onerror="this.style.display='none'">
-                 
-                 <div class="gen-header-text text-center">
-                    ${headerBackContent}
-                 </div>
-
-                 <img src="${conf.logoKanan}" class="logo-sm right" onerror="this.style.display='none'">
+                <img src="${conf.logoKiri}" class="logo-sm left" onerror="this.style.display='none'">
+                <div class="gen-header-text text-center">${headerBackContent}</div>
+                <img src="${conf.logoKanan}" class="logo-sm right" onerror="this.style.display='none'">
             </div>
             
             <div class="back-content p-3">
                 <div class="rules-box">
                     <div class="rules-head">TATA TERTIB PENGGUNAAN KARTU</div>
                     <ol>
-                        <li>Kartu ini adalah kartu identitas resmi siswa <b>${sekolahUpper}</b>.</li> <li>Harap membawa kartu ini selama berada di lingkungan sekolah.</li>
+                        <li>Kartu ini adalah kartu identitas resmi siswa <b>${sekolahUpper}</b>.</li>
+                        <li>Harap membawa kartu ini selama berada di lingkungan sekolah.</li>
                         <li>Dilarang mencoret atau merusak kartu.</li>
                         <li>Jika menemukan kartu ini, mohon kembalikan ke alamat sekolah.</li>
                     </ol>
                 </div>
-                
                 <div class="contact-box mt-3">
-                   <div class="cp-head">INFO KONTAK</div>
-                   <div>Telp: ${kontak}</div>
-                   <div>Email: ${conf.email}</div>
+                  <div class="cp-head">INFO KONTAK</div>
+                  <div>Telp: ${kontak}</div>
+                  <div>Email: ${conf.email}</div>
                 </div>
-                
             </div>
         </div>
         `;
