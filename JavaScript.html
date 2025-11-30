@@ -502,14 +502,47 @@
 
   // --- CONFIGURATION FUNCTIONS (BARU) ---
 
-  // 1. Ambil nilai dari Form
+  function changeSchoolType() {
+    var type = document.getElementById('confSchoolType').value;
+    
+    var lblYayasan = document.getElementById('lblYayasan');
+    var groupAlamat1 = document.getElementById('groupAlamat1');
+    var groupDinas = document.getElementById('groupDinas'); // [BARU]
+    var lblAlamat2 = document.getElementById('lblAlamat2');
+
+    if (type === 'umum') {
+      // --- MODE UMUM ---
+      lblYayasan.innerText = "Nama Pemerintah (Kabupaten/Kota)";
+      
+      groupAlamat1.style.display = 'none'; // Sembunyikan NSM
+      groupDinas.style.display = 'block';  // [BARU] Tampilkan Form Dinas
+      
+      lblAlamat2.innerText = "Alamat Sekolah";
+      
+    } else {
+      // --- MODE MADRASAH ---
+      lblYayasan.innerText = "Nama Yayasan";
+      
+      groupAlamat1.style.display = 'block'; // Tampilkan NSM
+      groupDinas.style.display = 'none';    // [BARU] Sembunyikan Form Dinas
+      
+      lblAlamat2.innerText = "Alamat Baris 2 (Lokasi dll)";
+    }
+
+    renderPreview();
+  }
+
+  // --- UPDATE: getConfigs ---
+  // Tambahkan 'schoolType' ke dalam objek yang diambil
   function getConfigs() {
     return {
+      schoolType: document.getElementById('confSchoolType').value, // <--- TAMBAHAN
+      dinas: document.getElementById('confDinas').value,
       yayasan: document.getElementById('confYayasan').value,
       alamat1: document.getElementById('confAlamat1').value,
       alamat2: document.getElementById('confAlamat2').value,
-      telp: document.getElementById('confTelp').value,    // Baru
-      email: document.getElementById('confEmail').value,  // Baru
+      telp: document.getElementById('confTelp').value,
+      email: document.getElementById('confEmail').value,
       tgl: document.getElementById('confTgl').value,
       kepala: document.getElementById('confKepala').value,
       nip: document.getElementById('confNIP').value,
@@ -539,12 +572,26 @@
     }).saveSchoolConfig(currentToken, conf);
   }
 
-  // 3. Fungsi Load dari Server
+  // --- UPDATE: loadSettings ---
+  // Pastikan dropdown terpilih sesuai data dari database
   function loadSettings() {
     google.script.run.withSuccessHandler(function(res){
       if(res.status === 'success' && res.data) {
         var d = res.data;
-        // Isi form jika datanya ada di database
+        
+        // Load School Type dulu
+        if(d.schoolType) {
+            document.getElementById('confSchoolType').value = d.schoolType;
+        } else {
+            // Default jika data lama belum punya schoolType
+            document.getElementById('confSchoolType').value = 'madrasah';
+        }
+
+        // Jalankan logika UI (Hide/Show form) berdasarkan type yang di-load
+        changeSchoolType();
+
+        // Isi form sisanya
+        if(d.dinas) document.getElementById('confDinas').value = d.dinas;
         if(d.yayasan) document.getElementById('confYayasan').value = d.yayasan;
         if(d.alamat1) document.getElementById('confAlamat1').value = d.alamat1;
         if(d.alamat2) document.getElementById('confAlamat2').value = d.alamat2;
@@ -559,7 +606,6 @@
         if(d.ttd) document.getElementById('confTTD').value = d.ttd;
         if(d.bgImage) document.getElementById('confBgImage').value = d.bgImage;
         
-        // Render ulang preview setelah data masuk
         renderPreview();
       }
     }).getSchoolConfig(currentToken);
@@ -687,24 +733,34 @@
     `;
   }
 
-  // --- FUNGSI RENDER PREVIEW (SMART FADE - NO BLUR) ---
+  // --- FUNGSI RENDER PREVIEW (DENGAN LOGIKA TIPE SEKOLAH) ---
   function renderPreview() {
+    // 1. Siapkan Data Dummy
     var dummy = { 
       nama: "PREVIEW SISWA", nisn: "0012345678", 
       tmp_lahir: "Jakarta", tgl_lahir: "2010-01-01", 
       jk: "L", kelas: "X-A", 
       alamat: "Jl. Contoh No. 1", foto: "" 
     };
+    
+    // 2. Ambil Konfigurasi dari Form (termasuk schoolType yang baru kita buat)
     var conf = getConfigs();
 
-    var htmlDepan = createCardHTML(dummy, conf);
-    var htmlBelakang = createBackCardHTML(conf);
+    // 3. LOGIKA PEMILIHAN TEMPLATE
+    // Jika tipe sekolah 'umum', paksa pakai style 'dinas1'
+    // Jika tipe sekolah 'madrasah', pakai style '1' (Default Hijau)
+    var styleId = (conf.schoolType === 'umum') ? 'dinas1' : '1';
 
-    // Cek Container
+    // 4. Generate HTML Menggunakan Template Engine (getCardTemplate)
+    // Fungsi getCardTemplate sudah ada di script Anda, kita manfaatkan itu
+    var htmlDepan = getCardTemplate('front', styleId, dummy, conf);
+    var htmlBelakang = getCardTemplate('back', styleId, dummy, conf);
+
+    // 5. Render ke dalam Container (Sama seperti sebelumnya)
     var switcher = document.getElementById('cardSwitcher');
     
     if (!switcher) {
-      // Struktur HTML Baru (Switch Container)
+      // Struktur HTML Baru (Switch Container) jika belum ada
       document.getElementById('previewContainer').innerHTML = `
         <div class="d-flex flex-column align-items-center justify-content-center p-3">
           
@@ -725,19 +781,19 @@
       `;
       switcher = document.getElementById('cardSwitcher');
     } else {
-      // Update isi jika container sudah ada
+      // Update isi jika container sudah ada (agar transisi halus)
       document.getElementById('viewDepan').innerHTML = htmlDepan;
       document.getElementById('viewBelakang').innerHTML = htmlBelakang;
     }
 
-    // Logic Otomatis (Cek Input User)
+    // 6. UX Tambahan: Otomatis balik kartu saat edit kontak
     var activeEl = document.activeElement;
     if (activeEl && activeEl.id) {
-      // Jika ngetik HP/Email -> Tampilkan Belakang (tambah class show-back)
+      // Jika ngetik HP/Email -> Tampilkan Belakang
       if (activeEl.id === 'confTelp' || activeEl.id === 'confEmail') {
          switcher.classList.add('show-back');
       } 
-      // Jika ngetik Config lain -> Tampilkan Depan (hapus class show-back)
+      // Jika ngetik Config lain -> Tampilkan Depan
       else if (activeEl.id.startsWith('conf')) {
          switcher.classList.remove('show-back');
       }
@@ -831,9 +887,20 @@
     var kontak = conf.telp || "-";
 
     // --- LOGIKA UTAMA: DINAS 1 (FINAL REFINEMENT) ---
+    // --- LOGIKA UTAMA: DINAS 1 ---
     if (styleId === "dinas1") {
       
       var bgUrl = conf.bgImage || ""; 
+
+      // [LOGIC BARU] Tentukan Isi Baris Kedua Header
+      var headerLine2 = "";
+      if (conf.schoolType === 'umum') {
+          // Jika Umum -> Pakai Input Dinas
+          headerLine2 = conf.dinas || "DINAS PENDIDIKAN"; 
+      } else {
+          // Jika Madrasah -> Pakai Alamat 1 (NSM/NPSN)
+          headerLine2 = conf.alamat1 || ""; 
+      }
 
       // --- BAGIAN DEPAN (FRONT) ---
       if (type === 'front') {
@@ -844,7 +911,9 @@
                 <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
                 <div class="dinas-header-text">
                     <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    <div class="dh-mid text-uppercase">${conf.alamat1}</div>
+                    
+                    <div class="dh-mid text-uppercase">${headerLine2}</div>
+                    
                     <div class="dh-bot text-uppercase">${sekolah}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
@@ -898,7 +967,9 @@
                 <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
                 <div class="dinas-header-text">
                     <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    <div class="dh-mid text-uppercase">${conf.alamat1}</div>
+                    
+                    <div class="dh-mid text-uppercase">${headerLine2}</div>
+                    
                     <div class="dh-bot text-uppercase">${sekolahUpper}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
