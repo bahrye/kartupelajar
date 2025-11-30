@@ -1,11 +1,139 @@
 <style>
-  body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  
-  /* Container Login agar lebih rapi di HP */
+  /* --- GLOBAL FONT & BODY --- */
+  body { 
+    background-color: #f0f2f5; 
+    font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif; /* Menggunakan font modern */
+  }
+
+  /* --- LOGIN WRAPPER (Full Screen Gradient) --- */
+  .login-wrapper {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Gradient Background Keren (Biru ke Ungu) */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+  }
+
+  /* --- AUTH BOX (Kartu Login) --- */
   .auth-box { 
     max-width: 400px; 
     width: 100%; 
-    margin-top: 50px; 
+    background: rgba(255, 255, 255, 0.95); /* Sedikit transparan */
+    border-radius: 20px; /* Sudut lebih bulat */
+    padding: 40px 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2); /* Bayangan lembut */
+    position: relative;
+    overflow: hidden;
+    
+    /* Animasi Masuk */
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  /* Hiasan Lingkaran di Background Login */
+  .login-wrapper::before {
+    content: "";
+    position: absolute;
+    top: -50px; left: -50px;
+    width: 200px; height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+  .login-wrapper::after {
+    content: "";
+    position: absolute;
+    bottom: 50px; right: 50px;
+    width: 150px; height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  /* --- FORM ELEMENTS --- */
+  .auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .auth-icon-circle {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 15px auto;
+    color: white;
+    font-size: 32px;
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+  }
+  .auth-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  .auth-subtitle {
+    color: #777;
+    font-size: 14px;
+  }
+
+  /* Input Fields dengan Icon */
+  .input-group-text {
+    background: #f8f9fa;
+    border-right: none;
+    color: #764ba2;
+  }
+  .form-control:focus {
+    box-shadow: none;
+    border-color: #764ba2;
+  }
+  .form-control {
+    border-left: none;
+    background: #f8f9fa;
+    height: 45px;
+  }
+  /* Agar border input menyatu rapi */
+  .input-group {
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  .input-group:focus-within {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
+  }
+
+  /* Tombol Utama */
+  .btn-primary-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    height: 45px;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    color: white;
+  }
+  .btn-primary-gradient:active {
+    transform: translateY(0);
+  }
+
+  .link-auth {
+    color: #764ba2;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .link-auth:hover { text-decoration: underline; }
+
+  /* Animasi Keyframes */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* SETUP CETAK */
