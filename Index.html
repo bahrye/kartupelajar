@@ -12,262 +12,302 @@
   </head>
   <body>
     
-    <div class="container py-3 py-md-5">
+    <div id="authContainer" class="auth-container">
       
-      <div id="loginPage" class="auth-box shadow mx-auto p-4 bg-white rounded">
-        <h3 class="text-center mb-4">Login App</h3>
-        <div class="mb-3"><label>Email</label><input type="email" id="loginEmail" class="form-control"></div>
-        <div class="mb-3"><label>Password</label><input type="password" id="loginPass" class="form-control"></div>
-        <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 mb-3">Login</button>
-        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('register')" style="cursor:pointer">Daftar Baru</span></div>
+      <div id="loginPage" class="auth-box shadow-sm">
+        <div class="auth-header">
+          <div class="auth-icon"><i class="bi bi-person-workspace"></i></div>
+          <h4 class="auth-title">Selamat Datang</h4>
+          <div class="auth-subtitle">Silakan login untuk mengelola kartu</div>
+        </div>
+        
+        <div class="auth-body">
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com">
+            <label for="loginEmail">Email Address</label>
+          </div>
+          <div class="form-floating mb-4">
+            <input type="password" class="form-control" id="loginPass" placeholder="Password">
+            <label for="loginPass">Password</label>
+          </div>
+
+          <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 btn-auth mb-3">
+            <i class="bi bi-box-arrow-in-right me-2"></i> MASUK APLIKASI
+          </button>
+          
+          <div class="auth-footer">
+            Belum punya akun sekolah? <br>
+            <span class="auth-link" onclick="switchPage('register')">Daftarkan Sekolah Baru</span>
+          </div>
+        </div>
       </div>
 
-      <div id="registerPage" class="auth-box shadow mx-auto p-4 bg-white rounded" style="display:none;">
-        <h3 class="text-center mb-4">Registrasi</h3>
-        <div class="mb-3"><label>Nama Sekolah</label><input type="text" id="regSekolah" class="form-control"></div>
-        <div class="mb-3"><label>Email</label><input type="email" id="regEmail" class="form-control"></div>
-        <div class="mb-3"><label>Password</label><input type="password" id="regPass" class="form-control"></div>
-        <button id="btnReg" onclick="runRegister()" class="btn btn-success w-100 mb-3">Buat Database</button>
-        <div class="text-center"><span class="text-primary text-decoration-underline" onclick="switchPage('login')" style="cursor:pointer">Kembali Login</span></div>
-      </div>
+      <div id="registerPage" class="auth-box register-mode shadow-sm" style="display:none;">
+        <div class="auth-header">
+          <div class="auth-icon"><i class="bi bi-building-add"></i></div>
+          <h4 class="auth-title">Registrasi Sekolah</h4>
+          <div class="auth-subtitle">Buat database baru untuk sekolah Anda</div>
+        </div>
+        
+        <div class="auth-body">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="regSekolah" placeholder="Nama Sekolah">
+            <label for="regSekolah">Nama Sekolah</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="regEmail" placeholder="Email Admin">
+            <label for="regEmail">Email Admin</label>
+          </div>
+          <div class="form-floating mb-4">
+            <input type="password" class="form-control" id="regPass" placeholder="Buat Password">
+            <label for="regPass">Buat Password</label>
+          </div>
 
-      <div id="dashboardPage" style="display:none;">
-        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+          <button id="btnReg" onclick="runRegister()" class="btn btn-success w-100 btn-auth mb-3">
+            <i class="bi bi-database-add me-2"></i> BUAT DATABASE
+          </button>
+          
+          <div class="auth-footer">
+            Sudah terdaftar? <br>
+            <span class="auth-link text-success" onclick="switchPage('login')">Kembali ke Login</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboardPage" class="container py-3 py-md-5" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-4 no-print">
           <h4 class="m-0"><i class="bi bi-building-check"></i> <span id="schoolTitle">Sekolah</span></h4>
           <button onclick="logoutApp()" class="btn btn-danger btn-sm">Logout</button>
-        </div>
+      </div>
 
-        <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
-          <li class="nav-item">
-            <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">1. Data Siswa</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="setting-tab" data-bs-toggle="tab" data-bs-target="#setting-pane" type="button">2. Pengaturan</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate-pane" type="button" onclick="renderAllCards()">3. Generate Kartu</button>
-          </li>
-        </ul>
+      <ul class="nav nav-tabs mb-4 no-print" id="myTab" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">1. Data Siswa</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="setting-tab" data-bs-toggle="tab" data-bs-target="#setting-pane" type="button">2. Pengaturan</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate-pane" type="button" onclick="renderAllCards()">3. Generate Kartu</button>
+        </li>
+      </ul>
 
-        <div class="tab-content" id="myTabContent">
+      <div class="tab-content" id="myTabContent">
+        
+        <div class="tab-pane fade show active no-print" id="data-pane">
+          <div class="d-flex justify-content-between mb-3 align-items-center">
+            <h5>Tabel Data Siswa</h5>
+            <div class="d-flex gap-2">
+
+              <button id="btnUploadExcel" class="btn btn-success btn-sm" onclick="showExcelGuide()">
+                <i class="bi bi-file-earmark-excel"></i> Upload Excel
+              </button>
+              
+              <button id="btnUploadZip" class="btn btn-warning btn-sm" onclick="showPhotoGuide()">
+                <i class="bi bi-images"></i> Upload Foto (ZIP)
+              </button>
+              
+              <button id="btnAddManual" class="btn btn-primary btn-sm" onclick="openModalAdd()">
+                <i class="bi bi-plus-circle"></i> Tambah Manual
+              </button>
+
+              <input type="file" id="fileImportExcel" accept=".xlsx, .xls" style="display: none;" onchange="processImportExcel(this)">
+              <input type="file" id="filePhotoZip" accept=".zip" style="display: none;" onchange="uploadPhotoZip(this)">
+            </div>
+          </div>
           
-          <div class="tab-pane fade show active no-print" id="data-pane">
-            <div class="d-flex justify-content-between mb-3 align-items-center">
-              <h5>Tabel Data Siswa</h5>
-              <div class="d-flex gap-2">
-  
-                <button id="btnUploadExcel" class="btn btn-success btn-sm" onclick="showExcelGuide()">
-                  <i class="bi bi-file-earmark-excel"></i> Upload Excel
-                </button>
-                
-                <button id="btnUploadZip" class="btn btn-warning btn-sm" onclick="showPhotoGuide()">
-                  <i class="bi bi-images"></i> Upload Foto (ZIP)
-                </button>
-                
-                <button id="btnAddManual" class="btn btn-primary btn-sm" onclick="openModalAdd()">
-                  <i class="bi bi-plus-circle"></i> Tambah Manual
-                </button>
+          <div class="table-responsive bg-white shadow-sm rounded p-2">
+            <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 1%;" class="text-center align-middle">
+                    <input type="checkbox" id="checkAll" class="form-check-input" onclick="toggleCheckAll(this)">
+                  </th>
 
-                <input type="file" id="fileImportExcel" accept=".xlsx, .xls" style="display: none;" onchange="processImportExcel(this)">
-                <input type="file" id="filePhotoZip" accept=".zip" style="display: none;" onchange="uploadPhotoZip(this)">
-              </div>
-            </div>
-            
-            <div class="table-responsive bg-white shadow-sm rounded p-2">
-              <table class="table table-hover table-bordered align-middle text-nowrap" id="studentTable">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width: 1%;" class="text-center align-middle">
-                      <input type="checkbox" id="checkAll" class="form-check-input" onclick="toggleCheckAll(this)">
-                    </th>
+                  <th style="width: 1%;" class="text-center align-middle">No</th>
 
-                    <th style="width: 1%;" class="text-center align-middle">No</th>
+                  <th style="width: 1%;" class="text-center align-middle">Aksi</th>
 
-                    <th style="width: 1%;" class="text-center align-middle">Aksi</th>
+                  <th class="text-center align-middle">Nama Lengkap</th>
 
-                    <th class="text-center align-middle">Nama Lengkap</th>
+                  <th style="width: 110px;" class="text-center align-middle">NISN</th>
 
-                    <th style="width: 110px;" class="text-center align-middle">NISN</th>
+                  <th style="width: 180px;" class="text-center align-middle">TTL</th>
 
-                    <th style="width: 180px;" class="text-center align-middle">TTL</th>
+                  <th style="width: 1%;" class="text-center align-middle">L/P</th>
 
-                    <th style="width: 1%;" class="text-center align-middle">L/P</th>
+                  <th style="width: 250px;" class="text-center align-middle">Alamat</th>
 
-                    <th style="width: 250px;" class="text-center align-middle">Alamat</th>
-
-                    <th style="width: 70px;" class="text-center align-middle">Foto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  </tbody>
-              </table>
-            </div>
+                  <th style="width: 70px;" class="text-center align-middle">Foto</th>
+                </tr>
+              </thead>
+              <tbody>
+                </tbody>
+            </table>
           </div>
+        </div>
 
-          <div class="tab-pane fade no-print" id="setting-pane">
-            <div class="row">
-              <div class="col-md-5 col-12 mb-4">
-                <div class="card border-warning">
-                  <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
-                  <div class="card-body">
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Nama Yayasan</label>
-                      <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
-                      <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
-                      <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
-                    </div>
-
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
-                      <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
-                    </div>
-                    
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Email Sekolah</label>
-                      <input type="text" id="confEmail" class="form-control" placeholder="admin@sekolah.com" oninput="renderPreview()">
-                    </div>
-
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Tempat & Tanggal TTD</label>
-                      <input type="text" id="confTgl" class="form-control" placeholder="Jakarta, 14 Juli 2025" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
-                      <input type="text" id="confKepala" class="form-control" placeholder="NAMA KEPALA S.Pd" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">NIP Kepala</label>
-                      <input type="text" id="confNIP" class="form-control" placeholder="-" oninput="renderPreview()">
-                    </div>
-                    <hr>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Logo Kiri (Kemenag)</label>
-                      <input type="text" id="confLogoKiri" class="form-control" value="https://i.imgur.com/WqGSzFl.png" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Logo Kanan (Sekolah)</label>
-                      <input type="text" id="confLogoKanan" class="form-control" value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Stempel</label>
-                      <input type="text" id="confStempel" class="form-control" placeholder="URL Stempel..." oninput="renderPreview()">
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label small fw-bold">URL Tanda Tangan</label>
-                      <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
-                    </div>
-
-                    <div class="mt-4">
-                      <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
-                        <i class="bi bi-save"></i> SIMPAN PENGATURAN
-                      </button>
-                    </div>
+        <div class="tab-pane fade no-print" id="setting-pane">
+          <div class="row">
+            <div class="col-md-5 col-12 mb-4">
+              <div class="card border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Nama Yayasan</label>
+                    <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
                   </div>
-                </div>
-              </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
+                    <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
+                    <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
+                  </div>
 
-              <div class="col-md-7 col-12">
-                <div class="sticky-top" style="top: 20px;">
-                  <h6 class="text-muted text-center mb-3">Live Preview Kartu</h6>
-                  <div id="previewContainer" class="d-flex justify-content-center bg-secondary bg-opacity-10 p-4 rounded border">
-                    </div>
-                  <div class="text-center mt-2 small text-muted">
-                    *Ini hanya contoh tampilan dengan data dummy.
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
+                    <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
+                  </div>
+                  
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Email Sekolah</label>
+                    <input type="text" id="confEmail" class="form-control" placeholder="admin@sekolah.com" oninput="renderPreview()">
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Tempat & Tanggal TTD</label>
+                    <input type="text" id="confTgl" class="form-control" placeholder="Jakarta, 14 Juli 2025" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">Nama Kepala Madrasah</label>
+                    <input type="text" id="confKepala" class="form-control" placeholder="NAMA KEPALA S.Pd" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">NIP Kepala</label>
+                    <input type="text" id="confNIP" class="form-control" placeholder="-" oninput="renderPreview()">
+                  </div>
+                  <hr>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Logo Kiri (Kemenag)</label>
+                    <input type="text" id="confLogoKiri" class="form-control" value="https://i.imgur.com/WqGSzFl.png" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Logo Kanan (Sekolah)</label>
+                    <input type="text" id="confLogoKanan" class="form-control" value="https://cdn-icons-png.flaticon.com/512/2991/2991108.png" oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Stempel</label>
+                    <input type="text" id="confStempel" class="form-control" placeholder="URL Stempel..." oninput="renderPreview()">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small fw-bold">URL Tanda Tangan</label>
+                    <input type="text" id="confTTD" class="form-control" placeholder="URL TTD..." oninput="renderPreview()">
+                  </div>
+
+                  <div class="mt-4">
+                    <button id="btnSaveConfig" onclick="runSaveSettings()" class="btn btn-primary w-100 fw-bold">
+                      <i class="bi bi-save"></i> SIMPAN PENGATURAN
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+
+            <div class="col-md-7 col-12">
+              <div class="sticky-top" style="top: 20px;">
+                <h6 class="text-muted text-center mb-3">Live Preview Kartu</h6>
+                <div id="previewContainer" class="d-flex justify-content-center bg-secondary bg-opacity-10 p-4 rounded border">
+                  </div>
+                <div class="text-center mt-2 small text-muted">
+                  *Ini hanya contoh tampilan dengan data dummy.
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div class="tab-pane fade" id="generate-pane">
-            <div class="alert alert-info no-print text-center">
-              <i class="bi bi-printer"></i> Pastikan setting printer: <strong>Layout Landscape (atau Portrait sesuai selera), Paper Size A4, Scale 100%.</strong>
-            </div>
-
-            <div class="text-center mb-3 no-print">
-              <label class="fw-bold">Pilih Mode Tampilan:</label>
-              <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
-                <option value="1">1. Madrasah (Hijau - Default)</option>
-                <option value="2">2. Merah Modern (Curve)</option>
-                <option value="3">3. Cokelat (Classic)</option>
-                <option value="4">4. Dark Mode (Elegant)</option>
-                <option value="5">5. Abu-abu (Corporate)</option>
-                <option value="6">6. Biru (Geometric)</option>
-                <option value="7">7. Ungu (Creative)</option>
-                <option value="8">8. Orange (Bright)</option>
-                <option value="9">9. Teal/Cyan (Clean)</option>
-                <option value="10">10. Navy (Official)</option>
-                <option value="11">11. Maroon (Formal)</option>
-                <option value="12">12. Cyber/Tech (Futuristik)</option>
-                <option value="13">13. Emerald (Nature/Leaf)</option>
-                <option value="14">14. Black & Gold (Luxury)</option>
-                <option value="15">15. Retro Paper (Vintage)</option>
-                <option value="16">16. Indigo (Wave Header)</option>
-                <option value="17">17. Crimson (Aggressive)</option>
-                <option value="18">18. Minimalist Border (Clean)</option>
-                <option value="19">19. Pastel Pink/Blue (Soft)</option>
-                <option value="20">20. Hexagon (Polygon Style)</option>
-                <option value="21">21. Full Gradient (Modern Art)</option>
-                <option value="22">22. Neumorphism (Soft UI)</option>
-                <option value="23">23. Midnight Gradient (Deep Blue)</option>
-                <option value="24">24. Swiss Grid (Bold Red)</option>
-                <option value="25">25. Abstract Blob (Playful)</option>
-                <option value="26">26. Professional Slate (Corporate)</option>
-                <option value="27">27. Sunset Vibes (Orange/Purple)</option>
-                <option value="28">28. High-Tech HUD (Cyan/Black)</option>
-                <option value="29">29. Eco Leaf (Nature Green)</option>
-                <option value="30">30. Royal Luxury (Violet/Gold)</option>
-                <option value="31">31. Candy Pop (Pink/Yellow)</option>
-                <option value="32">32. Mosaic Tiles (Geometric)</option>
-                <option value="33">33. Glass Effect (Translucent)</option>
-                <option value="34">34. Brutalism (Stark B&W)</option>
-                <option value="35">35. Holographic (Iridescent)</option>
-                <option value="36">36. Blackboard Classroom (Chalk Style)</option>
-                <option value="37">37. Old Library (Vintage Paper)</option>
-                <option value="38">38. Stationery Fun (Pencil & Ruler)</option>
-                <option value="39">39. Graduation Day (Academic Blue)</option>
-                <option value="40">40. Science Lab (Molecules)</option>
-
-                <option value="41">41. Deep Ocean (Bioluminescence)</option>
-                <option value="42">42. Tropical Wave (Sunny Beach)</option>
-                <option value="43">43. Coral Reef (Colorful)</option>
-                <option value="44">44. Glacial Ice (Frozen)</option>
-
-                <option value="45">45. Dragon Slayer (Scales & Fire)</option>
-                <option value="46">46. Arcane Magic (Mystic Runes)</option>
-                <option value="47">47. Elven Forest (Nature Magic)</option>
-                <option value="48">48. Steampunk (Gears & Brass)</option>
-              </select>
-            </div>
-
-            <div class="text-center mb-4 no-print">
-               <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
-            </div>
-
-            <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4">
-               </div>
-          </div>
-
         </div>
-      </div>
 
-      <div id="floatingAction" class="floating-action shadow-lg">
-        <div class="d-flex align-items-center justify-content-between">
-          <div class="fw-bold text-white">
-            <span id="selectedCount">0</span> Siswa Dipilih
+        <div class="tab-pane fade" id="generate-pane">
+          <div class="alert alert-info no-print text-center">
+            <i class="bi bi-printer"></i> Pastikan setting printer: <strong>Layout Landscape (atau Portrait sesuai selera), Paper Size A4, Scale 100%.</strong>
           </div>
-          <button class="btn btn-danger btn-sm fw-bold ms-3" onclick="runBulkDelete()">
-            <i class="bi bi-trash-fill"></i> Hapus
-          </button>
-        </div>
-      </div>
 
+          <div class="text-center mb-3 no-print">
+            <label class="fw-bold">Pilih Mode Tampilan:</label>
+            <select id="printTemplateMode" class="form-select w-auto d-inline-block ms-2" onchange="renderAllCards()">
+              <option value="1">1. Madrasah (Hijau - Default)</option>
+              <option value="2">2. Merah Modern (Curve)</option>
+              <option value="3">3. Cokelat (Classic)</option>
+              <option value="4">4. Dark Mode (Elegant)</option>
+              <option value="5">5. Abu-abu (Corporate)</option>
+              <option value="6">6. Biru (Geometric)</option>
+              <option value="7">7. Ungu (Creative)</option>
+              <option value="8">8. Orange (Bright)</option>
+              <option value="9">9. Teal/Cyan (Clean)</option>
+              <option value="10">10. Navy (Official)</option>
+              <option value="11">11. Maroon (Formal)</option>
+              <option value="12">12. Cyber/Tech (Futuristik)</option>
+              <option value="13">13. Emerald (Nature/Leaf)</option>
+              <option value="14">14. Black & Gold (Luxury)</option>
+              <option value="15">15. Retro Paper (Vintage)</option>
+              <option value="16">16. Indigo (Wave Header)</option>
+              <option value="17">17. Crimson (Aggressive)</option>
+              <option value="18">18. Minimalist Border (Clean)</option>
+              <option value="19">19. Pastel Pink/Blue (Soft)</option>
+              <option value="20">20. Hexagon (Polygon Style)</option>
+              <option value="21">21. Full Gradient (Modern Art)</option>
+              <option value="22">22. Neumorphism (Soft UI)</option>
+              <option value="23">23. Midnight Gradient (Deep Blue)</option>
+              <option value="24">24. Swiss Grid (Bold Red)</option>
+              <option value="25">25. Abstract Blob (Playful)</option>
+              <option value="26">26. Professional Slate (Corporate)</option>
+              <option value="27">27. Sunset Vibes (Orange/Purple)</option>
+              <option value="28">28. High-Tech HUD (Cyan/Black)</option>
+              <option value="29">29. Eco Leaf (Nature Green)</option>
+              <option value="30">30. Royal Luxury (Violet/Gold)</option>
+              <option value="31">31. Candy Pop (Pink/Yellow)</option>
+              <option value="32">32. Mosaic Tiles (Geometric)</option>
+              <option value="33">33. Glass Effect (Translucent)</option>
+              <option value="34">34. Brutalism (Stark B&W)</option>
+              <option value="35">35. Holographic (Iridescent)</option>
+              <option value="36">36. Blackboard Classroom (Chalk Style)</option>
+              <option value="37">37. Old Library (Vintage Paper)</option>
+              <option value="38">38. Stationery Fun (Pencil & Ruler)</option>
+              <option value="39">39. Graduation Day (Academic Blue)</option>
+              <option value="40">40. Science Lab (Molecules)</option>
+              <option value="41">41. Deep Ocean (Bioluminescence)</option>
+              <option value="42">42. Tropical Wave (Sunny Beach)</option>
+              <option value="43">43. Coral Reef (Colorful)</option>
+              <option value="44">44. Glacial Ice (Frozen)</option>
+              <option value="45">45. Dragon Slayer (Scales & Fire)</option>
+              <option value="46">46. Arcane Magic (Mystic Runes)</option>
+              <option value="47">47. Elven Forest (Nature Magic)</option>
+              <option value="48">48. Steampunk (Gears & Brass)</option>
+            </select>
+          </div>
+
+          <div class="text-center mb-4 no-print">
+              <button onclick="window.print()" class="btn btn-success btn-lg shadow"><i class="bi bi-file-pdf"></i> Cetak / Simpan PDF</button>
+          </div>
+
+          <div id="cardContainer" class="d-flex flex-wrap justify-content-center gap-4">
+              </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="floatingAction" class="floating-action shadow-lg">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold text-white">
+          <span id="selectedCount">0</span> Siswa Dipilih
+        </div>
+        <button class="btn btn-danger btn-sm fw-bold ms-3" onclick="runBulkDelete()">
+          <i class="bi bi-trash-fill"></i> Hapus
+        </button>
+      </div>
     </div>
 
     <div class="modal fade" id="studentModal" tabindex="-1">
