@@ -1,11 +1,120 @@
 <style>
-  body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  
-  /* Container Login agar lebih rapi di HP */
+  /* --- GLOBAL STYLE --- */
+  body { 
+    background-color: #f0f2f5; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  }
+
+  /* --- LOGIN & REGISTER PAGE STYLING (MODERN UI) --- */
+  /* Wrapper agar posisi selalu di tengah layar */
+  .auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f2f5 0%, #eef2f3 100%); /* Gradasi halus */
+    padding: 15px;
+  }
+
   .auth-box { 
-    max-width: 400px; 
-    width: 100%; 
-    margin-top: 50px; 
+    width: 100%;
+    max-width: 420px; 
+    background: #ffffff;
+    border-radius: 16px; /* Sudut lebih bulat */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Bayangan lembut profesional */
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.02);
+    animation: fadeInUp 0.5s ease-out;
+    position: relative;
+  }
+
+  /* Header dengan Icon Besar */
+  .auth-header {
+    text-align: center;
+    padding: 30px 30px 10px 30px;
+  }
+  .auth-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    background: -webkit-linear-gradient(45deg, #0d6efd, #0dcaf0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  /* Warna khusus untuk icon Register */
+  .register-mode .auth-icon {
+    background: -webkit-linear-gradient(45deg, #198754, #20c997);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .auth-title {
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 5px;
+    letter-spacing: -0.5px;
+  }
+  .auth-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  /* Body Form */
+  .auth-body {
+    padding: 20px 30px 40px 30px;
+  }
+
+  /* Input Field Modern (Floating Label) Custom */
+  .form-floating > .form-control {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    height: 50px;
+  }
+  .form-floating > .form-control:focus {
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+    border-color: #0d6efd;
+  }
+  .form-floating > label {
+    padding-top: 0.8rem;
+    padding-left: 0.8rem;
+    color: #999;
+  }
+
+  /* Tombol Utama */
+  .btn-auth {
+    padding: 12px;
+    font-weight: 700;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+  }
+  .btn-auth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* Link Footer */
+  .auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .auth-link {
+    color: #0d6efd;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .auth-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+  }
+
+  /* Animasi Masuk */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* SETUP CETAK */
