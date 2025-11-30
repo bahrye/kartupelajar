@@ -154,22 +154,40 @@
               <div class="card border-warning">
                 <div class="card-header bg-warning text-dark fw-bold">Form Konfigurasi</div>
                 <div class="card-body">
-                  <div class="mb-2">
-                    <label class="form-label small fw-bold">Nama Yayasan</label>
-                    <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN PENDIDIKAN" oninput="renderPreview()">
+                  
+                  <div class="mb-3 p-2 bg-light border rounded">
+                    <label class="form-label small fw-bold text-primary">Jenis Sekolah / Instansi</label>
+                    <select id="confSchoolType" class="form-select" onchange="changeSchoolType()">
+                      <option value="madrasah">Madrasah (Kemenag)</option>
+                      <option value="umum">Sekolah Umum (Dinas)</option>
+                    </select>
                   </div>
-                  <div class="mb-2">
-                    <label class="form-label small fw-bold">Alamat Baris 1 (NSM/NPSN)</label>
+
+                  <hr>
+
+                  <div class="mb-2" id="groupYayasan">
+                    <label class="form-label small fw-bold" id="lblYayasan">Nama Yayasan</label>
+                    <input type="text" id="confYayasan" class="form-control" placeholder="YAYASAN / PEMERINTAH KAB..." oninput="renderPreview()">
+                  </div>
+
+                  <div class="mb-2" id="groupDinas" style="display:none;">
+                    <label class="form-label small fw-bold">Nama Dinas / Instansi</label>
+                    <input type="text" id="confDinas" class="form-control" placeholder="DINAS PENDIDIKAN DAN KEBUDAYAAN" oninput="renderPreview()">
+                  </div>
+
+                  <div class="mb-2" id="groupAlamat1">
+                    <label class="form-label small fw-bold" id="lblAlamat1">Alamat Baris 1 (NSM/NPSN)</label>
                     <input type="text" id="confAlamat1" class="form-control" placeholder="NSM: ... NPSN: ..." oninput="renderPreview()">
                   </div>
-                  <div class="mb-2">
-                    <label class="form-label small fw-bold">Alamat Baris 2 (Lokasi dll)</label>
+
+                  <div class="mb-2" id="groupAlamat2">
+                    <label class="form-label small fw-bold" id="lblAlamat2">Alamat Baris 2 (Lokasi dll)</label>
                     <input type="text" id="confAlamat2" class="form-control" placeholder="Alamat Kota..." oninput="renderPreview()">
                   </div>
 
                   <div class="mb-2">
                     <label class="form-label small fw-bold">No. Telp / HP Sekolah</label>
-                    <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx (Akan muncul di belakang kartu)" oninput="renderPreview()">
+                    <input type="text" id="confTelp" class="form-control" placeholder="0812xxxx" oninput="renderPreview()">
                   </div>
                   
                   <div class="mb-2">
