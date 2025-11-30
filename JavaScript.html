@@ -17,6 +17,18 @@
   var lastActivityUpdate = 0; // Penanda waktu update terakhir agar tidak spam storage
   var sessionInterval;        // Variabel untuk interval cek background
 
+  // Variabel untuk menyimpan URL background default dari Database (yang ditandai YA)
+  var defaultDinasBgUrl = "";
+
+  // Fungsi untuk memuat background default saat aplikasi dimulai
+  function initDefaultBg() {
+     google.script.run.withSuccessHandler(function(url){
+        defaultDinasBgUrl = url;
+        // Setelah dapat URL, update preview jika sedang di tab setting
+        renderPreview(); 
+     }).getDefaultPreviewBg();
+  }
+
   // 1. Cek Sesi saat halaman pertama kali dimuat
   document.addEventListener('DOMContentLoaded', function() {
     checkSession();
@@ -205,6 +217,7 @@
         if (typeof loadSettings === 'function') loadSettings(); 
         
         // [BARU] Panggil fungsi untuk isi dropdown template
+        initDefaultBg();
         loadDynamicTemplates();
       }
     }
@@ -612,31 +625,40 @@
     }).getSchoolConfig(currentToken);
   }
 
-  // --- [BARU] FUNGSI ISI DROPDOWN DARI DATABASE UTAMA ---
+  // --- [UPDATE] FUNGSI ISI DROPDOWN DARI DATABASE UTAMA ---
   function loadDynamicTemplates() {
     var select = document.getElementById('printTemplateMode');
     
-    // Cek apakah opsi dinamis sudah pernah dimuat? (agar tidak dobel saat klik menu berulang)
+    // Cek apakah opsi dinamis sudah pernah dimuat?
     if (select.getAttribute('data-loaded') === 'true') return;
 
     google.script.run.withSuccessHandler(function(templates){
        if (templates && templates.length > 0) {
          
-         // Tambahkan pembatas visual (Separator)
+         // 1. Tambahkan Pembatas (Separator)
          var separator = document.createElement('option');
          separator.disabled = true;
-         separator.innerText = "────────── DARI PUSAT ──────────";
-         select.add(separator, 1); // Masukkan di urutan kedua (setelah default)
+         // Kita beri nama ini agar jelas bahwa opsi di bawahnya adalah bawaan aplikasi
+         separator.innerText = "────────── TEMPLATE BAWAAN ──────────";
+         
+         // Masukkan separator di posisi paling atas (index 0)
+         // Ini akan mendorong opsi "1. Madrasah" ke bawah
+         select.add(separator, 0);
 
-         // Loop data dari database dan masukkan ke dropdown
-         // Kita masukkan urutan terbalik agar muncul di atas (opsional)
+         // 2. Loop data dari database dan masukkan Paling Atas (Di atas Separator)
+         // Kita loop terbalik agar urutannya tetap rapi saat di-insert di index 0
          for (var i = templates.length - 1; i >= 0; i--) {
             var opt = document.createElement('option');
             opt.value = templates[i].url; // VALUE-nya adalah URL GAMBAR
-            opt.innerText = "★ " + templates[i].name; // Tambah bintang agar terlihat spesial
-            select.add(opt, 2); // Masukkan setelah separator
+            opt.innerText = "★ " + templates[i].name; 
+            
+            // Selalu masukkan di index 0 (Paling Atas)
+            select.add(opt, 0);
          }
          
+         // Opsional: Langsung pilih template pusat yang paling atas
+         select.selectedIndex = 0;
+
          // Tandai bahwa sudah diload
          select.setAttribute('data-loaded', 'true');
        }
@@ -778,10 +800,26 @@
     // 2. Ambil Konfigurasi dari Form (termasuk schoolType yang baru kita buat)
     var conf = getConfigs();
 
-    // 3. LOGIKA PEMILIHAN TEMPLATE
-    // Jika tipe sekolah 'umum', paksa pakai style 'dinas1'
-    // Jika tipe sekolah 'madrasah', pakai style '1' (Default Hijau)
-    var styleId = (conf.schoolType === 'umum') ? 'dinas1' : '1';
+    // 3. LOGIKA PEMILIHAN TEMPLATE PREVIEW
+    var styleId = '1'; // Default Madrasah (Hijau)
+
+    if (conf.schoolType === 'umum') {
+       // LOGIKA BARU:
+       // 1. Cek apakah user sudah pernah menyimpan background custom di Config (conf.bgImage)?
+       // 2. Jika belum (kosong), gunakan background default dari sheet Templates (yang ditandai YA).
+       if (conf.bgImage && conf.bgImage.length > 10) {
+           styleId = conf.bgImage; 
+       } else {
+           styleId = defaultDinasBgUrl; // Gunakan URL dari sheet Templates (Kolom C: YA)
+       }
+       
+       // Jika masih kosong juga (database error/belum ada data), fallback ke default aman (dinas1 lama)
+       if (!styleId) styleId = 'dinas1'; 
+    } 
+    else {
+       // Jika Madrasah, tetap pakai Style 1
+       styleId = '1'; 
+    }
 
     // 4. Generate HTML Menggunakan Template Engine (getCardTemplate)
     // Fungsi getCardTemplate sudah ada di script Anda, kita manfaatkan itu
