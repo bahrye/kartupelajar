@@ -563,16 +563,16 @@
     }).getSchoolConfig(currentToken);
   }
 
-  // 4. Update Tampilan Kartu Belakang (createBackCardHTML)
+  // 4. Update Tampilan Kartu Belakang (Preview)
   function createBackCardHTML(conf) {
     var sekolah = document.getElementById('schoolTitle').innerText || "MADRASAH CONTOH";
+    var sekolahUpper = sekolah.toUpperCase(); 
+
     var yayasan = conf.yayasan || "";
     var alamat1 = conf.alamat1 || "";
     var alamat2 = conf.alamat2 || "";
-    
     var kontakHP = conf.telp ? conf.telp : '-';
-    var email = conf.email || "";
-    
+    var email = conf.email || "-"; // Default dash jika kosong
     var logoKiri = conf.logoKiri;
     var logoKanan = conf.logoKanan;
 
@@ -582,7 +582,7 @@
            <div class="back-logo-box"><img src="${logoKiri}" onerror="this.style.display='none'"></div>
            <div class="back-header-text">
              <div class="txt-yayasan">${yayasan}</div>
-             <div class="txt-sekolah">${sekolah}</div>
+             <div class="txt-sekolah">${sekolahUpper}</div>
              <div class="txt-alamat">${alamat1}<br>${alamat2}</div>
            </div>
            <div class="back-logo-box"><img src="${logoKanan}" onerror="this.style.display='none'"></div>
@@ -590,30 +590,29 @@
 
         <div class="back-body">
           <div>
-            <div class="rules-title">KETENTUAN - KETENTUAN</div>
-            <ol class="rules-list">
-              <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah.toUpperCase()}</strong>.</li>
-              <li>Siswa wajib mematuhi Tata Tertib Madrasah & Perpustakaan.</li>
-              <li>Siswa bertanggung jawab penuh atas penggunaan kartu ini.</li>
-              <li>Kehilangan kartu harap segera melapor ke Tata Usaha/Kesiswaan.</li>
-              <li>Kartu wajib dibawa setiap hari sekolah/kegiatan madrasah.</li>
+            <div class="rules-title">TATA TERTIB PENGGUNAAN KARTU</div>
+            
+            <ol class="rules-list" style="text-align: justify; padding-right: 10px;">
+              <li>Kartu ini berlaku sebagai Identitas Siswa & Anggota Perpustakaan selama aktif di <strong>${sekolahUpper}</strong>.</li>
+              <li>Siswa/Anggota wajib mematuhi segala Peraturan Tata Tertib Madrasah & Perpustakaan.</li>
+              <li>Siswa bertanggung jawab penuh atas penggunaan dan pemeliharaan kartu ini.</li>
+              <li>Madrasah berhak mencabut status kesiswaan/keanggotaan jika terbukti melanggar tata tertib.</li>
+              <li>Apabila kartu hilang/ditemukan, harap segera melapor ke Bagian Kesiswaan/Perpustakaan.</li>
             </ol>
           </div>
 
           <div class="back-footer-container">
             <div class="cp-title">Contact Person:</div>
-            <table class="cp-table">
-              <tr>
-                <td class="cp-label">No Telp/HP</td>
-                <td class="cp-sep">:</td>
-                <td class="cp-val">${kontakHP}</td>
-              </tr>
-              <tr>
-                <td class="cp-label">Email</td>
-                <td class="cp-sep">:</td>
-                <td class="cp-val">${email}</td>
-              </tr>
-            </table>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-weight: bold; margin-top: 3px; border-top: 1px dotted #ccc; padding-top: 2px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span>Telp :</span> <span>${kontakHP}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span>Email :</span> <span>${email}</span>
+                </div>
+            </div>
+
           </div>
 
         </div>
@@ -808,7 +807,14 @@
   // Fungsi ini mengatur HTML berdasarkan ID Style yang dipilih
   function getCardTemplate(type, styleId, s, conf) {
     // Persiapan Data Umum
-    var sekolah = document.getElementById('schoolTitle').innerText || "NAMA SEKOLAH";
+    var sekolahRaw = document.getElementById('schoolTitle').innerText || "NAMA SEKOLAH";
+    // [UPDATE] Paksa Kapital untuk tampilan belakang
+    var sekolahUpper = sekolahRaw.toUpperCase(); 
+    
+    // Untuk depan, biarkan sesuai input atau kapital juga (opsional, disini saya buat default input)
+    // Jika ingin depan juga kapital semua, ganti sekolahRaw jadi sekolahUpper di bagian 'front'
+    var sekolah = sekolahRaw; 
+
     var hasPhoto = (s && s.foto && s.foto.length > 20 && s.foto.includes('http'));
     var photoHtml = hasPhoto ? `<img src="${s.foto}" class="real-photo">` : '';
     
@@ -823,8 +829,7 @@
     // --- MODE 1: MADRASAH (DEFAULT LAMA) ---
     if (styleId === "1") {
       if (type === 'front') {
-        // (KODE LAMA ANDA SAYA MASUKKAN SINI AGAR TIDAK HILANG)
-        return `
+         return `
         <div class="id-card temp-madrasah style-1">
           <div class="madrasah-header">
             <div class="logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
@@ -865,45 +870,51 @@
           </div>
         </div>`;
       } else {
-        // BELAKANG MODE 1
+        // [UPDATE] BAGIAN BELAKANG MODE 1 (PRINT)
         return `
         <div class="back-card style-1">
           <div class="back-header-flat">
              <div class="back-logo-box"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
              <div class="back-header-text">
                <div class="txt-yayasan">${conf.yayasan}</div>
-               <div class="txt-sekolah">${sekolah}</div>
+               <div class="txt-sekolah">${sekolahUpper}</div>
                <div class="txt-alamat">${conf.alamat1}<br>${conf.alamat2}</div>
              </div>
              <div class="back-logo-box"><img src="${conf.logoKanan}" onerror="this.style.display='none'"></div>
           </div>
           <div class="back-body">
             <div>
-              <div class="rules-title">KETENTUAN</div>
-              <ol class="rules-list">
-                <li>Kartu ini berlaku selama menjadi Siswa di <strong>${sekolah}</strong>.</li>
-                <li>Siswa wajib mematuhi Tata Tertib Madrasah.</li>
-                <li>Kartu wajib dibawa setiap hari sekolah.</li>
-                <li>Kehilangan kartu harap lapor ke Tata Usaha.</li>
+              <div class="rules-title">TATA TERTIB PENGGUNAAN KARTU</div>
+              
+              <ol class="rules-list" style="text-align: justify; padding-right: 10px;">
+                <li>Kartu ini berlaku sebagai Identitas Siswa & Anggota Perpustakaan selama aktif di <strong>${sekolahUpper}</strong>.</li>
+                <li>Siswa/Anggota wajib mematuhi segala Peraturan Tata Tertib Madrasah & Perpustakaan.</li>
+                <li>Siswa bertanggung jawab penuh atas penggunaan dan pemeliharaan kartu ini.</li>
+                <li>Madrasah berhak mencabut status kesiswaan/keanggotaan jika terbukti melanggar tata tertib.</li>
+                <li>Apabila kartu hilang/ditemukan, harap segera melapor ke Bagian Kesiswaan/Perpustakaan.</li>
               </ol>
             </div>
+
             <div class="back-footer-container">
               <div class="cp-title">Contact Person:</div>
-              <table class="cp-table">
-                <tr><td class="cp-label">Telp</td><td>:</td><td>${kontak}</td></tr>
-                <tr><td class="cp-label">Email</td><td>:</td><td>${conf.email}</td></tr>
-              </table>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-weight: bold; margin-top: 3px; border-top: 1px dotted #ccc; padding-top: 2px;">
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>Telp :</span> <span>${kontak}</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>Email :</span> <span>${conf.email || '-'}</span>
+                  </div>
+              </div>
             </div>
+
           </div>
         </div>`;
       }
     }
     
     // --- MODE 2 s/d 11 (TEMPLATE GENERIK) ---
-    // Kita gunakan struktur HTML yang sama, tapi CSS class (style-X) yang berbeda
-    // Ini memudahkan pembuatan 10 template sekaligus.
-    
-    var themeClass = "style-" + styleId; // style-2, style-3, dst...
+    var themeClass = "style-" + styleId; 
 
     if (type === 'front') {
         return `
@@ -960,8 +971,7 @@
                  <div class="gen-header-text text-center">
                     <div class="gen-yayasan small">${conf.yayasan}</div>
                     
-                    <div class="gen-sekolah small">${sekolah}</div>
-                    <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+                    <div class="gen-sekolah small">${sekolahUpper}</div> <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
                  </div>
 
                  <img src="${conf.logoKanan}" class="logo-sm right" onerror="this.style.display='none'">
@@ -971,8 +981,7 @@
                 <div class="rules-box">
                     <div class="rules-head">TATA TERTIB PENGGUNAAN KARTU</div>
                     <ol>
-                        <li>Kartu ini adalah kartu identitas resmi siswa <b>${sekolah}</b>.</li>
-                        <li>Harap membawa kartu ini selama berada di lingkungan sekolah.</li>
+                        <li>Kartu ini adalah kartu identitas resmi siswa <b>${sekolahUpper}</b>.</li> <li>Harap membawa kartu ini selama berada di lingkungan sekolah.</li>
                         <li>Dilarang mencoret atau merusak kartu.</li>
                         <li>Jika menemukan kartu ini, mohon kembalikan ke alamat sekolah.</li>
                     </ol>
