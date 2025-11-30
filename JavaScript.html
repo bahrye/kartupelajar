@@ -194,22 +194,18 @@
       if (pRegister) pRegister.style.display = 'block';
     } 
     else if (page === 'dashboard') {
-      // Jika dashboard, Container HARUS SEMBUNYI (sudah di-hide di langkah no 2)
-      // Kita hanya munculkan dashboardPage
       if (pDash) {
         pDash.style.display = 'block';
         
-        // Logika tambahan dashboard Anda (Modal & Settings)
         if(!modalSiswa) {
-           // Pastikan elemen modal ada sebelum di-init
            var elModal = document.getElementById('studentModal');
            if(elModal) modalSiswa = new bootstrap.Modal(elModal);
         }
         
-        // Cek apakah fungsi loadSettings ada sebelum dipanggil
-        if (typeof loadSettings === 'function') {
-           loadSettings(); 
-        }
+        if (typeof loadSettings === 'function') loadSettings(); 
+        
+        // [BARU] Panggil fungsi untuk isi dropdown template
+        loadDynamicTemplates();
       }
     }
   }
@@ -354,6 +350,7 @@
   function previewImage(input) {
     var preview = document.getElementById('imgPreview');
     var txt = document.getElementById('txtNoFoto');
+    var btnHapus = document.getElementById('btnHapusFoto'); // [BARU]
     
     if (input.files && input.files[0]) {
       var reader = new FileReader();
@@ -361,6 +358,7 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
         txt.style.display = 'none';
+        btnHapus.style.display = 'block';
       }
       reader.readAsDataURL(input.files[0]);
     } else {
@@ -394,6 +392,7 @@
     document.getElementById('inpFotoOld').value = "";
     document.getElementById('imgPreview').style.display = 'none';
     document.getElementById('txtNoFoto').style.display = 'block';
+    document.getElementById('btnHapusFoto').style.display = 'none';
     
     modalSiswa.show();
   }
@@ -419,9 +418,11 @@
       document.getElementById('imgPreview').src = s.foto;
       document.getElementById('imgPreview').style.display = 'block';
       document.getElementById('txtNoFoto').style.display = 'none';
+      document.getElementById('btnHapusFoto').style.display = 'block';
     } else {
       document.getElementById('imgPreview').style.display = 'none';
       document.getElementById('txtNoFoto').style.display = 'block';
+      document.getElementById('btnHapusFoto').style.display = 'none';
     }
     
     modalSiswa.show();
@@ -609,6 +610,37 @@
         renderPreview();
       }
     }).getSchoolConfig(currentToken);
+  }
+
+  // --- [BARU] FUNGSI ISI DROPDOWN DARI DATABASE UTAMA ---
+  function loadDynamicTemplates() {
+    var select = document.getElementById('printTemplateMode');
+    
+    // Cek apakah opsi dinamis sudah pernah dimuat? (agar tidak dobel saat klik menu berulang)
+    if (select.getAttribute('data-loaded') === 'true') return;
+
+    google.script.run.withSuccessHandler(function(templates){
+       if (templates && templates.length > 0) {
+         
+         // Tambahkan pembatas visual (Separator)
+         var separator = document.createElement('option');
+         separator.disabled = true;
+         separator.innerText = "────────── DARI PUSAT ──────────";
+         select.add(separator, 1); // Masukkan di urutan kedua (setelah default)
+
+         // Loop data dari database dan masukkan ke dropdown
+         // Kita masukkan urutan terbalik agar muncul di atas (opsional)
+         for (var i = templates.length - 1; i >= 0; i--) {
+            var opt = document.createElement('option');
+            opt.value = templates[i].url; // VALUE-nya adalah URL GAMBAR
+            opt.innerText = "★ " + templates[i].name; // Tambah bintang agar terlihat spesial
+            select.add(opt, 2); // Masukkan setelah separator
+         }
+         
+         // Tandai bahwa sudah diload
+         select.setAttribute('data-loaded', 'true');
+       }
+    }).getGlobalTemplates();
   }
 
   // 4. Update Tampilan Kartu Belakang (Preview)
@@ -886,34 +918,40 @@
     var ttl = s ? `${s.tmp_lahir}, ${formatTanggalAngka(s.tgl_lahir)}` : "";
     var kontak = conf.telp || "-";
 
-    // --- LOGIKA UTAMA: DINAS 1 (FINAL REFINEMENT) ---
-    // --- LOGIKA UTAMA: DINAS 1 ---
-    if (styleId === "dinas1") {
-      
-      var bgUrl = conf.bgImage || ""; 
+    // --- [BARU] LOGIKA CEK APAKAH CUSTOM BACKGROUND (URL) ---
+    // Jika styleId berisi "http" (URL dari database) ATAU "dinas1", kita pakai layout Custom
+    var isCustomBg = (styleId.indexOf('http') === 0) || (styleId === 'dinas1');
 
-      // [LOGIC BARU] Tentukan Isi Baris Kedua Header
+    if (isCustomBg) {
+      
+      // Tentukan URL Backgroundnya
+      var bgUrl = "";
+      if (styleId === 'dinas1') {
+        // Jika dinas1, ambil dari config sekolah (hidden input)
+        bgUrl = conf.bgImage || ""; 
+      } else {
+        // Jika dari database, styleId itu sendiri adalah URL-nya
+        bgUrl = styleId;
+      }
+
+      // [LOGIC HEADER] Tentukan Isi Baris Kedua Header (Sama seperti sebelumnya)
       var headerLine2 = "";
       if (conf.schoolType === 'umum') {
-          // Jika Umum -> Pakai Input Dinas
           headerLine2 = conf.dinas || "DINAS PENDIDIKAN"; 
       } else {
-          // Jika Madrasah -> Pakai Alamat 1 (NSM/NPSN)
           headerLine2 = conf.alamat1 || ""; 
       }
 
       // --- BAGIAN DEPAN (FRONT) ---
       if (type === 'front') {
         return `
-        <div class="id-card style-dinas-1" style="background-image: url('${bgUrl}');">
+        <div class="id-card style-dinas-1" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
             
             <div class="dinas-header">
                 <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
                 <div class="dinas-header-text">
                     <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    
                     <div class="dh-mid text-uppercase">${headerLine2}</div>
-                    
                     <div class="dh-bot text-uppercase">${sekolah}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
@@ -925,11 +963,11 @@
             </div>
 
             <div class="dinas-photo-absolute">
-               ${photoHtml}
+              ${photoHtml}
             </div>
 
             <div class="dinas-validity-absolute">
-               * BERLAKU SELAMA MENJADI SISWA
+              * BERLAKU SELAMA MENJADI SISWA
             </div>
 
             <div class="dinas-data-absolute">
@@ -962,14 +1000,12 @@
       // --- BAGIAN BELAKANG (BACK) ---
       else {
         return `
-        <div class="back-card style-dinas-1-back" style="background-image: url('${bgUrl}');">
+        <div class="back-card style-dinas-1-back" style="background-image: url('${bgUrl}'); background-size: 100% 100%;">
             <div class="dinas-header">
                 <div class="dinas-logo-left"><img src="${conf.logoKiri}" onerror="this.style.display='none'"></div>
                 <div class="dinas-header-text">
                     <div class="dh-top text-uppercase">${conf.yayasan}</div>
-                    
                     <div class="dh-mid text-uppercase">${headerLine2}</div>
-                    
                     <div class="dh-bot text-uppercase">${sekolahUpper}</div>
                     <div class="dh-address">${conf.alamat2}</div>
                 </div>
@@ -1082,19 +1118,43 @@
       }
     }
     
-    // --- MODE 2 s/d 11 (TEMPLATE GENERIK) ---
+    // --- MODE 2 s/d 48 (TEMPLATE GENERIK) ---
     var themeClass = "style-" + styleId; 
+
+    // [LOGIKA BARU] Atur Isi Kop Berdasarkan Tipe Sekolah
+    var headerContent = "";
+    
+    if (conf.schoolType === 'umum') {
+      // --- FORMAT DINAS (4 Baris) ---
+      // Baris 1: Pemerintah Kab/Kota (dari input Yayasan)
+      // Baris 2: Dinas Pendidikan (dari input Dinas)
+      // Baris 3: Nama Sekolah
+      // Baris 4: Alamat (Hanya alamat 2/Lokasi)
+      headerContent = `
+        <div class="gen-yayasan" style="line-height:1;">${conf.yayasan}</div>
+        <div class="gen-yayasan" style="font-size: 8px; font-weight: bold; margin-bottom: 2px;">${conf.dinas || 'DINAS PENDIDIKAN'}</div>
+        <div class="gen-sekolah">${sekolah}</div>
+        <div class="gen-alamat">${conf.alamat2}</div>
+      `;
+    } else {
+      // --- FORMAT MADRASAH (Standar) ---
+      headerContent = `
+        <div class="gen-yayasan">${conf.yayasan}</div>
+        <div class="gen-sekolah">${sekolah}</div>
+        <div class="gen-alamat">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+      `;
+    }
 
     if (type === 'front') {
         return `
         <div class="id-card temp-generic ${themeClass}">
             <div class="gen-header">
                 <img src="${conf.logoKiri}" class="logo-sm left">
+                
                 <div class="gen-header-text">
-                    <div class="gen-yayasan">${conf.yayasan}</div>
-                    <div class="gen-sekolah">${sekolah}</div>
-                    <div class="gen-alamat">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+                    ${headerContent} 
                 </div>
+
                 <img src="${conf.logoKanan}" class="logo-sm right">
             </div>
 
@@ -1132,15 +1192,32 @@
         `;
     } else {
         // --- TAMPILAN BELAKANG (GENERIK) ---
+        
+        // [LOGIKA BARU] Header Belakang
+        var headerBackContent = "";
+        
+        if (conf.schoolType === 'umum') {
+             headerBackContent = `
+                <div class="gen-yayasan small" style="line-height:1;">${conf.yayasan}</div>
+                <div class="gen-yayasan small fw-bold" style="margin-bottom:1px;">${conf.dinas || ''}</div>
+                <div class="gen-sekolah small">${sekolahUpper}</div> 
+                <div class="gen-alamat small">${conf.alamat2}</div>
+             `;
+        } else {
+             headerBackContent = `
+                <div class="gen-yayasan small">${conf.yayasan}</div>
+                <div class="gen-sekolah small">${sekolahUpper}</div> 
+                <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+             `;
+        }
+
         return `
         <div class="back-card temp-generic-back ${themeClass}">
             <div class="gen-header back-h">
                  <img src="${conf.logoKiri}" class="logo-sm left" onerror="this.style.display='none'">
                  
                  <div class="gen-header-text text-center">
-                    <div class="gen-yayasan small">${conf.yayasan}</div>
-                    
-                    <div class="gen-sekolah small">${sekolahUpper}</div> <div class="gen-alamat small">${conf.alamat1} ${conf.alamat2 ? '<br>' + conf.alamat2 : ''}</div>
+                    ${headerBackContent}
                  </div>
 
                  <img src="${conf.logoKanan}" class="logo-sm right" onerror="this.style.display='none'">
@@ -1162,7 +1239,7 @@
                    <div>Email: ${conf.email}</div>
                 </div>
                 
-                </div>
+            </div>
         </div>
         `;
     }
@@ -1535,6 +1612,25 @@
     // Set sumber gambar modal sesuai url yang diklik
     document.getElementById('imgPreviewFull').src = url;
     modalFoto.show();
+  }
+
+  // --- FUNGSI BARU: MENGHAPUS FOTO ---
+  function hapusFotoSiswa() {
+    // 1. Reset Input File (agar jika user save, tidak ada file yg terkirim)
+    document.getElementById('inpFotoFile').value = "";
+    
+    // 2. Reset Input Hidden (PENTING: ini agar URL foto lama terhapus di database)
+    document.getElementById('inpFotoOld').value = "";
+    
+    // 3. Sembunyikan Preview Gambar
+    document.getElementById('imgPreview').src = "";
+    document.getElementById('imgPreview').style.display = 'none';
+    
+    // 4. Tampilkan Teks "Belum ada foto"
+    document.getElementById('txtNoFoto').style.display = 'block';
+    
+    // 5. Sembunyikan Tombol Hapus itu sendiri
+    document.getElementById('btnHapusFoto').style.display = 'none';
   }
 
 </script>
