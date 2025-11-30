@@ -1608,7 +1608,13 @@
       padding: 6px 15px 0 15px;
       position: relative; z-index: 10; 
   }
-  .dinas-logo-left img { width: 40px; height: auto; filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); }
+  /* Terapkan style yang sama untuk logo kiri DAN kanan */
+  .dinas-logo-left img, 
+  .dinas-logo-right img { 
+      width: 40px; 
+      height: auto; 
+      filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); 
+  }
   .dinas-header-text { flex: 1; text-align: center; line-height: 1.15; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
   
   /* Font Size Header */
@@ -1668,8 +1674,10 @@
   .dinas-data-absolute {
       position: absolute;
       top: 90px;
-      left: 100px; /* Geser kiri dikit krn foto mengecil */
-      width: 150px; /* Lebar ditambah */
+      left: 100px;
+      /* Lebar kartu 335px. Dikurang kiri 100px = sisa 235px.
+         Kita pakai 225px agar ada jarak aman 10px dari kanan. */
+      width: 225px; 
       
       font-size: 9px; 
       font-weight: 600; 
@@ -1682,7 +1690,8 @@
   /* FOOTER / TTD (RAPAT) */
   .dinas-footer-absolute {
       position: absolute;
-      bottom: 8px; /* Lebih turun */
+      /* Turunkan ke 15px agar NIP pas di batas garis hijau & TTD di bawah Alamat */
+      bottom: 13px; 
       right: 12px;
       z-index: 10;
   }
@@ -1707,7 +1716,19 @@
   }
   .sign-img-wrap .sig-img { height: 100%; z-index: 2; position: relative; }
   .sign-img-wrap .stamp-img { 
-      position: absolute; left: -5px; top: -5px; width: 35px; opacity: 0.8; z-index: 1; transform: rotate(-10deg);
+      position: absolute; 
+      /* Geser ke kanan (positif) agar masuk ke area tengah dan menyentuh TTD */
+      left: 10px;  
+      
+      /* Naikkan sedikit agar pas di tengah vertikal */
+      top: -2px;   
+      
+      /* Perbesar sedikit agar lebih terlihat jelas */
+      width: 40px; 
+      
+      opacity: 0.8; 
+      z-index: 1; 
+      transform: rotate(-10deg);
   }
   .head-name { text-decoration: underline; margin-bottom: 1px; }
 
@@ -1718,9 +1739,18 @@
       background-position: center; position: relative; overflow: hidden;
       color: #000; box-sizing: border-box; background-color: white;
   }
-  .dinas-body-back { padding: 30px 20px 10px 20px; position: relative; z-index: 5; }
+  .dinas-body-back { 
+      /* Ubah padding-top (angka pertama) jadi 22px agar teks naik ke atas */
+      padding: 24px 20px 5px 20px; 
+      position: relative; 
+      z-index: 5; 
+  }
   .janji-list { font-size: 8.5px; line-height: 1.35; color: #000; padding-left: 15px; margin: 0; text-align: justify; }
-  .janji-list li { margin-bottom: 3px; padding-left: 2px; }
+  .janji-list li { 
+      /* Kurangi jarak antar nomor agar list lebih kompak dan muat di area putih */
+      margin-bottom: 1px; 
+      padding-left: 2px; 
+  }
   .janji-list b { font-weight: 800; text-decoration: underline; text-decoration-style: dotted; }
 
   /* PRINT FIX */
