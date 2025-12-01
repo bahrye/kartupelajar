@@ -31,9 +31,39 @@
      }).getDefaultPreviewBg();
   }
 
-  // 1. Cek Sesi saat halaman pertama kali dimuat
+  // --- [BARU] Helper untuk Memicu Tombol saat Enter ditekan ---
+  function attachEnterKey(inputId, btnId) {
+    var input = document.getElementById(inputId);
+    var btn = document.getElementById(btnId);
+    
+    if (input && btn) {
+      input.addEventListener("keypress", function(event) {
+        // Jika tombol yang ditekan adalah Enter
+        if (event.key === "Enter") {
+          event.preventDefault(); // Mencegah perilaku standar form (jika ada)
+          btn.click(); // Otomatis klik tombol target
+        }
+      });
+    }
+  }
+
+  // 1. Cek Sesi & Pasang Event Listener saat halaman dimuat
   document.addEventListener('DOMContentLoaded', function() {
     checkSession();
+
+    // --- SETUP TOMBOL ENTER ---
+    
+    // A. Halaman Login (Email & Password -> Tombol Masuk)
+    attachEnterKey('loginEmail', 'btnLogin');
+    attachEnterKey('loginPass', 'btnLogin');
+
+    // B. Registrasi Step 1 (Sekolah, Email, Pass -> Tombol Kirim OTP)
+    attachEnterKey('regSekolah', 'btnRegStep1');
+    attachEnterKey('regEmail', 'btnRegStep1');
+    attachEnterKey('regPass', 'btnRegStep1');
+
+    // C. Registrasi Step 2 (Input OTP -> Tombol Verifikasi)
+    attachEnterKey('regOTP', 'btnRegStep2');
   });
 
   function checkSession() {
@@ -181,16 +211,19 @@
     }
   }
 
-  // --- NAVIGATION ---
   function switchPage(page) {
     // 1. Definisikan variabel elemen
-    var container = document.getElementById('authContainer'); // Pembungkus Baru
+    var container = document.getElementById('authContainer');
     var pLogin    = document.getElementById('loginPage');
     var pRegister = document.getElementById('registerPage');
     var pDash     = document.getElementById('dashboardPage');
 
+    // [TAMBAHAN PENTING] Sembunyikan Alert Sukses setiap kali ganti halaman
+    // Agar saat user refresh atau klik "Kembali ke Login" biasa, pesannya hilang.
+    var alertBox = document.getElementById('loginSuccessAlert');
+    if (alertBox) alertBox.style.display = 'none';
+
     // 2. SEMBUNYIKAN SEMUANYA DULU (Reset)
-    // PENTING: Sembunyikan container agar tidak menutupi dashboard
     if (container) container.style.display = 'none'; 
     if (pLogin)    pLogin.style.display = 'none';
     if (pRegister) pRegister.style.display = 'none';
@@ -198,27 +231,21 @@
 
     // 3. TAMPILKAN HALAMAN YANG DIPILIH
     if (page === 'login') {
-      // Jika login, kita butuh container (background) + form login
       if (container) container.style.display = 'flex'; 
       if (pLogin)    pLogin.style.display = 'block';
     } 
     else if (page === 'register') {
-      // Jika register, kita butuh container (background) + form register
       if (container) container.style.display = 'flex';
       if (pRegister) pRegister.style.display = 'block';
     } 
     else if (page === 'dashboard') {
       if (pDash) {
         pDash.style.display = 'block';
-        
         if(!modalSiswa) {
            var elModal = document.getElementById('studentModal');
            if(elModal) modalSiswa = new bootstrap.Modal(elModal);
         }
-        
         if (typeof loadSettings === 'function') loadSettings(); 
-        
-        // [BARU] Panggil fungsi untuk isi dropdown template
         initDefaultBg();
         loadDynamicTemplates();
       }
@@ -246,23 +273,86 @@
       }).loginSchool(email, pass);
   }
 
-  function runRegister() {
+  // --- LOGIKA REGISTRASI BARU (DENGAN OTP) ---
+
+  // Langkah 1: Minta OTP
+  function runRequestOTP() {
+    var sekolah = document.getElementById('regSekolah').value;
+    var email = document.getElementById('regEmail').value;
+    var pass = document.getElementById('regPass').value;
+
+    if(!sekolah || !email || !pass) return showToast("Harap isi semua data!", 'bg-warning');
+
+    var btn = document.getElementById('btnRegStep1');
+    var oriText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = "<span class='spinner-border spinner-border-sm me-2'></span> Mengirim OTP...";
+
+    // Panggil Backend
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = oriText;
+      
+      if(res.status === 'success') {
+        showToast(res.message, 'bg-success');
+        
+        // Sembunyikan Form Data, Tampilkan Input OTP
+        document.getElementById('regFormGroup').style.display = 'none';
+        document.getElementById('regOtpGroup').style.display = 'block';
+        document.getElementById('regOTP').focus();
+        
+      } else {
+        showToast(res.message, 'bg-danger');
+      }
+    }).sendRegistrationOTP(email, sekolah);
+  }
+
+  // Langkah 2: Verifikasi OTP & Finalisasi
+  function runVerifyAndRegister() {
+    var otp = document.getElementById('regOTP').value;
+    if(!otp) return showToast("Masukkan kode OTP!", 'bg-warning');
+
     var form = {
       namaSekolah: document.getElementById('regSekolah').value,
       email: document.getElementById('regEmail').value,
       password: document.getElementById('regPass').value
     };
-    if(!form.namaSekolah || !form.email) return showToast("Isi semua data!", 'bg-warning');
 
-    var btn = document.getElementById('btnReg');
-    btn.disabled = true; btn.innerText = "Memproses...";
-    
+    var btn = document.getElementById('btnRegStep2');
+    var oriText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = "<span class='spinner-border spinner-border-sm me-2'></span> Memverifikasi...";
+
     google.script.run.withSuccessHandler(function(res){
-      btn.disabled = false; btn.innerText = "Buat Database";
+      btn.disabled = false; btn.innerHTML = oriText;
+
       if(res.status === 'success') {
-        alert(res.message); switchPage('login');
-      } else { showToast(res.message, 'bg-danger'); }
-    }).registerSchool(form);
+        // 1. Reset Form Register
+        resetRegForm(); 
+        
+        // 2. Pindah ke Halaman Login
+        switchPage('login'); 
+        
+        // 3. [BARU] Tampilkan Pesan Sukses di Halaman Login
+        var alertBox = document.getElementById('loginSuccessAlert');
+        var alertMsg = document.getElementById('loginSuccessMsg');
+        
+        if(alertBox && alertMsg) {
+          alertMsg.innerText = res.message; // Isi pesan dari server
+          alertBox.style.display = 'block'; // Munculkan kotak hijau
+          
+          // Efek animasi kecil agar user sadar
+          alertBox.classList.add('animate__animated', 'animate__fadeInDown');
+        }
+
+      } else {
+        showToast(res.message, 'bg-danger');
+      }
+    }).verifyAndCreateAccount(form, otp);
+  }
+
+  // Helper: Reset Tampilan jika user salah email/batal
+  function resetRegForm() {
+    document.getElementById('regFormGroup').style.display = 'block';
+    document.getElementById('regOtpGroup').style.display = 'none';
+    document.getElementById('regOTP').value = "";
   }
 
   // --- UPDATE FUNGSI LOAD TABLE DATA ---
