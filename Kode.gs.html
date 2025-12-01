@@ -571,3 +571,96 @@ function getDefaultPreviewBg() {
     return "";
   }
 }
+
+// --- [FITUR BARU] RESET PASSWORD ---
+
+// 1. Cek Email & Kirim OTP Reset
+function sendResetOTP(email) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(5000);
+    
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Users');
+    var data = sheet.getDataRange().getValues();
+    var userFound = false;
+    var namaSekolah = "";
+
+    // Cek apakah email terdaftar
+    for(var i=1; i<data.length; i++){
+      if(data[i][2] && data[i][2].toString().toLowerCase() == email.toLowerCase()) {
+        userFound = true;
+        namaSekolah = data[i][1]; // Ambil nama sekolah
+        break;
+      }
+    }
+
+    if (!userFound) {
+      return {status: 'error', message: 'Email tidak terdaftar dalam sistem kami.'};
+    }
+
+    // Generate OTP
+    var otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Simpan di Cache (Prefix beda dengan register agar tidak bentrok)
+    var cache = CacheService.getScriptCache();
+    cache.put("RESET_OTP_" + email, otp, 600); // 10 Menit
+
+    // Kirim Email
+    var subject = "Kode Reset Password - " + namaSekolah;
+    var body = "Halo Admin " + namaSekolah + ",\n\n" +
+               "Kami menerima permintaan untuk mereset kata sandi akun Anda.\n" +
+               "Berikut adalah kode verifikasi (OTP) Anda:\n\n" +
+               "KODE: " + otp + "\n\n" +
+               "Jika Anda tidak merasa meminta reset password, abaikan email ini.";
+    
+    MailApp.sendEmail(email, subject, body);
+
+    return {status: 'success', message: 'Kode OTP telah dikirim ke ' + email};
+
+  } catch(e) {
+    return {status: 'error', message: 'Gagal kirim email: ' + e.toString()};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// 2. Verifikasi OTP & Simpan Password Baru
+function confirmResetPassword(email, otp, newPass) {
+  var cache = CacheService.getScriptCache();
+  var savedOtp = cache.get("RESET_OTP_" + email);
+
+  if (!savedOtp || savedOtp !== otp) {
+    return {status: 'error', message: 'Kode OTP salah atau sudah kadaluarsa.'};
+  }
+
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Users');
+    var data = sheet.getDataRange().getValues();
+    
+    // Cari baris user dan update password
+    for(var i=1; i<data.length; i++){
+      if(data[i][2] && data[i][2].toString().toLowerCase() == email.toLowerCase()) {
+        // Update Kolom D (Index 3) -> Password
+        // Baris di sheet adalah i+1 karena array mulai dari 0 tapi sheet row mulai dari 1
+        sheet.getRange(i + 1, 4).setValue(newPass); 
+        
+        // Hapus OTP
+        cache.remove("RESET_OTP_" + email);
+        
+        return {status: 'success', message: 'Password berhasil diubah! Silakan login.'};
+      }
+    }
+    
+    return {status: 'error', message: 'User tidak ditemukan saat update.'};
+
+  } catch(e) {
+    return {status: 'error', message: 'Gagal update password: ' + e.toString()};
+  } finally {
+    lock.releaseLock();
+  }
+}
