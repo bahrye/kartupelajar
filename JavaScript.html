@@ -73,6 +73,12 @@
 
     // C. Registrasi Step 2 (Input OTP -> Tombol Verifikasi)
     attachEnterKey('regOTP', 'btnRegStep2');
+
+    // D. Forgot Password (Email -> Tombol Kirim)
+    attachEnterKey('forgotEmail', 'btnForgotStep1');
+    // E. Forgot Password (Pass -> Tombol Simpan)
+    attachEnterKey('forgotNewPass', 'btnForgotStep2');
+    
   });
 
   function checkSession() {
@@ -226,19 +232,20 @@
     var pLogin    = document.getElementById('loginPage');
     var pRegister = document.getElementById('registerPage');
     var pDash     = document.getElementById('dashboardPage');
+    var pForgot   = document.getElementById('forgotPage'); // [BARU]
 
-    // [TAMBAHAN PENTING] Sembunyikan Alert Sukses setiap kali ganti halaman
-    // Agar saat user refresh atau klik "Kembali ke Login" biasa, pesannya hilang.
+    // [TAMBAHAN] Sembunyikan Alert Sukses
     var alertBox = document.getElementById('loginSuccessAlert');
     if (alertBox) alertBox.style.display = 'none';
 
-    // 2. SEMBUNYIKAN SEMUANYA DULU (Reset)
+    // 2. SEMBUNYIKAN SEMUANYA
     if (container) container.style.display = 'none'; 
     if (pLogin)    pLogin.style.display = 'none';
     if (pRegister) pRegister.style.display = 'none';
     if (pDash)     pDash.style.display = 'none';
+    if (pForgot)   pForgot.style.display = 'none'; // [BARU]
 
-    // 3. TAMPILKAN HALAMAN YANG DIPILIH
+    // 3. TAMPILKAN HALAMAN
     if (page === 'login') {
       if (container) container.style.display = 'flex'; 
       if (pLogin)    pLogin.style.display = 'block';
@@ -246,7 +253,20 @@
     else if (page === 'register') {
       if (container) container.style.display = 'flex';
       if (pRegister) pRegister.style.display = 'block';
-    } 
+    }
+    // [LOGIKA BARU]
+    else if (page === 'forgot') {
+      if (container) container.style.display = 'flex';
+      if (pForgot) {
+         pForgot.style.display = 'block';
+         // Reset tampilan forgot ke step 1
+         document.getElementById('forgotStep1').style.display = 'block';
+         document.getElementById('forgotStep2').style.display = 'none';
+         document.getElementById('forgotEmail').value = "";
+         document.getElementById('forgotOTP').value = "";
+         document.getElementById('forgotNewPass').value = "";
+      }
+    }
     else if (page === 'dashboard') {
       if (pDash) {
         pDash.style.display = 'block';
@@ -395,6 +415,73 @@
         showToast(res.message, 'bg-danger');
       }
     }).verifyAndCreateAccount(form, otp);
+  }
+
+  // --- FITUR LUPA PASSWORD ---
+
+  // 1. Cek Email & Minta OTP
+  function runForgotRequestOTP() {
+    var email = document.getElementById('forgotEmail').value.trim();
+    
+    if (!email) {
+      showToast("Masukkan alamat email!", 'bg-warning');
+      return;
+    }
+
+    var btn = document.getElementById('btnForgotStep1');
+    var oriText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = "<span class='spinner-border spinner-border-sm me-2'></span> Cek Email...";
+
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = oriText;
+      
+      if(res.status === 'success') {
+        showToast(res.message, 'bg-success');
+        
+        // Pindah ke Step 2
+        document.getElementById('forgotStep1').style.display = 'none';
+        document.getElementById('forgotStep2').style.display = 'block';
+        document.getElementById('forgotOTP').focus();
+        
+      } else {
+        // Email tidak terdaftar
+        showToast(res.message, 'bg-danger');
+      }
+    }).sendResetOTP(email);
+  }
+
+  // 2. Simpan Password Baru
+  function runResetPassword() {
+    var email = document.getElementById('forgotEmail').value.trim();
+    var otp = document.getElementById('forgotOTP').value.trim();
+    var newPass = document.getElementById('forgotNewPass').value.trim();
+
+    if (!otp) return showToast("Masukkan Kode OTP!", 'bg-warning');
+    if (!newPass) return showToast("Masukkan Password Baru!", 'bg-warning');
+
+    var btn = document.getElementById('btnForgotStep2');
+    var oriText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = "<span class='spinner-border spinner-border-sm me-2'></span> Menyimpan...";
+
+    google.script.run.withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = oriText;
+
+      if(res.status === 'success') {
+        // Reset sukses
+        switchPage('login');
+        
+        // Tampilkan pesan sukses di halaman login
+        var alertBox = document.getElementById('loginSuccessAlert');
+        var alertMsg = document.getElementById('loginSuccessMsg');
+        if(alertBox && alertMsg) {
+          alertMsg.innerText = res.message; 
+          alertBox.style.display = 'block'; 
+        }
+
+      } else {
+        showToast(res.message, 'bg-danger');
+      }
+    }).confirmResetPassword(email, otp, newPass);
   }
 
   // Helper: Reset Tampilan jika user salah email/batal
