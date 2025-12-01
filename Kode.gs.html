@@ -15,69 +15,103 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-// --- FUNGSI REGISTRASI (DENGAN PEMINDAHAN DATABASE KE FOLDER) ---
-function registerSchool(form) {
+// --- FUNGSI BARU: KIRIM OTP KE EMAIL ---
+function sendRegistrationOTP(email, namaSekolah) {
   var lock = LockService.getScriptLock();
   try {
-    lock.waitLock(10000); 
-  } catch (e) {
-    return {status: 'error', message: 'Server sibuk.'};
-  }
-
-  try {
+    lock.waitLock(5000);
+    
     var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
     var sheet = ss.getSheetByName('Users');
     var data = sheet.getDataRange().getValues();
     
-    // Cek Email Duplikat
+    // 1. Cek Email Duplikat
     for(var i=0; i<data.length; i++){
-      if(data[i][2] && data[i][2].toString().toLowerCase() == form.email.toLowerCase()) {
-        return {status: 'error', message: 'Email sudah terdaftar!'};
+      if(data[i][2] && data[i][2].toString().toLowerCase() == email.toLowerCase()) {
+        return {status: 'error', message: 'Email sudah terdaftar! Silakan login.'};
       }
     }
 
-    // --- 1. SIAPKAN FOLDER UTAMA ---
+    // 2. Generate OTP 6 Digit
+    var otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 3. Simpan OTP di CacheService (Berlaku 10 menit)
+    var cache = CacheService.getScriptCache();
+    cache.put("OTP_" + email, otp, 600); 
+
+    // 4. Kirim Email
+    var subject = "Kode Verifikasi Pendaftaran - " + namaSekolah;
+    var body = "Halo Admin " + namaSekolah + ",\n\n" +
+               "Berikut adalah kode verifikasi (OTP) untuk pendaftaran aplikasi kartu pelajar Anda:\n\n" +
+               "KODE: " + otp + "\n\n" +
+               "Kode ini berlaku selama 10 menit.\nJangan berikan kode ini kepada siapapun.";
+    
+    MailApp.sendEmail(email, subject, body);
+
+    return {status: 'success', message: 'Kode OTP telah dikirim ke ' + email};
+
+  } catch(e) {
+    return {status: 'error', message: 'Gagal kirim email: ' + e.toString()};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// --- FUNGSI BARU: VERIFIKASI OTP & BUAT DATABASE ---
+function verifyAndCreateAccount(form, userOtp) {
+  var cache = CacheService.getScriptCache();
+  var savedOtp = cache.get("OTP_" + form.email);
+
+  // 1. Validasi OTP
+  if (!savedOtp || savedOtp !== userOtp) {
+    return {status: 'error', message: 'Kode OTP salah atau sudah kadaluarsa.'};
+  }
+
+  // 2. Jika OTP Benar, Jalankan Logika Pembuatan Database (Logika Lama dipindah kesini)
+  // Hapus OTP dari cache agar tidak bisa dipakai ulang
+  cache.remove("OTP_" + form.email);
+
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    
+    // --- MULAI PROSES PEMBUATAN FILE (Logika asli registerSchool) ---
+    var ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+    var sheet = ss.getSheetByName('Users');
+
+    // Cek folder utama
     var parentFolder;
     try {
       parentFolder = DriveApp.getFolderById(MAIN_PARENT_FOLDER_ID);
     } catch(e) {
-      return {status: 'error', message: 'Folder Induk Utama tidak ditemukan (Cek ID Folder).'};
+      return {status: 'error', message: 'Folder Induk Utama tidak ditemukan.'};
     }
 
-    // Buat Folder Khusus Sekolah Ini
+    // Buat Folder Sekolah
     var schoolFolderName = "KARTU PELAJAR - " + form.namaSekolah;
     var schoolFolder = parentFolder.createFolder(schoolFolderName);
 
-    // --- 2. BUAT DATABASE SPREADSHEET ---
-    // Secara default, create() akan meletakkan file di Root (My Drive)
+    // Buat Spreadsheet
     var newSS = SpreadsheetApp.create("DB_" + form.namaSekolah);
     var newSSId = newSS.getId();
-    
-    // >> PINDAHKAN FILE SPREADSHEET KE DALAM FOLDER SEKOLAH <<
     var fileSS = DriveApp.getFileById(newSSId);
-    fileSS.moveTo(schoolFolder); // Ini perintah kuncinya
+    fileSS.moveTo(schoolFolder);
 
-    // --- 3. BUAT FOLDER FOTO SISWA ---
-    // Folder ini dibuat DI DALAM folder sekolah
+    // Buat Folder Foto
     var imgFolder = schoolFolder.createFolder("FOTO SISWA");
     var imgFolderId = imgFolder.getId();
-    
-    // Set Permission Folder Foto (Public View)
     imgFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-    // --- 4. SETUP ISI DATABASE ---
+    // Setup Sheet
     var sheetSiswa = newSS.getSheets()[0];
     sheetSiswa.setName("DataSiswa");
     sheetSiswa.appendRow(["Nama", "NISN", "TempatLahir", "TglLahir", "JK", "Kelas", "Alamat", "FotoURL"]);
-    
-    // Data Dummy
     sheetSiswa.appendRow(["Siswa Contoh", "'0012345678", "Jakarta", "2008-01-01", "L", "X-A", "Jl. Mawar No 1", "https://via.placeholder.com/150"]);
 
-    // --- 5. SIMPAN AKUN KE MASTER SHEET ---
-    // Format: [Date, NamaSekolah, Email, Password, SS_ID, FOLDER_ID_FOTO]
+    // Simpan Akun
     sheet.appendRow([new Date(), form.namaSekolah, form.email, form.password, newSSId, imgFolderId]);
 
-    return {status: 'success', message: 'Registrasi Berhasil! Database & Folder telah dibuat.'};
+    return {status: 'success', message: 'Verifikasi Berhasil! Database telah dibuat. Silakan Login.'};
 
   } catch(e) {
     return {status: 'error', message: 'Error Register: ' + e.toString()};
