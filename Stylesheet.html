@@ -996,7 +996,7 @@
       font-weight: 600;
   }
 
-  /* --- STYLE 6: BIRU GEOMETRIC (FINAL FIX POSISI FOTO) --- */
+  /* --- STYLE 6: BIRU GEOMETRIC (REVISI POSISI FOTO) --- */
   .style-6 { 
       border: 1px solid #1565c0; 
       overflow: hidden; 
@@ -1033,7 +1033,7 @@
       background: #1565c0; z-index: 1;
   }
 
-  /* 3. FOTO LINGKARAN (POSISI DIPERBAIKI) */
+  /* 3. FOTO LINGKARAN (SUDAH DINAIKKAN) */
   .style-6 .gen-photo-box { 
       border-radius: 50%; 
       width: 75px; height: 75px; 
@@ -1043,10 +1043,12 @@
       /* POSISI ABSOLUT */
       position: absolute;
       right: 25px; 
-      /* UBAH DISINI: Naikkan ke 65px agar menjauh dari TTD */
-      top: 65px;   
-      margin: 0;
       
+      /* --- PERBAIKAN DISINI --- */
+      /* Diubah dari 65px menjadi 40px agar foto naik ke atas */
+      top: 10px;   
+      
+      margin: 0;
       z-index: 5;
       background: white;
   }
@@ -1077,7 +1079,7 @@
   .style-6 .ttd-jabatan { font-size: 7px; }
   .style-6 .ttd-name { font-size: 7px; margin-top: -2px; }
   .style-6 .ttd-nip { font-size: 7px; }
-  .style-6 .stamp-img { width: 40px; top: 0; left: -10px; }
+  .style-6 .stamp-img { width: 40px; top: 20; left: 5px; }
 
 
   /* --- REVISI HEADER BELAKANG STYLE 6 (DENGAN LOGO) --- */
