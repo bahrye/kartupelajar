@@ -282,15 +282,19 @@
     position: relative; 
   }
   
-  /* GAMBAR TTD */
+  /* 1. POSISI TANDA TANGAN (Mode 1 Madrasah) */
   .temp-madrasah .sig-img {
-    height: 40px; 
-    width: auto; 
-    display: block; 
-    margin-bottom: -20px; 
-    margin-left: -5px; 
-    position: relative; 
-    z-index: 2; 
+    height: 45px;        /* Sedikit diperbesar agar proporsional */
+    width: auto;
+    display: block;
+    
+    /* LOGIKA: Margin negatif untuk menarik posisi */
+    margin-top: -5px;    /* Menarik TTD naik ke arah teks 'Kepala Madrasah' */
+    margin-bottom: -10px; /* Menarik teks 'Nama' naik ke atas menimpa bawah TTD */
+    margin-left: -5px;
+    
+    position: relative;
+    z-index: 2;           /* Pastikan TTD berada di atas teks */
   }
 
   /* KOTAK PLACEHOLDER */
@@ -300,13 +304,19 @@
     margin: 2px 0; position: relative; z-index: 1;
   }
   
-  /* GAMBAR STEMPEL */
+  /* 2. POSISI STEMPEL (Mode 1 Madrasah) */
   .temp-madrasah .stamp-img {
-    position: absolute; 
-    width: 50px; height: auto;
-    left: -20px; top: 15px;   
-    z-index: 3;  opacity: 0.65; 
-    transform: rotate(-8deg); 
+    position: absolute;
+    width: 50px; 
+    height: auto;
+    
+    /* UBAH DISINI: Naikkan nilai top (semakin kecil/minus semakin ke atas) */
+    left: -35px; 
+    top: 10px;    /* Sebelumnya 15px, diubah jadi -5px agar naik */
+    
+    z-index: 3;  
+    opacity: 0.65;
+    transform: rotate(-8deg);
     pointer-events: none;
   }
 
