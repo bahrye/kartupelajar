@@ -32,9 +32,13 @@
             <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com">
             <label for="loginEmail">Email Address</label>
           </div>
-          <div class="form-floating mb-4">
-            <input type="password" class="form-control" id="loginPass" placeholder="Password">
+          <div class="form-floating mb-4 position-relative">
+            <input type="password" class="form-control input-password" id="loginPass" placeholder="Password">
             <label for="loginPass">Password</label>
+            
+            <span class="password-toggle" onclick="togglePassword('loginPass', this)">
+              <i class="bi bi-eye"></i>
+            </span>
           </div>
 
           <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 btn-auth mb-3">
@@ -65,9 +69,13 @@
               <input type="email" class="form-control" id="regEmail" placeholder="Email Admin">
               <label for="regEmail">Email Admin (Aktif)</label>
             </div>
-            <div class="form-floating mb-4">
-              <input type="password" class="form-control" id="regPass" placeholder="Buat Password">
+            <div class="form-floating mb-4 position-relative">
+              <input type="password" class="form-control input-password" id="regPass" placeholder="Buat Password">
               <label for="regPass">Buat Password</label>
+              
+              <span class="password-toggle" onclick="togglePassword('regPass', this)">
+                <i class="bi bi-eye"></i>
+              </span>
             </div>
   
             <button id="btnRegStep1" onclick="runRequestOTP()" class="btn btn-success w-100 btn-auth mb-3">
