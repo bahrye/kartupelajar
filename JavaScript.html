@@ -1817,4 +1817,24 @@
     document.getElementById('btnHapusFoto').style.display = 'none';
   }
 
+  // --- FUNGSI TOGGLE PASSWORD (SHOW/HIDE) ---
+  function togglePassword(inputId, iconSpan) {
+    var input = document.getElementById(inputId);
+    var icon = iconSpan.querySelector('i');
+
+    if (input.type === "password") {
+      // Ubah jadi Text (Terlihat)
+      input.type = "text";
+      // Ubah ikon jadi 'Mata Dicoret' (Slash)
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    } else {
+      // Kembalikan jadi Password (Titik-titik)
+      input.type = "password";
+      // Ubah ikon jadi 'Mata Terbuka'
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
+    }
+  }
+
 </script>
