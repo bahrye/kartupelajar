@@ -106,7 +106,7 @@ function verifyAndCreateAccount(form, userOtp) {
     var sheetSiswa = newSS.getSheets()[0];
     sheetSiswa.setName("DataSiswa");
     sheetSiswa.appendRow(["Nama", "NISN", "TempatLahir", "TglLahir", "JK", "Kelas", "Alamat", "FotoURL"]);
-    sheetSiswa.appendRow(["Siswa Contoh", "'0012345678", "Jakarta", "2008-01-01", "L", "X-A", "Jl. Mawar No 1", "https://via.placeholder.com/150"]);
+    sheetSiswa.appendRow(["Siswa Contoh", "'0012345678", "Jakarta", "2008-01-01", "P", "X-A", "Jl. Mawar No 1", "https://cdn.awsli.com.br/2500x2500/963/963818/produto/107131975/1cac5ba504.jpg"]);
 
     // Simpan Akun
     sheet.appendRow([new Date(), form.namaSekolah, form.email, form.password, newSSId, imgFolderId]);
