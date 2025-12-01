@@ -1983,13 +1983,16 @@
     position: absolute;
     /* Geser sedikit ke kiri agar lurus dengan garis vertikal */
     left: -2px; 
-    /* Turunkan sedikit (negatif kecil) agar 'mulut' gunting menyentuh garis */
-    bottom: -4px; 
+    
+    /* --- UBAH BAGIAN INI --- */
+    /* Sebelumnya -4px (turun), ubah jadi 2px (naik) agar mengambang di atas garis */
+    bottom: 0px; 
+    /* ----------------------- */
     
     font-size: 16px;
     color: #333;
     line-height: 1;
-    background: #fff; /* Background putih untuk menimpa sudut garis */
+    background: #fff; /* Background putih */
     padding-right: 2px;
   }
 
@@ -2032,48 +2035,57 @@
 
 
   /* --- [BAGIAN 2] KHUSUS PRINT (SETTINGAN KERTAS) --- */
-  @media print {
-    /* Setting Kertas A4 Margin 5mm */
-    @page { 
-      size: A4 portrait;
-      margin: 5mm !important; 
-    }
-    
-    body {
-      padding: 0 !important; 
-      margin: 0 !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-
-    /* Penyesuaian Wrapper saat Print */
-    .view-card-wrapper {
-      margin: 0 auto !important;
-      margin-bottom: 10px !important; 
-      break-inside: avoid; 
-      page-break-inside: avoid;
-
-      /* SKALA MAKSIMAL (Agar muat 4 & Terbaca Jelas) */
-      transform: scale(0.98); 
-      transform-origin: top center;
-    }
-
-    /* Pastikan warna border tercetak */
-    .cut-wrapper { border-color: #000 !important; }
-
-    /* Reset border kartu asli (Tipiskan) */
-    .style-dinas-1, .style-dinas-1-back,
-    .style-biru-putih, .style-biru-putih.back-card,
-    .temp-generic, .temp-generic-back,
-    .id-card, .back-card {
-        border: 1px solid #ddd !important; 
-        box-shadow: none !important;
-    }
-    
-    /* Tema Gelap Exception */
-    .style-4, .style-12, .style-14, .style-23, .style-28, .style-34, .style-45 {
-        border: 1px solid #999 !important; 
-    }
+@media print {
+  /* Setting Kertas A4 Margin 5mm */
+  @page { 
+    size: A4 portrait;
+    margin: 5mm !important; 
   }
+  
+  body {
+    padding: 0 !important; 
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Penyesuaian Wrapper saat Print */
+  .view-card-wrapper {
+    margin: 0 auto !important;
+    margin-bottom: 10px !important; 
+    break-inside: avoid; 
+    page-break-inside: avoid;
+
+    /* SKALA MAKSIMAL (Agar muat 4 & Terbaca Jelas) */
+    transform: scale(0.98); 
+    transform-origin: top center;
+  }
+  
+  /* --- [TAMBAHAN PENTING: RESET KONFLIK LAMA] --- */
+  /* Ini wajib ada untuk mematikan efek scale(0.85) dari kode lama */
+  .view-card-wrapper .print-row {
+    transform: none !important; 
+    gap: 0px !important;
+    margin: 0 !important;
+  }
+  /* ----------------------------------------------- */
+
+  /* Pastikan warna border tercetak */
+  .cut-wrapper { border-color: #000 !important; }
+
+  /* Reset border kartu asli (Tipiskan) */
+  .style-dinas-1, .style-dinas-1-back,
+  .style-biru-putih, .style-biru-putih.back-card,
+  .temp-generic, .temp-generic-back,
+  .id-card, .back-card {
+      border: 1px solid #ddd !important; 
+      box-shadow: none !important;
+  }
+  
+  /* Tema Gelap Exception */
+  .style-4, .style-12, .style-14, .style-23, .style-28, .style-34, .style-45 {
+      border: 1px solid #999 !important; 
+  }
+}
 
 </style>
