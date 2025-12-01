@@ -44,6 +44,10 @@
           <button id="btnLogin" onclick="runLogin()" class="btn btn-primary w-100 btn-auth mb-3">
             <i class="bi bi-box-arrow-in-right me-2"></i> MASUK APLIKASI
           </button>
+
+          <div class="d-flex justify-content-end mb-3">
+            <span class="small text-primary" style="cursor:pointer; text-decoration:none;" onclick="switchPage('forgot')">Lupa Kata Sandi?</span>
+          </div>
           
           <div class="auth-footer">
             Belum punya akun sekolah? <br>
@@ -105,6 +109,57 @@
             Sudah terdaftar? <br>
             <span class="auth-link text-success" onclick="switchPage('login')">Kembali ke Login</span>
           </div>
+        </div>
+      </div>
+
+      <div id="forgotPage" class="auth-box shadow-sm" style="display:none;">
+        <div class="auth-header">
+          <div class="auth-icon"><i class="bi bi-key"></i></div>
+          <h4 class="auth-title">Reset Password</h4>
+          <div class="auth-subtitle">Masukkan email admin sekolah Anda</div>
+        </div>
+        
+        <div class="auth-body">
+          
+          <div id="forgotStep1">
+            <div class="form-floating mb-4">
+              <input type="email" class="form-control" id="forgotEmail" placeholder="Email Terdaftar">
+              <label for="forgotEmail">Email Sekolah</label>
+            </div>
+            <button id="btnForgotStep1" onclick="runForgotRequestOTP()" class="btn btn-warning w-100 btn-auth text-dark mb-3">
+              <i class="bi bi-envelope-paper me-2"></i> KIRIM KODE OTP
+            </button>
+          </div>
+
+          <div id="forgotStep2" style="display:none; animation: fadeInUp 0.5s;">
+             <div class="alert alert-info small py-2">
+              <i class="bi bi-check-circle"></i> OTP terkirim! Cek email Anda.
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="number" class="form-control text-center fw-bold letter-spacing-2" id="forgotOTP" placeholder="Kode OTP">
+              <label for="forgotOTP">Kode OTP</label>
+            </div>
+
+            <div class="form-floating mb-4 position-relative">
+              <input type="password" class="form-control input-password" id="forgotNewPass" placeholder="Password Baru">
+              <label for="forgotNewPass">Password Baru</label>
+              <span class="password-toggle" onclick="togglePassword('forgotNewPass', this)">
+                <i class="bi bi-eye"></i>
+              </span>
+            </div>
+
+            <button id="btnForgotStep2" onclick="runResetPassword()" class="btn btn-primary w-100 btn-auth mb-3">
+              <i class="bi bi-save me-2"></i> SIMPAN PASSWORD
+            </button>
+          </div>
+
+          <div class="auth-footer">
+            <span class="auth-link text-secondary" onclick="switchPage('login')">
+              <i class="bi bi-arrow-left"></i> Kembali ke Login
+            </span>
+          </div>
+
         </div>
       </div>
     </div>
