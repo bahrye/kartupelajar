@@ -51,6 +51,15 @@
   document.addEventListener('DOMContentLoaded', function() {
     checkSession();
 
+    // --- [TEMPELLE KODE DISINI] ---
+    var inputSekolah = document.getElementById('regSekolah');
+    if (inputSekolah) {
+      inputSekolah.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    }
+    // ------------------------------
+
     // --- SETUP TOMBOL ENTER ---
     
     // A. Halaman Login (Email & Password -> Tombol Masuk)
@@ -254,17 +263,33 @@
 
   // --- AUTHENTICATION ---
   function runLogin() {
-    var email = document.getElementById('loginEmail').value;
-    var pass = document.getElementById('loginPass').value;
+    var emailInput = document.getElementById('loginEmail');
+    var passInput = document.getElementById('loginPass');
+    
+    var email = emailInput.value.trim();
+    var pass = passInput.value.trim();
+
+    // --- [PERBAIKAN] Validasi Input Kosong ---
+    if (!email) {
+      showToast("Email harus diisi!", 'bg-warning');
+      emailInput.focus();
+      return; // Berhenti di sini, jangan lanjut loading
+    }
+    
+    if (!pass) {
+      showToast("Password harus diisi!", 'bg-warning');
+      passInput.focus();
+      return; // Berhenti di sini
+    }
+    // -----------------------------------------
+
     var btn = document.getElementById('btnLogin');
     btn.disabled = true; btn.innerText = "Loading...";
 
     google.script.run.withSuccessHandler(function(res){
-        btn.disabled = false; btn.innerText = "Login";
+        btn.disabled = false; btn.innerText = "MASUK APLIKASI"; // Reset teks tombol
         if(res.status === 'success') {
-          // [UBAH DISINI] Simpan sesi sebelum pindah halaman
           saveSession(res.token, res.sekolah);
-          
           currentToken = res.token;
           document.getElementById('schoolTitle').innerText = res.sekolah;
           switchPage('dashboard');
@@ -273,15 +298,35 @@
       }).loginSchool(email, pass);
   }
 
-  // --- LOGIKA REGISTRASI BARU (DENGAN OTP) ---
-
   // Langkah 1: Minta OTP
   function runRequestOTP() {
-    var sekolah = document.getElementById('regSekolah').value;
-    var email = document.getElementById('regEmail').value;
-    var pass = document.getElementById('regPass').value;
+    var sekolahInput = document.getElementById('regSekolah');
+    var emailInput = document.getElementById('regEmail');
+    var passInput = document.getElementById('regPass');
 
-    if(!sekolah || !email || !pass) return showToast("Harap isi semua data!", 'bg-warning');
+    var sekolah = sekolahInput.value.trim();
+    var email = emailInput.value.trim();
+    var pass = passInput.value.trim();
+
+    // --- [PERBAIKAN] Validasi Input Kosong Spesifik ---
+    if (!sekolah) {
+      showToast("Nama Sekolah wajib diisi!", 'bg-warning');
+      sekolahInput.focus();
+      return;
+    }
+
+    if (!email) {
+      showToast("Email Admin wajib diisi!", 'bg-warning');
+      emailInput.focus();
+      return;
+    }
+
+    if (!pass) {
+      showToast("Password wajib dibuat!", 'bg-warning');
+      passInput.focus();
+      return;
+    }
+    // --------------------------------------------------
 
     var btn = document.getElementById('btnRegStep1');
     var oriText = btn.innerHTML;
@@ -297,7 +342,11 @@
         // Sembunyikan Form Data, Tampilkan Input OTP
         document.getElementById('regFormGroup').style.display = 'none';
         document.getElementById('regOtpGroup').style.display = 'block';
-        document.getElementById('regOTP').focus();
+        
+        // Auto focus ke input OTP
+        var otpInput = document.getElementById('regOTP');
+        otpInput.value = "";
+        otpInput.focus();
         
       } else {
         showToast(res.message, 'bg-danger');
